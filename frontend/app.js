@@ -24,7 +24,7 @@
     ["Nothing","Phone (1)"],["Nothing","Phone (2)"],["Nothing","Phone (2a)"],["Nothing","Phone (2a) Plus"],["Nothing","Phone (3)"],["Nothing","Phone (3a)"],["Nothing","Phone (3a) Pro"],
     ["Sony","Xperia 1 IV"],["Sony","Xperia 1 V"],["Sony","Xperia 1 VI"],["Sony","Xperia 5 IV"],["Sony","Xperia 5 V"],["Sony","Xperia 10 V"],["Sony","Xperia 10 VI"],
     ["ZTE Nubia","RedMagic 7"],["ZTE Nubia","RedMagic 8 Pro"],["ZTE Nubia","RedMagic 9 Pro"],["ZTE Nubia","RedMagic 10 Pro"],["ZTE Nubia","RedMagic 11 Pro"],["ZTE Nubia","Nubia Z50"],["ZTE Nubia","Nubia Z60 Ultra"],["ZTE Nubia","Nubia Z70 Ultra"],
-    ["Lenovo Legion","Legion Phone Duel 2"],["Lenovo Legion","Legion Y70"],["Huawei","P50 Pro"],["Huawei","P60 Pro"],["Huawei","Mate 50 Pro"],["Huawei","Mate 60 Pro"],["Huawei","Mate 70 Pro"],
+    ["Lenovo Legion","Legion Phone Duel"],["Lenovo Legion","Legion Phone Duel 2"],["Lenovo Legion","Legion Y70"],["Lenovo Legion","Legion Y90"],["Lenovo Legion","Legion Y700"],["Huawei","P50 Pro"],["Huawei","P60 Pro"],["Huawei","Mate 50 Pro"],["Huawei","Mate 60 Pro"],["Huawei","Mate 70 Pro"],
     ["Motorola","Moto G05"],["Motorola","Moto G15"],["Motorola","Moto G35"],["Motorola","Moto G55"],["Motorola","Moto G75"],["Motorola","Moto G85"],["Motorola","Edge 50 Fusion"],["Motorola","Edge 50 Pro"],["Motorola","Edge 50 Ultra"],["Motorola","Edge 60 Fusion"],["Motorola","Edge 60 Pro"],
     ["Xiaomi","POCO X7"],["Xiaomi","POCO X7 Pro"],["Xiaomi","POCO F7"],["Xiaomi","POCO F7 Pro"],["Xiaomi","POCO F7 Ultra"],["Xiaomi","Redmi Note 14"],["Xiaomi","Redmi Note 14 Pro"],["Xiaomi","Redmi Note 14 Pro+"],["Xiaomi","Redmi Note 15"],["Xiaomi","Redmi Note 15 Pro"],
     ["Samsung","Galaxy A02"],
