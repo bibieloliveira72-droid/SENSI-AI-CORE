@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id), bridge=window.AndroidBridge||null;
 const parse=v=>{try{return JSON.parse(v)}catch(_){return null}};
 const put=(id,v)=>{const e=$(id);if(e)e.textContent=v};
 const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
-let applyQueue=[],applyIndex=-1;
+let applyQueue=[],applyIndex=-1,massinhaRestarted=false;
 const SETTINGS_KEY="sensi_ai_app_settings_v1";
 const defaultSettings={autoOpenFreeFire:true,gameEdition:"freefire"};
 function readSettings(){try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}}catch(_){return {...defaultSettings}}}
@@ -48,36 +48,22 @@ function setSelected(keys){document.querySelectorAll("#boostMultiGrid input").fo
 function buildPlan(){const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
 const h=document.createElement("strong");h.textContent="Seu plano de otimização • "+keys.length+" etapa(s)";box.append(h);
 const p=document.createElement("p");p.textContent="Siga na ordem abaixo e marque mentalmente o que já conferiu. Você continua no controle de cada mudança.";box.append(p);
-const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";if(key==="massinha"){const version=document.querySelector('input[name="massinhaVersion"]:checked')?.value||"v1";b.textContent+="Variante "+version.toUpperCase()+". ";span.textContent=version==="v1"?"Perfil sem a opção adicional nearest. Compare a aparência e a estabilidade usando somente as opções gráficas do próprio Free Fire.":"Perfil com opção adicional nearest. Compare com a V1, observando nitidez, artefatos e estabilidade usando somente as opções gráficas do próprio Free Fire.";}else{span.textContent=guides[key][1]}li.append(b,span);ol.append(li)});box.append(ol);
-const note=document.createElement("small");note.textContent="Plano de orientação. Nenhum comando ou ajuste foi aplicado pelo aplicativo.";box.append(note)}
-function applyStatus(message){put("boostApplyStatus",message)}
-function applyNextTweak(){
-if(applyIndex<0||applyIndex>=applyQueue.length){
-applyStatus("Todos os itens do plano foram concluídos. Preparando sua sessão…");
-$("boostNextTweak").disabled=true;
-if(appSettings.autoOpenFreeFire){
-const confirmed=window.confirm("Plano concluído. Deseja abrir o Free Fire agora?\\n\\nO SENSI.AI não encerrará uma partida em andamento. O Gráfico Massinha ainda exige comparação manual nas configurações do jogo.");
-if(confirmed){openFreeFire(false)}else{applyStatus("Plano concluído. Free Fire não foi aberto. Você pode iniciá-lo manualmente quando quiser.")}
-}else{applyStatus("Plano concluído. A abertura automática está desativada nas Configurações.")}
-return}
-const key=applyQueue[applyIndex],label=guides[key]?.[0]||key;
-if(key==="animations"){
-if(!bridge||typeof bridge.applySafeTweak!=="function"){applyStatus("Este tweak exige o APK Android com Shizuku autorizado.");$("boostNextTweak").disabled=false;return}
-try{const result=parse(bridge.applySafeTweak("animations"));if(result?.ok){applyStatus("Animações Leves aplicadas: 0,5x. Os valores anteriores foram salvos. Use RESTAURAR TWEAKS para voltar ao estado anterior.");}else{applyStatus(result?.message||"Não foi possível aplicar. Confira Shizuku e tente novamente.");}}catch(_){applyStatus("Falha ao aplicar Animações Leves. Nenhuma confirmação de alteração foi recebida.");}
-$("boostNextTweak").disabled=false;return}
-if(key==="refresh"){refresh();applyStatus(label+": diagnóstico atualizado. Nenhuma configuração foi alterada.");$("boostNextTweak").disabled=false;return}
-if(key==="massinha"){const version=document.querySelector('input[name="massinhaVersion"]:checked')?.value||"v1";applyStatus("Gráfico Massinha "+version.toUpperCase()+" selecionado. Compare o perfil manualmente nas configurações gráficas do Free Fire. Nenhum comando do sistema foi executado.");$("boostNextTweak").disabled=false;return}
+const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";if(key==="massinha"){
+const version=document.querySelector('input[name="massinhaVersion"]:checked')?.value||"v1";
+const packageName=appSettings.gameEdition==="freefiremax"?"com.dts.freefiremax":"com.dts.freefireth";
+if(!bridge||typeof bridge.applyMassinhaTweak!=="function"){applyStatus("Gráfico Massinha exige APK Android e autorização Shizuku.");$("boostNextTweak").disabled=false;return}
+if(!window.confirm("Aplicar Gráfico Massinha "+version.toUpperCase()+"? O Free Fire será encerrado. Uma partida em andamento será perdida. Continue somente fora de uma partida.")){applyStatus("Aplicação cancelada.");$("boostNextTweak").disabled=false;return}
+try{const result=parse(bridge.applyMassinhaTweak(version,packageName));if(result?.ok){massinhaRestarted=true;applyStatus(result.message+" Abrindo o jogo…");if(!openFreeFire(false))applyStatus(result.message+" Abra o jogo manualmente.");}else applyStatus(result?.message||"Falha ao aplicar.");}catch(_){applyStatus("Falha ao aplicar. Verifique o Shizuku.");}
+$("boostNextTweak").disabled=false;return
+}
 if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
 applyStatus(label+": siga as instruções do plano. Este item é uma orientação manual, sem alteração automática.");$("boostNextTweak").disabled=false;return}
-if(!bridge||typeof bridge.openTweakSettings!=="function"){applyStatus("Este ajuste precisa da versão APK Android. Nenhuma mudança foi feita.");$("boostNextTweak").disabled=true;return}
-let opened=false;try{opened=bridge.openTweakSettings(key)===true}catch(_){opened=false}
-if(opened){applyStatus(label+": painel do Android aberto. Faça a alteração desejada e volte para tocar em Próximo Ajuste.");$("boostNextTweak").disabled=false}
-else{applyStatus(label+": painel indisponível nesta versão do Android. Nenhuma mudança foi feita. Toque em Próximo Ajuste.");$("boostNextTweak").disabled=false}
+applyStatus(label+": item informativo. Nenhuma tela de Configurações foi aberta e nenhuma alteração automática foi feita.");$("boostNextTweak").disabled=false;return;
 }
 function nextTweak(){applyIndex++;applyNextTweak()}
 function startApplyTweaks(){
 const keys=selected();if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de aplicar.");return}
-applyQueue=keys;applyIndex=-1;applyStatus("Iniciando "+keys.length+" ajuste(s). Cada alteração será confirmada por você no Android.");nextTweak()
+applyQueue=keys;applyIndex=-1;massinhaRestarted=false;applyStatus("Iniciando. Ajustes compatíveis serão executados pelo Shizuku.");nextTweak()
 }
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
@@ -101,8 +87,8 @@ $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
 $("boostNextTweak")?.addEventListener("click",nextTweak);
 $("boostRestoreTweaks")?.addEventListener("click",()=>{
  if(!bridge||typeof bridge.restoreSafeTweak!=="function"){applyStatus("A restauração exige o APK Android com Shizuku.");return}
- try{const result=parse(bridge.restoreSafeTweak("animations"));applyStatus(result?.ok?result.message:(result?.message||"Não foi possível restaurar os valores."));}
- catch(_){applyStatus("Falha ao restaurar. Verifique se Shizuku está ativo e autorizado.")}
+ try{const messages=[];const a=parse(bridge.restoreSafeTweak("animations"));if(a?.ok)messages.push(a.message);if(typeof bridge.restoreMassinhaTweak==="function"){const m=parse(bridge.restoreMassinhaTweak());if(m?.ok)messages.push(m.message);}applyStatus(messages.length?messages.join(" "):(a?.message||"Nenhum backup disponível."));}
+ catch(_){applyStatus("Falha ao restaurar. Verifique Shizuku.")}
 });
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
