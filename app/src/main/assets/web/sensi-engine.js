@@ -216,12 +216,17 @@
     const tier = cfg.processador || "intermediario";
     const ram = sanitizeNumber(cfg.ram, 8, 1, 32);
     const options = [
+      { id: "400x300", resolution: "400 × 300", label: "4:3 · teste compacto" },
+      { id: "512x384", resolution: "512 × 384", label: "4:3 · muito leve" },
+      { id: "640x480", resolution: "640 × 480", label: "4:3 · leve clássico" },
       { id: "800x600", resolution: "800 × 600", label: "4:3 · ultra leve" },
+      { id: "832x624", resolution: "832 × 624", label: "4:3 · compacto" },
       { id: "960x720", resolution: "960 × 720", label: "4:3 · leve" },
       { id: "1024x768", resolution: "1024 × 768", label: "4:3 · leve nítida" },
       { id: "1152x864", resolution: "1152 × 864", label: "4:3 · equilibrada" },
       { id: "1280x960", resolution: "1280 × 960", label: "4:3 · média" },
       { id: "1360x1020", resolution: "1360 × 1020", label: "4:3 · média nítida" },
+      { id: "1400x1050", resolution: "1400 × 1050", label: "4:3 · alta popular" },
       { id: "1440x1080", resolution: "1440 × 1080", label: "4:3 · alta" },
       { id: "1600x1200", resolution: "1600 × 1200", label: "4:3 · muito alta" },
       { id: "1920x1440", resolution: "1920 × 1440", label: "4:3 · máxima" },

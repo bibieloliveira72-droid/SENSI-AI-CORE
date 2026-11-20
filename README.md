@@ -226,3 +226,12 @@ O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.ri
 - A recomendação automática escolhe um ponto de partida conforme a categoria do hardware, mas o usuário pode selecionar outra opção e copiar a resolução escolhida.
 - O DPI sugerido permanece separado da seleção de resolução.
 - Resoluções maiores podem exigir mais recursos; compatibilidade e proporção visual variam por aparelho e jogo. O app não aplica alterações automaticamente.
+
+
+## SENSI.AI 2.1.6
+
+- **VersionName:** 2.1.6
+- **VersionCode:** 22
+- Catálogo ampliado para 14 presets 4:3 encontrados em referências e conteúdos da comunidade de Free Fire/tela esticada: 400×300, 512×384, 640×480, 800×600, 832×624, 960×720, 1024×768, 1152×864, 1280×960, 1360×1020, 1400×1050, 1440×1080, 1600×1200 e 1920×1440.
+- A seleção manual e a cópia continuam disponíveis; DPI permanece separado.
+- Os presets são referências comunitárias, não uma classificação oficial de popularidade nem garantia de compatibilidade ou vantagem no jogo.

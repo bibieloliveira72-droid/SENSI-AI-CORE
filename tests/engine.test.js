@@ -265,12 +265,14 @@ test("Motor recomenda resolução e DPI por classe de hardware sem aplicar alter
   assert.equal(mid.dpi, 480);
   assert.equal(high.resolution, "1440 × 1080");
   assert.equal(high.dpi, 560);
-  assert.equal(entry.options.length, 9);
+  assert.equal(entry.options.length, 14);
   assert.ok(entry.options.every((option) => {
     const [width, height] = option.id.split("x").map(Number);
     return width / height === 4 / 3;
   }));
   assert.ok(entry.options.some((option) => option.id === "1920x1440"));
+  assert.ok(entry.options.some((option) => option.id === "400x300"));
+  assert.ok(entry.options.some((option) => option.id === "1400x1050"));
   assert.match(entry.note, /4:3/);
   assert.match(entry.note, /não altera/i);
 });
