@@ -118,25 +118,25 @@ private class AndroidClipboardBridge(private val context: Context) {
 
   @JavascriptInterface
   fun runShizukuDiagnostics(): String {
+    // Verificação temporariamente limitada ao estado do Binder e à autorização do app.
+    // Não inicia UserService nem executa teste de compatibilidade enquanto o Hub estiver instável.
     val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
-    if (!running) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo. Inicie o serviço e tente novamente.").toString()
-    val granted = try { Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED } catch (_: Throwable) { false }
-    if (!granted) return JSONObject().put("ok", false).put("message", "Autorização Shizuku ainda não concedida.").toString()
+    val granted = running && try {
+      Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+    } catch (_: Throwable) { false }
 
-    return try {
-      // Transaction 5 performs a harmless identity read inside the actual Shizuku UserService.
-      val remote = JSONObject(callSafeTweakService(5, null))
-      if (!remote.optBoolean("ok")) return remote.toString()
-      val metrics = context.resources.displayMetrics
-      remote.put("identity", "UserService Shizuku conectado")
-        .put("androidRelease", Build.VERSION.RELEASE)
-        .put("screenSize", "${metrics.widthPixels}x${metrics.heightPixels}")
-        .put("screenDensity", "${metrics.densityDpi} dpi")
-        .put("message", "Comunicação real com o UserService confirmada. Identidade remota consultada sem alterar configurações.")
-      remote.toString()
-    } catch (error: Throwable) {
-      JSONObject().put("ok", false).put("message", "Falha ao conectar ao UserService Shizuku: ${error.message ?: "erro desconhecido"}").toString()
+    val message = when {
+      !running -> "Shizuku não está ativo. Inicie o serviço e tente novamente."
+      !granted -> "Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização."
+      else -> "Shizuku está ativo e a autorização do SENSI.AI foi confirmada. Teste de compatibilidade temporariamente desativado."
     }
+    return JSONObject()
+      .put("ok", running && granted)
+      .put("running", running)
+      .put("granted", granted)
+      .put("message", message)
+      .put("checkMode", "authorization_only")
+      .toString()
   }
 
   @JavascriptInterface
