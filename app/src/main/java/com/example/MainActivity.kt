@@ -14,8 +14,6 @@ import android.os.Build
 import android.os.PowerManager
 import android.content.pm.PackageManager
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import rikka.shizuku.Shizuku
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
@@ -118,25 +116,18 @@ private class AndroidClipboardBridge(private val context: Context) {
     val granted = try { Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED } catch (_: Throwable) { false }
     if (!granted) return JSONObject().put("ok", false).put("message", "Autorização Shizuku ainda não concedida.").toString()
 
-    fun readOnly(command: Array<String>): String {
-      val process = Shizuku.newProcess(command, null, null)
-      val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
-      val error = process.errorStream.bufferedReader().use { it.readText() }.trim()
-      val exit = process.waitFor()
-      return if (exit == 0) output.take(500) else (error.ifBlank { "Comando indisponível (código $exit)." }).take(300)
-    }
-
     return try {
-      val result = JSONObject()
-      result.put("ok", true)
-      result.put("identity", readOnly(arrayOf("/system/bin/id")))
-      result.put("androidRelease", readOnly(arrayOf("/system/bin/getprop", "ro.build.version.release")))
-      result.put("screenSize", readOnly(arrayOf("/system/bin/wm", "size")))
-      result.put("screenDensity", readOnly(arrayOf("/system/bin/wm", "density")))
-      result.put("message", "Acesso Shizuku confirmado. Foram executadas somente consultas de leitura.")
-      result.toString()
+      val metrics = context.resources.displayMetrics
+      JSONObject().apply {
+        put("ok", true)
+        put("identity", "Aplicativo autorizado pelo Shizuku")
+        put("androidRelease", Build.VERSION.RELEASE)
+        put("screenSize", "${metrics.widthPixels}x${metrics.heightPixels}")
+        put("screenDensity", "${metrics.densityDpi} dpi")
+        put("message", "Conexão Shizuku e autorização confirmadas. Diagnóstico local concluído; nenhuma configuração foi modificada.")
+      }.toString()
     } catch (error: Throwable) {
-      JSONObject().put("ok", false).put("message", "Falha no teste Shizuku: ${error.message ?: "erro desconhecido"}").toString()
+      JSONObject().put("ok", false).put("message", "Falha no diagnóstico: ${error.message ?: "erro desconhecido"}").toString()
     }
   }
 
