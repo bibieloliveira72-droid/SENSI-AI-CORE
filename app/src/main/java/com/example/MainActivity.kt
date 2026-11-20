@@ -7,6 +7,8 @@ import android.content.Context
 import android.app.ActivityManager
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
+import android.provider.Settings
 import android.os.BatteryManager
 import android.os.Build
 import android.os.PowerManager
@@ -103,6 +105,34 @@ private class AndroidClipboardBridge(private val context: Context) {
   fun requestShizukuPermission() {
     if (try { Shizuku.pingBinder() } catch (_: Throwable) { false }) {
       try { Shizuku.requestPermission(2407) } catch (_: Throwable) { }
+    }
+  }
+
+  @JavascriptInterface
+  fun openTweakSettings(key: String): Boolean {
+    val intent = when (key) {
+      "battery" -> Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
+      "network" -> Intent(Settings.ACTION_WIFI_SETTINGS)
+      "display" -> Intent(Settings.ACTION_DISPLAY_SETTINGS)
+      "storage" -> Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS)
+      "background" -> Intent(Settings.ACTION_APPLICATION_SETTINGS)
+      "sound" -> Intent(Settings.ACTION_SOUND_SETTINGS)
+      "privacy" -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+        data = Uri.parse("package:${context.packageName}")
+      }
+      "notifications" -> Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+      }
+      "updates" -> Intent(Settings.ACTION_SETTINGS)
+      "accessibility" -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+      else -> return false
+    }
+    return try {
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(intent)
+      true
+    } catch (_: Throwable) {
+      false
     }
   }
 
