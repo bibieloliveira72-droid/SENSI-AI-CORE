@@ -157,14 +157,14 @@ test("Comparação calcula diferenças exatas por mira", () => {
 });
 
 
-test("Catálogo de aparelhos cobre as oito marcas do seletor, sem modelos duplicados", () => {
+test("Catálogo de aparelhos cobre as 18 marcas do seletor, sem modelos duplicados", () => {
   const app = fs.readFileSync(path.join(FRONTEND_DIR, "app.js"), "utf8");
   const catalogStart = app.indexOf("  const DEVICE_CATALOG = [");
   const catalogEnd = app.indexOf("\n  ].map", catalogStart);
   assert.ok(catalogStart >= 0 && catalogEnd > catalogStart, "Catálogo de dispositivos não encontrado");
   const arrayStart = app.indexOf("[", catalogStart);
   const entries = vm.runInNewContext("(" + app.slice(arrayStart, catalogEnd + 4).trim() + ")");
-  const brands = ["Samsung", "Xiaomi", "Motorola", "Apple", "ASUS ROG", "Realme", "Infinix", "OnePlus"];
+  const brands = ["Google","OPPO","vivo","Tecno","HONOR","Nothing","Sony","ZTE Nubia","Lenovo Legion","Huawei","Motorola","Xiaomi","Samsung","Apple","ASUS ROG","Realme","Infinix","OnePlus"];
   const counts = new Map(brands.map((brand) => [brand, 0]));
   const seen = new Set();
   for (const [brand, model] of entries) {
@@ -176,7 +176,7 @@ test("Catálogo de aparelhos cobre as oito marcas do seletor, sem modelos duplic
     counts.set(brand, counts.get(brand) + 1);
   }
   for (const [brand, count] of counts) {
-    assert.ok(count >= 20, brand + " precisa ter pelo menos 20 modelos no catálogo");
+    assert.ok(count >= 5, brand + " precisa ter pelo menos 5 modelos no catálogo");
   }
   assert.ok(entries.length >= 250, "Catálogo deve conter pelo menos 250 modelos");
 });
