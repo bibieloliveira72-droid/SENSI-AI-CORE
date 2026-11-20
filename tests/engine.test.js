@@ -156,9 +156,11 @@ test("Comparação calcula diferenças exatas por mira", () => {
 
 test("Catálogo de aparelhos cobre as oito marcas do seletor, sem modelos duplicados", () => {
   const app = fs.readFileSync(path.join(FRONTEND_DIR, "app.js"), "utf8");
-  const match = app.match(/const DEVICE_CATALOG = \[([\s\S]*?)\n  \]\.map\(\(\[brand, model\]\) => \(\{ brand, model \}\)\);/);
-  assert.ok(match, "Catálogo de dispositivos não encontrado");
-  const entries = vm.runInNewContext("[" + match[1] + "]");
+  const catalogStart = app.indexOf("  const DEVICE_CATALOG = [");
+  const catalogEnd = app.indexOf("\\n  ].map", catalogStart);
+  assert.ok(catalogStart >= 0 && catalogEnd > catalogStart, "Catálogo de dispositivos não encontrado");
+  const arrayStart = app.indexOf("[", catalogStart);
+  const entries = vm.runInNewContext("(" + app.slice(arrayStart, catalogEnd + 4).trim() + ")");
   const brands = ["Samsung", "Xiaomi", "Motorola", "Apple", "ASUS ROG", "Realme", "Infinix", "OnePlus"];
   const counts = new Map(brands.map((brand) => [brand, 0]));
   const seen = new Set();
