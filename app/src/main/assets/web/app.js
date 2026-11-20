@@ -3,6 +3,7 @@
 
   const STORAGE_SAVED = "sensi_ai_saved_profiles_v2";
   const STORAGE_HISTORY = "sensi_ai_history_v2";
+  const STORAGE_LEARNING = "sensi_ai_learning_v1";
   const MAX_HISTORY = 25;
 
   const SCOPE_LABELS = [
@@ -726,6 +727,33 @@
     }
   }
 
+  function calibrationLearningKey(config, profileLabel) {
+    return [config.marca, config.modelo, profileLabel].map((part) =>
+      String(part || "").trim().toLowerCase()
+    ).join("|");
+  }
+
+  function readCalibrationLearning(config, profileLabel) {
+    const all = readStorageObject(STORAGE_LEARNING);
+    const key = calibrationLearningKey(config, profileLabel);
+    return all[key] && typeof all[key] === "object" ? all[key] : {};
+  }
+
+  function saveCalibrationLearning(config, profileLabel, learningState) {
+    const all = readStorageObject(STORAGE_LEARNING);
+    all[calibrationLearningKey(config, profileLabel)] = learningState;
+    localStorage.setItem(STORAGE_LEARNING, JSON.stringify(all));
+  }
+
+  function readStorageObject(key) {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(key) || "{}");
+      return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+    } catch (_err) {
+      return {};
+    }
+  }
+
   function writeStorageArray(key, arr) {
     localStorage.setItem(key, JSON.stringify(arr));
   }
@@ -1151,6 +1179,7 @@
       notes: generated.notes,
       disclaimer: generated.disclaimer,
       calibrationSteps: 0,
+      learningState: readCalibrationLearning(generated.config, generated.profileLabel),
     };
 
     els.calibrationFeedbackBox.classList.add("hidden");
@@ -1181,11 +1210,14 @@
         dpi: activeState.config.dpi,
         fireButtonSize: activeState.config.fireButtonSize,
         calibrationSteps: activeState.calibrationSteps,
+        learningState: activeState.learningState,
       }
     );
 
     activeState.values = result.values;
+    activeState.learningState = result.learningState;
     activeState.calibrationSteps += 1;
+    saveCalibrationLearning(activeState.config, activeState.profileLabel, activeState.learningState);
 
     const changedParts = Object.entries(result.deltas)
       .filter(([, d]) => d !== 0)
@@ -1220,6 +1252,8 @@
     if (!activeState) return;
     activeState.values = { ...activeState.baseValues };
     activeState.calibrationSteps = 0;
+    activeState.learningState = {};
+    saveCalibrationLearning(activeState.config, activeState.profileLabel, {});
     els.calibrationFeedbackBox.classList.add("hidden");
     renderActiveResults();
     showToast("Valores restaurados para a base calculada.");
