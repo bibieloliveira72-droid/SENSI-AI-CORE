@@ -251,35 +251,20 @@
     const tips = [];
 
     if (cfg.dpi >= 800) {
-      tips.push(
-        `DPI alta (${cfg.dpi}) detectada: o algoritmo reduziu proporcionalmente a sensibilidade base para evitar que a mira passe da cabeça.`
-      );
+      tips.push(`DPI alta (${cfg.dpi}) detectada: a sugestão inicial foi ajustada pela curva de DPI. Valide o resultado no treinamento.`);
     } else if (cfg.dpi <= 420) {
-      tips.push(
-        `DPI baixa/padrão (${cfg.dpi}): o algoritmo elevou a resposta inicial de General (${values.General}) e Red Dot (${values["Red Dot"]}) para facilitar a puxada.`
-      );
+      tips.push(`DPI baixa/padrão (${cfg.dpi}): a curva de DPI ajustou a sugestão inicial. Valide o resultado no treinamento.`);
     } else {
-      tips.push(
-        `DPI intermediária (${cfg.dpi}) combinada com tela de ${cfg.hz} Hz para equilíbrio entre trocação rápida e estabilidade.`
-      );
+      tips.push(`DPI intermediária (${cfg.dpi}) aplicada à sugestão inicial.`);
     }
 
     if (cfg.fireButtonSize >= 65) {
-      tips.push(
-        `Botão de tiro grande (${cfg.fireButtonSize}%): compensação aplicada na subida vertical. Se sentir pouco espaço de arraste, teste reduzir o botão entre 45% e 55%.`
-      );
+      tips.push(`Botão de tiro grande (${cfg.fireButtonSize}%): o tamanho foi considerado como preferência de configuração. Teste pequenas alterações para encontrar seu conforto.`);
     } else if (cfg.fireButtonSize <= 42) {
-      tips.push(
-        `Botão de tiro compacto (${cfg.fireButtonSize}%): ótimo curso livre de tela para puxada contínua.`
-      );
+      tips.push(`Botão de tiro compacto (${cfg.fireButtonSize}%): o tamanho foi considerado como preferência de configuração.`);
     }
 
-    if (cfg.ram <= 4) {
-      tips.push(
-        `Com ${cfg.ram} GB de RAM, a 2x (${values["2x"]}) e a 4x (${values["4x"]}) foram calibradas com margem extra contra oscilações de FPS.`
-      );
-    }
-
+    tips.push("Chipset, RAM e Hz são informações de desempenho do aparelho; não são usados como medida direta da sensibilidade do toque.");
     return tips;
   }
 
