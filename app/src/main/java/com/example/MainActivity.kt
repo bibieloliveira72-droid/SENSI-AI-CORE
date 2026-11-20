@@ -7,6 +7,8 @@ import android.content.Context
 import android.app.ActivityManager
 import android.content.Intent
 import android.content.IntentFilter
+import android.provider.Settings
+import android.net.Uri
 import android.os.BatteryManager
 import android.os.Build
 import android.os.PowerManager
@@ -103,6 +105,40 @@ private class AndroidClipboardBridge(private val context: Context) {
   fun requestShizukuPermission() {
     if (try { Shizuku.pingBinder() } catch (_: Throwable) { false }) {
       try { Shizuku.requestPermission(2407) } catch (_: Throwable) { }
+    }
+  }
+
+  @JavascriptInterface
+  fun openBoostSettings(action: String): String {
+    return try {
+      val intent = when (action) {
+        "game" -> {
+          val packages = listOf("com.dts.freefireth", "com.dts.freefiremax")
+          val installed = packages.firstOrNull { packageName ->
+            try { context.packageManager.getApplicationInfo(packageName, 0); true }
+            catch (_: PackageManager.NameNotFoundException) { false }
+          }
+          if (installed != null) Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:$installed"))
+          else Intent(Settings.ACTION_APPLICATION_SETTINGS)
+        }
+        "memory", "background" -> Intent(Settings.ACTION_APPLICATION_SETTINGS)
+        "thermal", "battery" -> Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
+        "network" -> Intent(Settings.ACTION_WIFI_SETTINGS)
+        "touch", "accessibility" -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+        "display" -> Intent(Settings.ACTION_DISPLAY_SETTINGS)
+        "storage" -> Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS)
+        "sound" -> Intent(Settings.ACTION_SOUND_SETTINGS)
+        "privacy" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) Intent(Settings.ACTION_PRIVACY_SETTINGS) else Intent(Settings.ACTION_SECURITY_SETTINGS)
+        "notifications" -> Intent(Settings.ACTION_NOTIFICATION_SETTINGS)
+        "updates" -> Intent(Settings.ACTION_SYSTEM_UPDATE_SETTINGS)
+        "report" -> Intent(Settings.ACTION_DEVICE_INFO_SETTINGS)
+        else -> return JSONObject().put("ok", false).put("message", "Ação não reconhecida.").toString()
+      }
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(intent)
+      JSONObject().put("ok", true).put("message", "Tela de configurações aberta. Confirme manualmente no Android; o app não altera nada em segundo plano.").toString()
+    } catch (_: Throwable) {
+      JSONObject().put("ok", false).put("message", "O Android não disponibilizou essa tela neste aparelho.").toString()
     }
   }
 
