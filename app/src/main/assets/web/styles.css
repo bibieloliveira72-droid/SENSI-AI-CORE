@@ -862,3 +862,4 @@ body{background-image:radial-gradient(ellipse at 12% 0%,rgba(85,246,210,.09),tra
 .device-manual-fields>p{margin:0 0 12px;color:#9aabb7;font-size:.76rem}
 .device-manual-fields .field-grid{margin-bottom:8px}
 @media(min-width:560px){.device-results{grid-template-columns:repeat(2,minmax(0,1fr));max-height:360px}}
+.field-help{margin:7px 0 0;color:#91a5b3;font-size:.7rem;line-height:1.45}
