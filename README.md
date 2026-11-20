@@ -112,3 +112,18 @@ O motor produz pontos de partida com base nos dados informados. Ele não mede di
 - DPI permanece manual, pois é uma configuração do Android que pode mudar independentemente do modelo.
 
 > As especificações preenchidas são referências para variantes comuns. RAM e algumas características podem variar por região e configuração; confirme os dados do seu aparelho antes de gerar a sensibilidade.
+
+
+## Versão atual
+
+**SENSI.AI 1.4.0**
+
+### Novidades da 1.4.0
+- Geração inicial deixa de usar fabricante, nome do modelo, RAM, chipset e taxa de atualização como substitutos de uma medição real de toque.
+- DPI e tamanho do botão permanecem como parâmetros configuráveis da sugestão inicial.
+- Calibração adaptativa com memória local por aparelho e perfil.
+- Redução gradual do passo quando a mesma mira recebe correções repetidas na mesma direção.
+- Memória independente para cada uma das seis miras, armazenada no próprio dispositivo.
+- Reset da base também reinicia o aprendizado daquele aparelho e perfil.
+
+O aprendizado é uma heurística local baseada no feedback selecionado, não um modelo de IA treinado nem uma medição automática da partida. O resultado deve ser validado pelo jogador no modo treinamento.
