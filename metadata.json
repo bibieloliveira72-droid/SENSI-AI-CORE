@@ -1,0 +1,6 @@
+{
+  "name": "SENSI.AI",
+  "description": "Calibrador de sensibilidade mobile com frontend HTML/CSS/JS compatível com APK/AAB e backend Node.js integrado ao SDK @google/genai.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
