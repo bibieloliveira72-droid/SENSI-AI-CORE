@@ -42,6 +42,8 @@ jobs:
           cmp frontend/boost.css app/src/main/assets/web/boost.css
           cmp frontend/resolution-lab.js app/src/main/assets/web/resolution-lab.js
           cmp frontend/resolution-lab.css app/src/main/assets/web/resolution-lab.css
+          cmp frontend/masterstrap-inspired.css app/src/main/assets/web/masterstrap-inspired.css
+          cmp frontend/touch-effects.js app/src/main/assets/web/touch-effects.js
 
       - name: Setup Java 21
         uses: actions/setup-java@v6

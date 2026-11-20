@@ -11,12 +11,14 @@
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./boost.css" />
   <link rel="stylesheet" href="./resolution-lab.css" />
+  <link rel="stylesheet" href="./masterstrap-inspired.css" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
   <div class="bg-glow" aria-hidden="true"></div>
   <div class="ambient-orb ambient-orb-a" aria-hidden="true"></div>
   <div class="ambient-orb ambient-orb-b" aria-hidden="true"></div>
+  <canvas id="touchTrailCanvas" class="touch-trail-canvas" aria-hidden="true"></canvas>
 
   <div class="app-shell">
     <header class="topbar">
@@ -177,8 +179,7 @@
               <button type="button" class="chip-mini" data-dpi="720">720</button>
               <button type="button" class="chip-mini" data-dpi="800">800</button>
               <button type="button" class="chip-mini" data-dpi="960">960</button>
-            </div>
-          </div>
+            </div>          </div>
 
           <div class="field">
             <div class="label-row">
@@ -357,8 +358,7 @@
           </div>
 
           <div class="field-grid">
-            <div class="field">
-              <label for="compareSelectA">Configuração A (Base)</label>
+            <div class="field">              <label for="compareSelectA">Configuração A (Base)</label>
               <select id="compareSelectA" class="input-control"></select>
             </div>
             <div class="field">
@@ -523,5 +523,6 @@
   <script src="./app.js" defer></script>
   <script src="./boost.js" defer></script>
   <script src="./resolution-lab.js" defer></script>
+  <script src="./touch-effects.js" defer></script>
 </body>
 </html>
