@@ -265,14 +265,21 @@ test("Motor recomenda resolução e DPI por classe de hardware sem aplicar alter
   assert.equal(mid.dpi, 480);
   assert.equal(high.resolution, "1440 × 1080");
   assert.equal(high.dpi, 560);
-  assert.equal(entry.options.length, 14);
+  assert.equal(entry.options.length, 100);
+  const ids = entry.options.map((option) => option.id);
+  assert.equal(new Set(ids).size, 100, "As 100 resoluções devem ser únicas");
   assert.ok(entry.options.every((option) => {
     const [width, height] = option.id.split("x").map(Number);
-    return width / height === 4 / 3;
-  }));
+    return Number.isInteger(width) && Number.isInteger(height) && width * 3 === height * 4;
+  }), "Todas as opções devem ter proporção 4:3 exata");
+  assert.ok(entry.options.every((option) => ["community", "calculated"].includes(option.source)));
+  assert.equal(entry.options.filter((option) => option.source === "community").length, 12);
   assert.ok(entry.options.some((option) => option.id === "1920x1440"));
   assert.ok(entry.options.some((option) => option.id === "400x300"));
   assert.ok(entry.options.some((option) => option.id === "1400x1050"));
+  assert.ok(entry.options.some((option) => option.id === "1360x1020" && option.source === "calculated"));
+  assert.ok(entry.options.some((option) => option.id === "1400x1050" && option.source === "community"));
+  assert.ok(entry.options.every((option, index, list) => index === 0 || Number(option.id.split("x")[0]) > Number(list[index - 1].id.split("x")[0])));
   assert.match(entry.note, /4:3/);
   assert.match(entry.note, /não altera/i);
 });

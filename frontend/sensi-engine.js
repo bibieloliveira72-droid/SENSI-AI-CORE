@@ -215,22 +215,33 @@
   function recommendDisplaySetup(cfg) {
     const tier = cfg.processador || "intermediario";
     const ram = sanitizeNumber(cfg.ram, 8, 1, 32);
-    const options = [
-      { id: "400x300", resolution: "400 × 300", label: "4:3 · teste compacto" },
-      { id: "512x384", resolution: "512 × 384", label: "4:3 · muito leve" },
-      { id: "640x480", resolution: "640 × 480", label: "4:3 · leve clássico" },
-      { id: "800x600", resolution: "800 × 600", label: "4:3 · ultra leve" },
-      { id: "832x624", resolution: "832 × 624", label: "4:3 · compacto" },
-      { id: "960x720", resolution: "960 × 720", label: "4:3 · leve" },
-      { id: "1024x768", resolution: "1024 × 768", label: "4:3 · leve nítida" },
-      { id: "1152x864", resolution: "1152 × 864", label: "4:3 · equilibrada" },
-      { id: "1280x960", resolution: "1280 × 960", label: "4:3 · média" },
-      { id: "1360x1020", resolution: "1360 × 1020", label: "4:3 · média nítida" },
-      { id: "1400x1050", resolution: "1400 × 1050", label: "4:3 · alta popular" },
-      { id: "1440x1080", resolution: "1440 × 1080", label: "4:3 · alta" },
-      { id: "1600x1200", resolution: "1600 × 1200", label: "4:3 · muito alta" },
-      { id: "1920x1440", resolution: "1920 × 1440", label: "4:3 · máxima" },
-    ];
+    // 12 dimensões são referências encontradas em listas/conteúdos da comunidade.
+    // As demais são variações matemáticas 4:3 para ampliar a faixa de testes, não presets
+    // comprovadamente populares nem garantia de compatibilidade com cada aparelho/jogo.
+    const communityReferences = new Set([
+      "400x300", "512x384", "640x480", "800x600", "832x624", "960x720",
+      "1024x768", "1152x864", "1280x960", "1400x1050", "1440x1080", "1600x1200",
+    ]);
+    const widths = Array.from({ length: 100 }, (_, index) => 400 + index * 16)
+      .map((width) => width === 1392 ? 1400 : width)
+      .sort((a, b) => a - b);
+    const options = widths.map((width) => {
+      const height = width * 3 / 4;
+      const id = width + "x" + height;
+      const tier = width <= 640 ? "ultraleve"
+        : width <= 960 ? "leve"
+        : width <= 1280 ? "equilibrada"
+        : width <= 1600 ? "alta"
+        : "muito alta";
+      const source = communityReferences.has(id) ? "community" : "calculated";
+      const originLabel = source === "community" ? "referência comunitária" : "variação calculada";
+      return {
+        id,
+        resolution: width + " × " + height,
+        label: "4:3 · " + tier + " · " + originLabel,
+        source,
+      };
+    });
     let selectedOptionId = "960x720";
     let dpi = 420;
     let reason = "Perfil 4:3 de menor carga, indicado como ponto de partida para aparelhos de entrada.";
