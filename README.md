@@ -171,3 +171,14 @@ O diagnóstico não é um benchmark de FPS e não mede diretamente o desempenho 
 
 - VersionName: 2.0.0 (mantido)
 - VersionCode: 6 (incremento técnico para atualização Android)
+
+
+# SENSI.AI 2.0.1 HOTFIX
+
+- VersionName: 2.0.1
+- VersionCode: 12
+- Cada modelo do catálogo recebe uma ficha técnica estruturada.
+- As 52 fichas com dados preexistentes são marcadas como parciais e exigem conferência da variante.
+- Modelos sem especificações validadas recebem ficha pendente; campos desconhecidos permanecem vazios, sem valores inventados.
+- O workflow gera APK Debug assinado com chave de depuração e APK Release sem assinatura.
+- O Release sem assinatura é destinado a validação/assinatura posterior e não pode ser instalado diretamente como um APK assinado comum.
