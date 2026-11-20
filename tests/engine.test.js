@@ -258,11 +258,13 @@ test("Motor recomenda resolução e DPI por classe de hardware sem aplicar alter
   const entry = engine.recommendDisplaySetup({ processador: "entrada", ram: 3 });
   const mid = engine.recommendDisplaySetup({ processador: "intermediario", ram: 8 });
   const high = engine.recommendDisplaySetup({ processador: "flagship", ram: 12 });
-  assert.equal(entry.resolution, "1280 × 720");
+  assert.equal(entry.resolution, "960 × 720");
+  assert.match(entry.resolutionLabel, /4:3/);
   assert.equal(entry.dpi, 420);
-  assert.equal(mid.resolution, "1600 × 900");
+  assert.equal(mid.resolution, "1280 × 960");
   assert.equal(mid.dpi, 480);
-  assert.equal(high.resolution, "1920 × 1080");
+  assert.equal(high.resolution, "1440 × 1080");
   assert.equal(high.dpi, 560);
+  assert.match(entry.note, /4:3/);
   assert.match(entry.note, /não altera/i);
 });

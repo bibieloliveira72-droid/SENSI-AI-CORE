@@ -206,3 +206,13 @@ O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.ri
 - Ao gerar a sensibilidade, o app também apresenta uma resolução de referência e um DPI sugerido conforme a categoria do processador e a RAM informadas.
 - Botões independentes para copiar resolução e DPI; ambos também entram em **COPIAR TUDO**.
 - As recomendações são referências de configuração, não alteram automaticamente o Android ou o jogo e devem ser validadas nas opções disponíveis no aparelho.
+
+
+## SENSI.AI 2.1.4
+
+- **VersionName:** 2.1.4
+- **VersionCode:** 20
+- As recomendações de resolução agora priorizam proporção esticada 4:3, em vez da proporção original da tela.
+- Perfis sugeridos por capacidade: 960×720 (entrada), 1280×960 (intermediário) e 1440×1080 (alto desempenho).
+- DPI continua adaptado à categoria do hardware.
+- O app informa que a proporção 4:3 pode deformar ou cortar a imagem e não é suportada por todos os aparelhos/jogos. Nenhuma alteração é aplicada automaticamente.

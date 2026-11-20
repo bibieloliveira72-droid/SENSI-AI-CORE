@@ -215,26 +215,26 @@
   function recommendDisplaySetup(cfg) {
     const tier = cfg.processador || "intermediario";
     const ram = sanitizeNumber(cfg.ram, 8, 1, 32);
-    let resolution = "1280 × 720";
-    let resolutionLabel = "HD equilibrado";
+    let resolution = "960 × 720";
+    let resolutionLabel = "Esticada 4:3 · leve";
     let dpi = 420;
-    let reason = "Perfil conservador para priorizar estabilidade em aparelhos de entrada.";
+    let reason = "Perfil 4:3 de menor carga, indicado como ponto de partida para aparelhos de entrada.";
 
     if (tier === "flagship" && ram >= 8) {
-      resolution = "1920 × 1080";
-      resolutionLabel = "Full HD";
+      resolution = "1440 × 1080";
+      resolutionLabel = "Esticada 4:3 · alta";
       dpi = 560;
-      reason = "Perfil de maior capacidade; confirme se o jogo e a tela oferecem essa opção.";
+      reason = "Perfil 4:3 de maior definição para aparelhos de alto desempenho.";
     } else if ((tier === "intermediario_plus" && ram >= 6) || (tier === "flagship" && ram < 8)) {
-      resolution = "1600 × 900";
-      resolutionLabel = "HD+";
+      resolution = "1280 × 960";
+      resolutionLabel = "Esticada 4:3 · média";
       dpi = 500;
-      reason = "Equilíbrio sugerido entre nitidez e fluidez para hardware intermediário/premium.";
+      reason = "Perfil 4:3 intermediário, buscando equilibrar definição e fluidez.";
     } else if (tier === "intermediario" && ram >= 6) {
-      resolution = "1600 × 900";
-      resolutionLabel = "HD+";
+      resolution = "1280 × 960";
+      resolutionLabel = "Esticada 4:3 · média";
       dpi = 480;
-      reason = "Base intermediária; reduza a carga gráfica se houver quedas de fluidez.";
+      reason = "Perfil 4:3 intermediário; reduza a carga gráfica se houver perda de fluidez.";
     }
 
     return {
@@ -242,7 +242,7 @@
       resolutionLabel,
       dpi,
       reason,
-      note: "Referência de configuração, não altera a resolução nem o DPI do Android. Use apenas opções disponíveis no jogo/aparelho; a sensibilidade depende também do toque e da preferência pessoal."
+      note: "Prioridade para proporção esticada 4:3, não para a proporção original da tela. A imagem pode ficar deformada ou cortada e nem todo jogo/aparelho aceita essas dimensões. É apenas uma recomendação: não altera o Android automaticamente."
     };
   }
 
