@@ -157,7 +157,7 @@
       renderDetails(first, details);
     }
 
-    tabButton.addEventListener("click", () => {
+    nav.querySelectorAll(".tab-btn:not([data-tab=\"devices\"])").forEach((button) => {\n      button.addEventListener("click", () => panel.classList.add("hidden"));\n    });\n\n    tabButton.addEventListener("click", () => {
       nav.querySelectorAll(".tab-btn").forEach((button) => {
         const active = button === tabButton;
         button.classList.toggle("active", active);
