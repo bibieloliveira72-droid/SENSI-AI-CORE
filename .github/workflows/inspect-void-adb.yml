@@ -1,0 +1,81 @@
+name: Inspect Void ADB archive (read-only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "VOID ADB_15.8.2.zip"
+      - ".github/workflows/inspect-void-adb.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Inspect archive without executing its contents
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import zipfile, pathlib, hashlib, json
+          archive = pathlib.Path("VOID ADB_15.8.2.zip")
+          if not archive.is_file():
+              raise SystemExit("Archive not found")
+          report = []
+          total = 0
+          max_total = 200 * 1024 * 1024
+          text_ext = {".txt",".md",".sh",".bash",".bat",".cmd",".ps1",".py",".js",".json",".xml",".properties",".cfg",".ini",".conf",".prop",".reg",".yml",".yaml",".gradle",".kt",".java"}
+          with zipfile.ZipFile(archive) as z:
+              infos = z.infolist()
+              report.append("VOID ADB ARCHIVE ANALYSIS (READ-ONLY)")
+              report.append(f"Archive bytes: {archive.stat().st_size}")
+              report.append(f"SHA256: {hashlib.sha256(archive.read_bytes()).hexdigest()}")
+              report.append(f"Entries: {len(infos)}")
+              report.append("")
+              for info in infos:
+                  name = info.filename
+                  total += info.file_size
+                  if total > max_total:
+                      report.append("STOP: uncompressed size limit reached.")
+                      break
+                  # Do not extract paths or execute scripts. Read only bounded text members.
+                  report.append(f"FILE: {name} | size={info.file_size} | compressed={info.compress_size}")
+                  p = pathlib.PurePosixPath(name)
+                  if p.is_absolute() or ".." in p.parts or info.is_dir():
+                      report.append("  [not read: directory or unsafe archive path]")
+                      continue
+                  if p.suffix.lower() not in text_ext or info.file_size > 256 * 1024:
+                      report.append("  [metadata only: non-text or over 256 KiB]")
+                      continue
+                  try:
+                      raw = z.read(info)
+                      try:
+                          decoded = raw.decode("utf-8-sig")
+                      except UnicodeDecodeError:
+                          try:
+                              decoded = raw.decode("utf-16")
+                          except UnicodeDecodeError:
+                              decoded = raw.decode("cp1252", errors="replace")
+                      report.append("----- BEGIN FILE CONTENT -----")
+                      report.append(decoded[:20000])
+                      if len(decoded) > 20000:
+                          report.append("[TRUNCATED]")
+                      report.append("----- END FILE CONTENT -----")
+                  except Exception as e:
+                      report.append(f"  [read error: {type(e).__name__}]")
+                  report.append("")
+          out = pathlib.Path("void-adb-inspection.txt")
+          out.write_text("\\n".join(report), encoding="utf-8")
+          print(f"Inspection report created: {out} ({out.stat().st_size} bytes)")
+          PY
+      - name: Upload inspection report
+        uses: actions/upload-artifact@v4
+        with:
+          name: void-adb-inspection
+          path: void-adb-inspection.txt
+          if-no-files-found: error
+          retention-days: 3
