@@ -59,7 +59,7 @@ test("Motor gera exatamente os mesmos valores para a mesma entrada (determiníst
   }
 });
 
-test("Motor considera DPI, Hz, RAM, processador, tamanho do botão de tiro e gera perfis distintos", () => {
+test("Motor usa DPI e botão como parâmetros de ajuste, sem inventar relação entre hardware e sensibilidade", () => {
   const engine = loadEngine();
   const base = {
     marca: "Samsung",
@@ -75,6 +75,9 @@ test("Motor considera DPI, Hz, RAM, processador, tamanho do botão de tiro e ger
   const lowDpi = engine.generateSensitivity({ ...base, dpi: 411 });
   const highDpi = engine.generateSensitivity({ ...base, dpi: 960 });
   assert.ok(lowDpi.values.General > highDpi.values.General, "DPI maior deve reduzir sensibilidade base");
+
+  const hardwareVariant = engine.generateSensitivity({ ...base, ram: 16, hz: 165, processador: "flagship", marca: "Apple", modelo: "iPhone 17 Pro" });
+  assert.deepEqual(hardwareVariant.values, engine.generateSensitivity(base).values, "Hardware não deve alterar números de sensibilidade sem medição de toque");
 
   const smallBtn = engine.generateSensitivity({ ...base, fireButtonSize: 35 });
   const largeBtn = engine.generateSensitivity({ ...base, fireButtonSize: 78 });
@@ -199,3 +202,16 @@ test("Autopreenchimento de ficha técnica inclui Galaxy A07 4G e valida dados su
   assert.match(app, /selectChipValue\(els\.ramChips, els\.ramInput, specs\.ram\)/);
   assert.match(app, /selectChipValue\(els\.hzChips, els\.hzInput, specs\.hz\)/);
 });
+
+test("Aprendizado local reduz o passo em correções repetidas por mira e mantém miras independentes", () => {
+  const engine = loadEngine();
+  const initial = { General: 160, "Red Dot": 160, "2x": 150, "4x": 140, AWM: 90, Olhadinha: 150 };
+  const first = engine.applyAdaptiveCalibration(initial, "overshoot_head", { learningState: {} });
+  const second = engine.applyAdaptiveCalibration(first.values, "overshoot_head", { learningState: first.learningState });
+  assert.ok(Math.abs(second.deltas.General) <= Math.abs(first.deltas.General));
+  assert.ok(Math.abs(second.deltas["Red Dot"]) <= Math.abs(first.deltas["Red Dot"]));
+  assert.equal(second.deltas.AWM, 0);
+  assert.equal(second.deltas["4x"], 0);
+  assert.equal(second.learningState.AWM.sameDirectionCount, 0);
+});
+
