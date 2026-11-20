@@ -148,3 +148,26 @@ O motor híbrido combina regras determinísticas e controles do jogador. Não é
 - VersionName: 2.0.0
 - VersionCode: 5
 - Branch: release/sensi-ai-2.0.0
+
+
+## Mega upgrade interno da linha 2.0.0
+
+O Boost Center amplia a versão 2.0.0 sem alterar o VersionName. O VersionCode Android foi incrementado para permitir que o Android reconheça a compilação como atualização.
+
+### Boost Center
+- Painel de diagnóstico local com modelo, versão Android, memória disponível, bateria e temperatura quando o sistema fornece esses dados.
+- Recomendações conservadoras para estabilidade e uso durante jogos.
+- Indicadores de dados indisponíveis quando o Android não fornece uma leitura.
+- Nenhum ajuste de sistema é aplicado automaticamente.
+
+### Shizuku Hub
+- Integração com a API Shizuku para verificar se o serviço está ativo e se a autorização do SENSI.AI foi concedida.
+- Solicitação de autorização somente após toque explícito do usuário.
+- Esta compilação não executa comandos privilegiados nem modifica configurações do Android ou arquivos do jogo.
+- A autorização Shizuku é opcional e pode ser revogada pelo usuário.
+
+### Segurança e limites
+O diagnóstico não é um benchmark de FPS e não mede diretamente o desempenho dentro do Free Fire. O SENSI.AI não encerra processos à força, não desativa proteções, não altera arquivos do jogo e não promete ganho de FPS ou headshots. O app continua funcionando sem Shizuku.
+
+- VersionName: 2.0.0 (mantido)
+- VersionCode: 6 (incremento técnico para atualização Android)
