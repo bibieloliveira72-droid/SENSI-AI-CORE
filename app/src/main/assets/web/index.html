@@ -374,23 +374,32 @@
           <div class="shizuku-actions"><button type="button" id="shizukuCheckBtn" class="btn-secondary">VERIFICAR SHIZUKU</button><button type="button" id="shizukuGrantBtn" class="btn-ghost-sm" disabled>SOLICITAR AUTORIZAÇÃO</button></div>
           <p class="field-help">Nesta versão, a integração verifica o serviço e a autorização. Não executa comandos, não altera propriedades do sistema, não desativa proteções e não modifica o Free Fire. A autorização é opcional.</p>
         </section>
-        <section class="card boost-card">
-          <div class="section-head"><div><h2>Boost Toolbox</h2><p class="device-summary">Ferramentas guiadas para cuidar do aparelho.</p></div><span class="badge">12 FERRAMENTAS</span></div>
-          <div class="boost-tool-grid">
-            <button type="button" class="boost-tool" data-boost-tool="game"><span>🎮</span><strong>Game Mode</strong><small>Preparar sessão de jogo</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="memory"><span>▦</span><strong>RAM Manager</strong><small>Memória e apps em uso</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="thermal"><span>♨</span><strong>Thermal Guard</strong><small>Temperatura e pausas</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="battery"><span>🔋</span><strong>Battery Care</strong><small>Consumo e economia</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="network"><span>⌁</span><strong>Network Check</strong><small>Estabilidade da conexão</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="touch"><span>✣</span><strong>Touch Setup</strong><small>Tela e controles</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="display"><span>▣</span><strong>Display Lab</strong><small>Taxa de atualização</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="storage"><span>▤</span><strong>Storage Care</strong><small>Espaço disponível</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="background"><span>◷</span><strong>Background Apps</strong><small>Gerenciar manualmente</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="sound"><span>♫</span><strong>Audio Setup</strong><small>Som e foco no jogo</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="privacy"><span>◇</span><strong>Privacy Check</strong><small>Permissões e segurança</small></button>
-            <button type="button" class="boost-tool" data-boost-tool="report"><span>⌗</span><strong>System Report</strong><small>Checklist do dispositivo</small></button>
+        <section class="card boost-card boost-workspace">
+          <div class="section-head"><div><h2>Monte seu Boost</h2><p class="device-summary">Escolha várias otimizações e monte um plano para seu aparelho.</p></div><span class="badge">MULTISELECT</span></div>
+          <div class="boost-welcome"><span class="boost-welcome-icon">✦</span><div><strong>Seu aparelho, suas escolhas.</strong><p>Marque o que deseja revisar. O SENSI.AI organiza tudo em uma lista simples, sem aplicar mudanças escondidas.</p></div></div>
+          <div class="boost-profile-row"><label for="boostUseCase">Objetivo da sessão</label><select id="boostUseCase" class="input-control"><option value="stable">Menos travamentos</option><option value="cool">Menos aquecimento</option><option value="battery">Economizar bateria</option><option value="network">Conexão mais estável</option><option value="balanced">Equilíbrio geral</option></select></div>
+          <div class="boost-selection-bar"><div><strong id="boostSelectedCount">0 selecionadas</strong><small>Você pode combinar várias opções.</small></div><div class="boost-quick-actions"><button type="button" id="boostSelectRecommended" class="btn-ghost-sm">Recomendadas</button><button type="button" id="boostSelectAll" class="btn-ghost-sm">Todas</button><button type="button" id="boostClearSelection" class="btn-ghost-sm">Limpar</button></div></div>
+          <div class="boost-multi-grid" id="boostMultiGrid">
+            <label class="boost-option"><input type="checkbox" value="game"><span class="boost-option-icon">🎮</span><span><strong>Preparar jogo</strong><small>Configuração estável de sessão</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="memory"><span class="boost-option-icon">▦</span><span><strong>Revisar memória</strong><small>RAM e apps abertos</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="thermal"><span class="boost-option-icon">♨</span><span><strong>Controle térmico</strong><small>Temperatura e pausas</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="battery"><span class="boost-option-icon">🔋</span><span><strong>Cuidar da bateria</strong><small>Consumo e energia</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="network"><span class="boost-option-icon">⌁</span><span><strong>Rede e conexão</strong><small>Wi-Fi e estabilidade</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="touch"><span class="boost-option-icon">✣</span><span><strong>Controles e toque</strong><small>HUD e sensibilidade</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="display"><span class="boost-option-icon">▣</span><span><strong>Tela e fluidez</strong><small>Hz e brilho suportados</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="storage"><span class="boost-option-icon">▤</span><span><strong>Armazenamento</strong><small>Espaço e arquivos</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="background"><span class="boost-option-icon">◷</span><span><strong>Apps em segundo plano</strong><small>Escolhas manuais</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="sound"><span class="boost-option-icon">♫</span><span><strong>Áudio</strong><small>Som e dispositivos</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="privacy"><span class="boost-option-icon">◇</span><span><strong>Privacidade</strong><small>Permissões e segurança</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="report"><span class="boost-option-icon">⌗</span><span><strong>Relatório do sistema</strong><small>Checklist do dispositivo</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="refresh"><span class="boost-option-icon">↻</span><span><strong>Diagnóstico atualizado</strong><small>RAM, bateria e temperatura</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="notifications"><span class="boost-option-icon">♧</span><span><strong>Notificações</strong><small>Organizar alertas manualmente</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="updates"><span class="boost-option-icon">⇧</span><span><strong>Atualizações</strong><small>Downloads e processos agendados</small></span></label>
+            <label class="boost-option"><input type="checkbox" value="accessibility"><span class="boost-option-icon">◎</span><span><strong>Acessibilidade</strong><small>Revisar recursos ativos</small></span></label>
           </div>
-          <div id="boostToolDetail" class="boost-tool-detail" aria-live="polite"><strong>Selecione uma ferramenta</strong><p>Toque em qualquer módulo para ver as recomendações e abrir o checklist correspondente. Nenhum ajuste é aplicado silenciosamente.</p></div>
+          <button type="button" id="boostBuildPlan" class="btn-primary">MONTAR MEU PLANO</button>
+          <div id="boostPlanResult" class="boost-plan-result" aria-live="polite"><strong>Seu plano aparece aqui</strong><p>Selecione uma ou mais opções e toque em “Montar meu plano”.</p></div>
+          <p class="boost-safety-note">As opções são orientações seguras e reversíveis feitas por você. Shizuku ainda não executa otimizações nesta versão; nenhuma configuração do Android ou do jogo será alterada automaticamente.</p>
         </section>
       </section>
     </main>
