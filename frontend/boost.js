@@ -3,6 +3,8 @@
 const $=id=>document.getElementById(id), bridge=window.AndroidBridge||null;
 const parse=v=>{try{return JSON.parse(v)}catch(_){return null}};
 const put=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
+let applyQueue=[],applyIndex=-1;
 const guides={
 game:["Preparar jogo","Escolha gráficos que o aparelho mantenha estáveis, teste uma partida curta e desligue apenas sobreposições que você não usa."],
 memory:["Revisar memória","Atualize o diagnóstico. Feche manualmente apenas apps que você abriu e não está usando. Mantenha música e comunicação se precisar delas."],
@@ -30,6 +32,23 @@ const h=document.createElement("strong");h.textContent="Seu plano de otimizaçã
 const p=document.createElement("p");p.textContent="Siga na ordem abaixo e marque mentalmente o que já conferiu. Você continua no controle de cada mudança.";box.append(p);
 const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";span.textContent=guides[key][1];li.append(b,span);ol.append(li)});box.append(ol);
 const note=document.createElement("small");note.textContent="Plano de orientação. Nenhum comando ou ajuste foi aplicado pelo aplicativo.";box.append(note)}
+function applyStatus(message){put("boostApplyStatus",message)}
+function applyNextTweak(){
+if(applyIndex<0||applyIndex>=applyQueue.length){applyStatus("Todos os itens selecionados foram percorridos. Você pode revisar o resultado nas Configurações.");$("boostNextTweak").disabled=true;return}
+const key=applyQueue[applyIndex],label=guides[key]?.[0]||key;
+if(key==="refresh"){refresh();applyStatus("Diagnóstico atualizado. Nenhuma configuração foi alterada.");advanceQueue();return}
+if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
+applyStatus(label+": siga as instruções do plano. Este item não possui uma alteração automática segura no Android.");advanceQueue();return}
+if(!bridge||typeof bridge.openTweakSettings!=="function"){applyStatus("Este ajuste precisa da versão APK Android. Nenhuma mudança foi feita.");$("boostNextTweak").disabled=true;return}
+let opened=false;try{opened=bridge.openTweakSettings(key)===true}catch(_){opened=false}
+if(opened){applyStatus(label+": painel do Android aberto. Faça a alteração que desejar e volte ao SENSI.AI para avançar.");$("boostNextTweak").disabled=false}
+else{applyStatus(label+": não foi possível abrir esse painel nesta versão do Android. Nenhuma mudança foi feita.");advanceQueue()}
+}
+function advanceQueue(){applyIndex++;if(applyIndex>=applyQueue.length){$("boostNextTweak").disabled=true;applyStatus("Fila concluída. Os ajustes foram apresentados sem alterar nada automaticamente.")}else{$("boostNextTweak").disabled=false}}
+function startApplyTweaks(){
+const keys=selected();if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de aplicar.");return}
+applyQueue=keys;applyIndex=0;applyStatus("Iniciando "+keys.length+" ajuste(s). O Android poderá abrir as Configurações para você confirmar cada um.");applyNextTweak()
+}
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
 if(!d){put("boostDevice","Modo navegador: diagnóstico Android nativo indisponível.");put("boostMemory","N/D");put("boostMemoryHint","Disponível no APK");put("boostBattery","N/D");put("boostBatteryHint","Disponível no APK");put("boostTemp","N/D");put("boostTempHint","Disponível no APK");put("boostAndroid",/Android/i.test(navigator.userAgent)?"Android":"Web");put("boostAndroidHint","Sem leitura nativa");put("boostAdvice","Abra a versão APK para consultar os dados do Android.");return}
@@ -43,6 +62,8 @@ $("boostSelectRecommended")?.addEventListener("click",()=>setSelected(recommende
 $("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides)));
 $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
 $("boostBuildPlan")?.addEventListener("click",buildPlan);
+$("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
+$("boostNextTweak")?.addEventListener("click",applyNextTweak);
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
 $("shizukuGrantBtn")?.addEventListener("click",()=>{try{if(bridge&&typeof bridge.requestShizukuPermission==="function"){bridge.requestShizukuPermission();shizuku("","Solicitação enviada","Conclua ou negue no Shizuku e depois toque em verificar.",false)}}catch(_){shizuku("","Falha ao solicitar","O app continua funcionando sem Shizuku.",false)}});
