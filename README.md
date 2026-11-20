@@ -246,3 +246,17 @@ O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.ri
 - As variações calculadas não são apresentadas como presets populares comprovados.
 - DPI continua independente da resolução.
 - A recomendação não altera o Android automaticamente. Compatibilidade, deformação/corte da imagem e impacto no desempenho variam conforme aparelho e jogo.
+
+
+# SENSI.AI 2.2.0
+
+- **VersionName:** 2.2.0
+- **VersionCode:** 24
+- Nova aba **Resolution Lab**, independente do gerador de sensibilidade.
+- Catálogo offline com 400 dimensões organizadas em quatro proporções: 4:3, 16:9, 19.5:9 e 20:9.
+- 100 opções por proporção, com dimensões de referência cadastradas separadas das variações matemáticas.
+- Pesquisa por dimensão/proporção, filtros por proporção e origem, prévia visual, cópia e favoritos locais.
+- Lista paginada para manter a interface leve em aparelhos de entrada.
+- A ferramenta não aplica mudanças no Android nem no Free Fire; copiar uma resolução não significa que o aparelho ou jogo a aceite.
+- DPI continua independente e não é alterado pelo Resolution Lab.
+- Testes automatizados verificam as 400 opções, unicidade e proporções exatas.

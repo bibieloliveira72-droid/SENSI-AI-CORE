@@ -10,6 +10,7 @@
   <title>SENSI.AI — Motor de Sensibilidade Free Fire</title>
   <link rel="stylesheet" href="./styles.css" />
   <link rel="stylesheet" href="./boost.css" />
+  <link rel="stylesheet" href="./resolution-lab.css" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -48,6 +49,9 @@
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="compare">
         <span class="tab-icon">⇄</span><span>Comparar</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="resolutionLab">
+        <span class="tab-icon">▦</span><span>Resolução</span>
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="boost"><span class="tab-icon">⚡</span><span>Boost</span></button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="settings"><span class="tab-icon">⚙</span><span>Ajustes</span></button>
@@ -367,6 +371,29 @@
         </div>
       </section>
 
+      <section id="tab-resolutionLab" class="tab-panel hidden" role="tabpanel">
+        <section class="hero-panel resolution-lab-hero"><div class="hero-copy"><span class="eyebrow"><i></i> DISPLAY CONFIGURATION / 06</span><h2>Resolution <em>Lab.</em></h2><p>Explore proporções, compare dimensões, visualize o formato e salve suas opções favoritas.</p><div class="hero-meta"><span>400 OPÇÕES</span><span>4 PROPORÇÕES</span><span>OFFLINE</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">▦</div><i class="orbit-dot"></i></div></section>
+        <section class="card rl-card">
+          <div class="section-head"><div><h2>Catálogo de resoluções</h2><p class="device-summary">Dimensões de referência e variações matemáticas exatas.</p></div><span class="badge" id="rlCountBadge">400 OPÇÕES</span></div>
+          <label class="rl-search-label" for="rlSearch">PESQUISAR DIMENSÃO</label>
+          <input id="rlSearch" class="input-control" type="search" placeholder="Ex.: 1920x1080, 4:3, referência..." autocomplete="off" />
+          <div class="rl-filter-grid">
+            <div class="field"><label for="rlRatioFilter">Proporção</label><select id="rlRatioFilter" class="input-control"><option value="all">Todas as proporções</option><option value="4:3">4:3 · Clássica</option><option value="16:9">16:9 · Widescreen</option><option value="19.5:9">19.5:9 · Tela ampla</option><option value="20:9">20:9 · Ultrawide</option></select></div>
+            <div class="field"><label for="rlSourceFilter">Origem</label><select id="rlSourceFilter" class="input-control"><option value="all">Todas</option><option value="reference">Referências cadastradas</option><option value="calculated">Variações calculadas</option></select></div>
+          </div>
+          <label class="rl-favorites-toggle"><input id="rlFavoritesOnly" type="checkbox" /> Mostrar somente favoritos</label>
+          <div class="rl-preview-panel">
+            <div class="rl-preview-copy"><span>PRÉVIA DA PROPORÇÃO</span><strong id="rlSelectedResolution">960 × 720</strong><small id="rlSelectedMeta">4:3 · Referência cadastrada</small></div>
+            <div class="rl-preview-stage"><div id="rlPreviewShape" class="rl-preview-shape" aria-label="Prévia da proporção selecionada"></div></div>
+          </div>
+          <div class="rl-selection-actions"><button type="button" id="rlCopyBtn" class="btn-primary">COPIAR RESOLUÇÃO</button><button type="button" id="rlFavoriteBtn" class="btn-secondary">☆ SALVAR FAVORITO</button></div>
+          <p class="rl-safety-note">O catálogo é informativo. Copiar uma dimensão não altera a tela, o Android ou o Free Fire. Nem todas as combinações são suportadas pelo aparelho ou pelo jogo. DPI permanece independente.</p>
+          <div class="rl-results-head"><strong id="rlResultsSummary">Mostrando opções</strong><span id="rlFavoriteCount">0 favoritos</span></div>
+          <div id="rlResults" class="rl-results" aria-live="polite"></div>
+          <button type="button" id="rlLoadMore" class="btn-secondary rl-load-more">CARREGAR MAIS</button>
+        </section>
+      </section>
+
       <section id="tab-boost" class="tab-panel hidden" role="tabpanel">
         <section class="hero-panel boost-hero"><div class="hero-copy"><span class="eyebrow"><i></i> DEVICE CARE / 04</span><h2>Boost <em>Center.</em></h2><p>Diagnóstico do aparelho, dicas práticas e integração transparente com Shizuku.</p><div class="hero-meta"><span>DIAGNÓSTICO LOCAL</span><span>SEM ROOT</span><span>CONTROLE DO USUÁRIO</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">⚡</div><i class="orbit-dot"></i></div></section>
         <section class="card boost-card">
@@ -495,5 +522,6 @@
   <script src="./sensi-engine.js" defer></script>
   <script src="./app.js" defer></script>
   <script src="./boost.js" defer></script>
+  <script src="./resolution-lab.js" defer></script>
 </body>
 </html>

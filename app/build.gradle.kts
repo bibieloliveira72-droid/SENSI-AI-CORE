@@ -15,8 +15,8 @@ android {
     applicationId = "com.aistudio.mockcraft.kvwqnz"
     minSdk = 24
     targetSdk = 36
-    versionCode = 23
-    versionName = "2.1.7"
+    versionCode = 24
+    versionName = "2.2.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }

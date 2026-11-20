@@ -677,6 +677,7 @@
       generator: document.getElementById("tab-generator"),
       saved: document.getElementById("tab-saved"),
       compare: document.getElementById("tab-compare"),
+      resolutionLab: document.getElementById("tab-resolutionLab"),
       boost: document.getElementById("tab-boost"),
       settings: document.getElementById("tab-settings"),
     },
