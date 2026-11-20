@@ -6,8 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.ViewGroup
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
@@ -28,7 +26,6 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,17 +33,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.ui.theme.MyApplicationTheme
-import org.json.JSONObject
 
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
-
-    // Configure Firebase App Check with launch intent before any UI, ViewModels, or Firebase calls
-    configureAppCheck(this, intent)
 
     val darkBar = AndroidColor.parseColor("#070709")
     enableEdgeToEdge(
@@ -56,65 +47,25 @@ class MainActivity : ComponentActivity() {
 
     setContent {
       MyApplicationTheme {
-        val sensiViewModel: SensiAiViewModel = viewModel()
-        SensiWebHost(viewModel = sensiViewModel)
+        SensiOfflineWebHost()
       }
     }
   }
 }
 
-private class AndroidSensiBridge(
-  private val context: Context,
-  private val onGenerateRequest: (requestJson: String, callbackId: String) -> Unit,
-) {
-  private val mainHandler = Handler(Looper.getMainLooper())
-
+private class AndroidClipboardBridge(private val context: Context) {
   @JavascriptInterface
   fun copyText(text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
     clipboard?.setPrimaryClip(ClipData.newPlainText("SENSI.AI", text))
   }
-
-  @JavascriptInterface
-  fun hasFirebaseAi(): Boolean = true
-
-  @JavascriptInterface
-  fun generateSensiWithFirebase(requestJson: String, callbackId: String) {
-    mainHandler.post { onGenerateRequest(requestJson, callbackId) }
-  }
 }
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-fun SensiWebHost(viewModel: SensiAiViewModel) {
+fun SensiOfflineWebHost() {
   var webViewRef by remember { mutableStateOf<WebView?>(null) }
   var canGoBack by remember { mutableStateOf(false) }
-  val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-  LaunchedEffect(uiState, webViewRef) {
-    val webView = webViewRef ?: return@LaunchedEffect
-    when (val state = uiState) {
-      is SensiAiUiState.Success -> {
-        val quotedId = JSONObject.quote(state.callbackId)
-        val quotedPayload = JSONObject.quote(state.payloadJson)
-        webView.evaluateJavascript(
-          "window.__onFirebaseSensiResult && window.__onFirebaseSensiResult($quotedId, true, $quotedPayload);",
-          null,
-        )
-        viewModel.markHandled()
-      }
-      is SensiAiUiState.Error -> {
-        val quotedId = JSONObject.quote(state.callbackId)
-        val quotedError = JSONObject.quote(state.message)
-        webView.evaluateJavascript(
-          "window.__onFirebaseSensiResult && window.__onFirebaseSensiResult($quotedId, false, $quotedError);",
-          null,
-        )
-        viewModel.markHandled()
-      }
-      else -> Unit
-    }
-  }
 
   BackHandler(enabled = canGoBack) {
     webViewRef?.goBack()
@@ -143,20 +94,11 @@ fun SensiWebHost(viewModel: SensiAiViewModel) {
             javaScriptEnabled = true
             domStorageEnabled = true
             allowFileAccess = true
-            @Suppress("DEPRECATION")
-            allowFileAccessFromFileURLs = true
-            @Suppress("DEPRECATION")
-            allowUniversalAccessFromFileURLs = true
-            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
-            cacheMode = WebSettings.LOAD_DEFAULT
+            blockNetworkLoads = true
+            cacheMode = WebSettings.LOAD_NO_CACHE
           }
 
-          addJavascriptInterface(
-            AndroidSensiBridge(context.applicationContext) { requestJson, callbackId ->
-              viewModel.generateSensitivity(requestJson, callbackId)
-            },
-            "AndroidBridge",
-          )
+          addJavascriptInterface(AndroidClipboardBridge(context.applicationContext), "AndroidBridge")
 
           webChromeClient = WebChromeClient()
           webViewClient =
@@ -166,7 +108,7 @@ fun SensiWebHost(viewModel: SensiAiViewModel) {
                 request: WebResourceRequest?,
               ): Boolean {
                 val url = request?.url?.toString().orEmpty()
-                return !(url.startsWith("file:///android_asset/") || url.startsWith("about:"))
+                return !url.startsWith("file:///android_asset/")
               }
 
               override fun onPageFinished(view: WebView?, url: String?) {

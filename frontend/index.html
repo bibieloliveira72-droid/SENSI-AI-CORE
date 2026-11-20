@@ -7,7 +7,7 @@
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
   />
   <meta name="theme-color" content="#070709" />
-  <title>SENSI.AI — Calibrador de Sensibilidade</title>
+  <title>SENSI.AI — Motor de Sensibilidade Free Fire</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -26,220 +26,336 @@
         </div>
         <div>
           <h1 class="brand-title">SENSI<span>.AI</span></h1>
-          <p class="brand-sub">Calibrador Tático Mobile</p>
+          <p class="brand-sub">Motor Próprio • Free Fire</p>
         </div>
       </div>
 
-      <button
-        type="button"
-        id="toggleServerBtn"
-        class="server-pill"
-        aria-expanded="false"
-        aria-controls="serverPanel"
-      >
-        <span class="status-dot" id="serverDot"></span>
-        <span id="serverStatusText">Servidor</span>
-      </button>
+      <div class="offline-pill" aria-label="Modo de execução offline local">
+        <span class="status-dot online" aria-hidden="true"></span>
+        <span>100% OFFLINE</span>
+      </div>
     </header>
 
-    <section id="serverPanel" class="card server-panel hidden" aria-label="Configuração do motor de IA e servidor">
-      <div class="section-head">
-        <h2>Conexão com Gemini IA</h2>
-        <span class="badge">SEM CHAVE NO CLIENTE</span>
-      </div>
-      <div id="providerRow" class="field hidden">
-        <label for="providerSelect">Provedor de IA</label>
-        <select id="providerSelect" class="input-control">
-          <option value="firebase">Firebase AI Logic (Nativo Android)</option>
-          <option value="node">Backend Node.js (/api/sensi)</option>
-        </select>
-      </div>
-      <div id="nodeConfigBox">
-        <p class="helper-text">
-          Informe a URL do seu servidor Node.js (ex.: <code>https://sua-api.onrender.com</code> ou <code>http://10.0.2.2:3000</code> no emulador Android). A chave Gemini permanece protegida exclusivamente no backend.
-        </p>
-        <div class="server-row">
-          <input
-            type="url"
-            id="backendUrlInput"
-            class="input-control"
-            placeholder="http://10.0.2.2:3000"
-            autocomplete="url"
-            inputmode="url"
-          />
-          <button type="button" id="saveServerBtn" class="btn-secondary">Salvar</button>
-        </div>
-        <div class="server-actions">
-          <button type="button" id="testHealthBtn" class="btn-ghost">Testar Conexão (/api/health)</button>
-          <span id="healthResult" class="health-msg" role="status"></span>
-        </div>
-      </div>
-    </section>
+    <nav class="tab-bar" role="tablist" aria-label="Navegação principal">
+      <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="generator">
+        Gerador
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="saved">
+        Perfis &amp; Histórico
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="compare">
+        Comparar
+      </button>
+    </nav>
 
     <main class="main-content">
-      <form id="sensiForm" class="card form-card" novalidate>
-        <div class="section-head">
-          <h2>Perfil do Smartphone &amp; Estilo</h2>
-          <span class="badge">GEMINI IA</span>
-        </div>
-
-        <div class="field-grid">
-          <div class="field">
-            <label for="marcaSelect">Marca</label>
-            <select id="marcaSelect" name="marca" class="input-control" required>
-              <option value="Samsung">Samsung</option>
-              <option value="Xiaomi">Xiaomi / Redmi / POCO</option>
-              <option value="Motorola">Motorola</option>
-              <option value="Apple">Apple (iPhone)</option>
-              <option value="ASUS ROG">ASUS ROG / Zenfone</option>
-              <option value="Realme">Realme</option>
-              <option value="Infinix">Infinix</option>
-              <option value="OnePlus">OnePlus</option>
-              <option value="Outra">Outra marca</option>
-            </select>
+      <!-- TAB 1: GERADOR + CALIBRAÇÃO -->
+      <section id="tab-generator" class="tab-panel" role="tabpanel">
+        <form id="sensiForm" class="card form-card" novalidate>
+          <div class="section-head">
+            <h2>Hardware &amp; Botão de Tiro</h2>
+            <span class="badge">MOTOR LOCAL JS</span>
           </div>
 
-          <div class="field hidden" id="customBrandField">
-            <label for="customMarcaInput">Qual marca?</label>
-            <input
-              type="text"
-              id="customMarcaInput"
-              class="input-control"
-              placeholder="Ex.: Tecno, RedMagic, Sony"
-              maxlength="50"
-            />
+          <div class="field-grid">
+            <div class="field">
+              <label for="marcaSelect">Marca do Celular</label>
+              <select id="marcaSelect" name="marca" class="input-control" required>
+                <option value="Samsung">Samsung</option>
+                <option value="Xiaomi">Xiaomi / Redmi / POCO</option>
+                <option value="Motorola">Motorola</option>
+                <option value="Apple">Apple (iPhone)</option>
+                <option value="ASUS ROG">ASUS ROG / RedMagic</option>
+                <option value="Realme">Realme</option>
+                <option value="Infinix">Infinix</option>
+                <option value="OnePlus">OnePlus</option>
+                <option value="Outra">Outra marca</option>
+              </select>
+            </div>
+
+            <div class="field hidden" id="customBrandField">
+              <label for="customMarcaInput">Qual marca?</label>
+              <input
+                type="text"
+                id="customMarcaInput"
+                class="input-control"
+                placeholder="Ex.: Tecno, LG, Sony"
+                maxlength="50"
+              />
+            </div>
+
+            <div class="field">
+              <label for="modeloInput">Modelo do Celular</label>
+              <input
+                type="text"
+                id="modeloInput"
+                name="modelo"
+                class="input-control"
+                placeholder="Ex.: Poco X6 Pro, Galaxy A55"
+                maxlength="60"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="processadorSelect">Categoria do Processador</label>
+              <select id="processadorSelect" name="processador" class="input-control">
+                <option value="flagship">Topo de linha (Snapdragon 8 / Dimensity 9000+ / Apple A)</option>
+                <option value="intermediario_plus" selected>Intermediário Premium (Snapdragon 7 / Dimensity 8000)</option>
+                <option value="intermediario">Intermediário (Snapdragon 6 / Helio G99 / Dimensity 6000)</option>
+                <option value="entrada">Básico / Entrada (Helio G85 ou inferior)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="processadorDetalheInput">Chipset (opcional)</label>
+              <input
+                type="text"
+                id="processadorDetalheInput"
+                class="input-control"
+                placeholder="Ex.: Snapdragon 8 Gen 2"
+                maxlength="60"
+              />
+            </div>
           </div>
 
           <div class="field">
-            <label for="modeloInput">Modelo do Aparelho</label>
+            <span class="field-label">Memória RAM</span>
+            <div class="chip-group" role="radiogroup" aria-label="Memória RAM" id="ramChips">
+              <button type="button" class="chip" data-value="2">2 GB</button>
+              <button type="button" class="chip" data-value="3">3 GB</button>
+              <button type="button" class="chip" data-value="4">4 GB</button>
+              <button type="button" class="chip" data-value="6">6 GB</button>
+              <button type="button" class="chip active" data-value="8">8 GB</button>
+              <button type="button" class="chip" data-value="12">12 GB</button>
+              <button type="button" class="chip" data-value="16">16 GB</button>
+            </div>
+            <input type="hidden" id="ramInput" name="ram" value="8" />
+          </div>
+
+          <div class="field">
+            <span class="field-label">Taxa de Atualização (Hz)</span>
+            <div class="chip-group" role="radiogroup" aria-label="Taxa de atualização" id="hzChips">
+              <button type="button" class="chip" data-value="60">60 Hz</button>
+              <button type="button" class="chip" data-value="90">90 Hz</button>
+              <button type="button" class="chip active" data-value="120">120 Hz</button>
+              <button type="button" class="chip" data-value="144">144 Hz</button>
+              <button type="button" class="chip" data-value="165">165 Hz</button>
+            </div>
+            <input type="hidden" id="hzInput" name="hz" value="120" />
+          </div>
+
+          <div class="field">
+            <div class="label-row">
+              <label for="dpiInput">DPI do Sistema</label>
+              <span class="range-hint">200 – 1600</span>
+            </div>
             <input
-              type="text"
-              id="modeloInput"
-              name="modelo"
-              class="input-control"
-              placeholder="Ex.: Galaxy S23, Poco X6 Pro, Moto G84"
-              maxlength="60"
+              type="number"
+              id="dpiInput"
+              name="dpi"
+              class="input-control mono-input"
+              min="200"
+              max="1600"
+              step="1"
+              value="600"
+              inputmode="numeric"
               required
             />
+            <div class="chip-group compact" aria-label="Atalhos de DPI" id="dpiPresets">
+              <button type="button" class="chip-mini" data-dpi="411">411</button>
+              <button type="button" class="chip-mini" data-dpi="520">520</button>
+              <button type="button" class="chip-mini active" data-dpi="600">600</button>
+              <button type="button" class="chip-mini" data-dpi="720">720</button>
+              <button type="button" class="chip-mini" data-dpi="800">800</button>
+              <button type="button" class="chip-mini" data-dpi="960">960</button>
+            </div>
           </div>
-        </div>
 
-        <div class="field">
-          <span class="field-label">Memória RAM</span>
-          <div class="chip-group" role="radiogroup" aria-label="Memória RAM" id="ramChips">
-            <button type="button" class="chip" data-value="2">2 GB</button>
-            <button type="button" class="chip" data-value="3">3 GB</button>
-            <button type="button" class="chip" data-value="4">4 GB</button>
-            <button type="button" class="chip" data-value="6">6 GB</button>
-            <button type="button" class="chip active" data-value="8">8 GB</button>
-            <button type="button" class="chip" data-value="12">12 GB</button>
-            <button type="button" class="chip" data-value="16">16 GB</button>
+          <div class="field">
+            <div class="label-row">
+              <label for="fireButtonRange">Tamanho do Botão de Tiro</label>
+              <span class="fire-badge" id="fireButtonBadge">52%</span>
+            </div>
+            <input
+              type="range"
+              id="fireButtonRange"
+              class="range-slider"
+              min="25"
+              max="90"
+              step="1"
+              value="52"
+            />
+            <div class="chip-group compact" aria-label="Atalhos do botão de tiro" id="fireButtonPresets">
+              <button type="button" class="chip-mini" data-fire="38">38%</button>
+              <button type="button" class="chip-mini" data-fire="45">45%</button>
+              <button type="button" class="chip-mini active" data-fire="52">52%</button>
+              <button type="button" class="chip-mini" data-fire="62">62%</button>
+              <button type="button" class="chip-mini" data-fire="72">72%</button>
+            </div>
           </div>
-          <input type="hidden" id="ramInput" name="ram" value="8" />
-        </div>
 
-        <div class="field">
-          <span class="field-label">Taxa de Atualização da Tela</span>
-          <div class="chip-group" role="radiogroup" aria-label="Taxa de atualização" id="hzChips">
-            <button type="button" class="chip" data-value="60">60 Hz</button>
-            <button type="button" class="chip" data-value="90">90 Hz</button>
-            <button type="button" class="chip active" data-value="120">120 Hz</button>
-            <button type="button" class="chip" data-value="144">144 Hz</button>
-            <button type="button" class="chip" data-value="165">165 Hz</button>
+          <div class="field">
+            <span class="field-label">Perfil de Sensibilidade</span>
+            <div class="profile-grid" role="radiogroup" aria-label="Perfil Free Fire" id="profileCards">
+              <button type="button" class="profile-card active" data-profile="capa">
+                <strong>Capa</strong>
+                <span>Puxada vertical ágil</span>
+              </button>
+              <button type="button" class="profile-card" data-profile="precisao">
+                <strong>Precisão</strong>
+                <span>Miras firmes e estáveis</span>
+              </button>
+              <button type="button" class="profile-card" data-profile="equilibrado">
+                <strong>Equilibrado</strong>
+                <span>Versátil em qualquer distância</span>
+              </button>
+              <button type="button" class="profile-card" data-profile="agressivo">
+                <strong>Agressivo</strong>
+                <span>Rush e giro rápido de câmera</span>
+              </button>
+            </div>
+            <input type="hidden" id="profileInput" name="profile" value="capa" />
           </div>
-          <input type="hidden" id="hzInput" name="taxaAtualizacao" value="120" />
-        </div>
 
-        <div class="field">
-          <div class="label-row">
-            <label for="dpiInput">DPI do Sistema</label>
-            <span class="range-hint">100 – 2000</span>
-          </div>
-          <input
-            type="number"
-            id="dpiInput"
-            name="dpi"
-            class="input-control mono-input"
-            min="100"
-            max="2000"
-            step="1"
-            value="600"
-            inputmode="numeric"
-            required
-          />
-          <div class="chip-group compact" aria-label="Atalhos de DPI" id="dpiPresets">
-            <button type="button" class="chip-mini" data-dpi="411">411</button>
-            <button type="button" class="chip-mini" data-dpi="520">520</button>
-            <button type="button" class="chip-mini active" data-dpi="600">600</button>
-            <button type="button" class="chip-mini" data-dpi="720">720</button>
-            <button type="button" class="chip-mini" data-dpi="800">800</button>
-            <button type="button" class="chip-mini" data-dpi="960">960</button>
-          </div>
-        </div>
+          <div id="errorBox" class="alert-error hidden" role="alert"></div>
 
-        <div class="field">
-          <label for="estiloSelect">Estilo de Jogo</label>
-          <select id="estiloSelect" name="estiloJogo" class="input-control" required>
-            <option value="Rush Agressivo">Rush (Agressivo / Curta distância)</option>
-            <option value="Equilibrado">Equilibrado (Versátil)</option>
-            <option value="Capa e Precisão Média">Capa e Precisão Média</option>
-            <option value="Suporte / Squad">Suporte / Squad</option>
-            <option value="Sniper / AWM">Franco-atirador (Sniper / AWM)</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label for="miraSelect">Preferência de Mira</label>
-          <select id="miraSelect" name="preferenciaMira" class="input-control" required>
-            <option value="Subir capa rápido">Subir capa rápido (puxada ágil)</option>
-            <option value="Controle de recuo estável">Controle de recuo estável (mira firme)</option>
-            <option value="Mira rápida (Flick)">Mira rápida / Flick de reação</option>
-            <option value="Precisão a longa distância">Precisão a longa distância</option>
-          </select>
-        </div>
-
-        <div id="errorBox" class="alert-error hidden" role="alert"></div>
-
-        <button type="submit" id="generateBtn" class="btn-primary">
-          <span class="btn-spinner hidden" id="btnSpinner" aria-hidden="true"></span>
-          <span id="btnLabel">GERAR SENSIBILIDADE</span>
-        </button>
-      </form>
-
-      <section id="resultsSection" class="card results-card hidden" aria-live="polite">
-        <div class="section-head">
-          <div>
-            <h2>Sensibilidade Recomendada</h2>
-            <p id="deviceSummary" class="device-summary"></p>
-          </div>
-          <button type="button" id="copyAllBtn" class="btn-copy-all">
-            COPIAR TUDO
+          <button type="submit" id="generateBtn" class="btn-primary">
+            GERAR SENSIBILIDADE
           </button>
+        </form>
+
+        <section id="resultsSection" class="card results-card hidden" aria-live="polite">
+          <div class="section-head">
+            <div>
+              <h2>Sensibilidade Inicial</h2>
+              <p id="deviceSummary" class="device-summary"></p>
+            </div>
+            <button type="button" id="copyAllBtn" class="btn-copy-all">
+              COPIAR TUDO
+            </button>
+          </div>
+
+          <div class="sensi-grid" id="sensiGrid"></div>
+
+          <!-- Calibração Interativa -->
+          <div class="calibration-panel">
+            <div class="calibration-head">
+              <div>
+                <h3>Calibração Interativa (Teste no Treinamento)</h3>
+                <p>Informe como a mira se comportou para o algoritmo adaptativo refinar os valores:</p>
+              </div>
+              <button type="button" id="resetBaseBtn" class="btn-ghost-sm">Resetar Base</button>
+            </div>
+
+            <div class="calibration-actions" id="calibrationButtons">
+              <button type="button" class="cal-btn" data-feedback="overshoot_head">
+                Passando da cabeça
+              </button>
+              <button type="button" class="cal-btn" data-feedback="stuck_chest">
+                Travando no peito
+              </button>
+              <button type="button" class="cal-btn" data-feedback="scope_shake">
+                2x / 4x tremendo
+              </button>
+              <button type="button" class="cal-btn" data-feedback="slow_turn">
+                Giro / gelo lento
+              </button>
+              <button type="button" class="cal-btn" data-feedback="awm_slow">
+                AWM lenta
+              </button>
+              <button type="button" class="cal-btn" data-feedback="awm_fast">
+                AWM rápida
+              </button>
+            </div>
+
+            <div id="calibrationFeedbackBox" class="cal-feedback hidden"></div>
+          </div>
+
+          <!-- Salvar Perfil Local -->
+          <div class="save-profile-box">
+            <label for="saveProfileNameInput">Salvar este perfil no aparelho</label>
+            <div class="save-row">
+              <input
+                type="text"
+                id="saveProfileNameInput"
+                class="input-control"
+                placeholder="Ex.: Poco X6 • Capa 600 DPI"
+                maxlength="48"
+              />
+              <button type="button" id="saveProfileBtn" class="btn-secondary">
+                SALVAR PERFIL
+              </button>
+            </div>
+          </div>
+
+          <div id="notesBox" class="notes-box hidden">
+            <h3>Leitura Técnica do Algoritmo</h3>
+            <ul id="notesList" class="notes-list"></ul>
+          </div>
+
+          <div class="disclaimer-box" role="note">
+            <strong>Sugestão inicial ajustável por testes:</strong>
+            <span id="disclaimerText">
+              O SENSI.AI não promete mira automática ou capa garantida. Use os valores como ponto de partida no modo treinamento e ajuste de 1 em 1 ponto conforme sua pegada.
+            </span>
+          </div>
+        </section>
+
+        <section class="disclaimer-static" role="note" id="staticDisclaimer">
+          <strong>Importante:</strong> Todas as sensibilidades são sugestões iniciais calculadas localmente para testes e ajustes finos — não há garantia de mira automática ou capa automática.
+        </section>
+      </section>
+
+      <!-- TAB 2: PERFIS SALVOS & HISTÓRICO -->
+      <section id="tab-saved" class="tab-panel hidden" role="tabpanel">
+        <div class="card">
+          <div class="section-head">
+            <h2>Perfis Salvos</h2>
+            <span class="badge" id="savedCountBadge">0 SALVOS</span>
+          </div>
+          <div id="savedProfilesList" class="list-stack"></div>
         </div>
 
-        <div class="sensi-grid" id="sensiGrid"></div>
-
-        <div id="notesBox" class="notes-box hidden">
-          <h3>Nota de Calibração</h3>
-          <p id="notesText"></p>
-        </div>
-
-        <div class="disclaimer-box" role="note">
-          <strong>Sugestão inicial — não garantida:</strong>
-          <span id="disclaimerText">
-            Os valores exibidos são sugestões iniciais geradas pela IA para servir como ponto de partida. Não são valores garantidos; teste no modo treinamento e ajuste gradualmente conforme película, toque da tela e memória muscular.
-          </span>
+        <div class="card">
+          <div class="section-head">
+            <h2>Histórico Local</h2>
+            <button type="button" id="clearHistoryBtn" class="btn-ghost-sm">Limpar Histórico</button>
+          </div>
+          <div id="historyList" class="list-stack"></div>
         </div>
       </section>
 
-      <section class="disclaimer-static" role="note" id="staticDisclaimer">
-        <strong>Aviso:</strong> Todas as sensibilidades do SENSI.AI são sugestões iniciais para teste e ajuste fino, nunca resultados garantidos.
+      <!-- TAB 3: COMPARAÇÃO -->
+      <section id="tab-compare" class="tab-panel hidden" role="tabpanel">
+        <div class="card">
+          <div class="section-head">
+            <h2>Comparar Sensibilidades</h2>
+            <span class="badge">LADO A LADO</span>
+          </div>
+
+          <div class="field-grid">
+            <div class="field">
+              <label for="compareSelectA">Configuração A (Base)</label>
+              <select id="compareSelectA" class="input-control"></select>
+            </div>
+            <div class="field">
+              <label for="compareSelectB">Configuração B (Comparada)</label>
+              <select id="compareSelectB" class="input-control"></select>
+            </div>
+          </div>
+
+          <div id="compareResultBox" class="compare-result"></div>
+        </div>
       </section>
     </main>
   </div>
 
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
+  <script src="./sensi-engine.js" defer></script>
   <script src="./app.js" defer></script>
 </body>
 </html>

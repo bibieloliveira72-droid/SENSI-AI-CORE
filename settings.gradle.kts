@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "MockCraft"
+rootProject.name = "SENSI.AI"
 
 include(":app")
