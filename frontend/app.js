@@ -675,6 +675,7 @@
     fireButtonPresets: document.getElementById("fireButtonPresets"),
     profileCards: document.getElementById("profileCards"),
     profileInput: document.getElementById("profileInput"),
+    engineModeInput: document.getElementById("engineModeInput"),
 
     errorBox: document.getElementById("errorBox"),
     resultsSection: document.getElementById("resultsSection"),
@@ -1019,6 +1020,7 @@
       dpi: Number.parseInt(els.dpiInput.value, 10),
       fireButtonSize: Number.parseInt(els.fireButtonRange.value, 10),
       profile: els.profileInput.value,
+      engineMode: els.engineModeInput.value,
     };
   }
 
@@ -1042,6 +1044,7 @@
     syncDpiPresetHighlight();
     syncFireButtonUi(config.fireButtonSize || 52);
     syncProfileCardSelection(config.profile || "capa");
+    if (els.engineModeInput) els.engineModeInput.value = config.engineMode || "balanceado";
     syncDevicePickerFromForm();
   }
 
@@ -1102,6 +1105,16 @@
       valueRow.appendChild(valEl);
       valueRow.appendChild(plusBtn);
 
+      const fineTune = document.createElement("input");
+      fineTune.type = "range";
+      fineTune.className = "scope-range";
+      fineTune.min = "0";
+      fineTune.max = "200";
+      fineTune.step = "1";
+      fineTune.value = String(value);
+      fineTune.setAttribute("aria-label", "Personalizar " + label);
+      fineTune.addEventListener("input", () => { activeState.values = window.SensiEngine.setScopeValue(activeState.values, key, fineTune.value); renderActiveResults(); });
+
       const bar = document.createElement("div");
       bar.className = "sensi-bar";
       const fill = document.createElement("div");
@@ -1111,6 +1124,7 @@
 
       card.appendChild(top);
       card.appendChild(valueRow);
+      card.appendChild(fineTune);
       card.appendChild(bar);
       els.sensiGrid.appendChild(card);
     });
@@ -1174,6 +1188,7 @@
     activeState = {
       config: generated.config,
       profileLabel: generated.profileLabel,
+      engineMode: generated.engineMode || raw.engineMode || "balanceado",
       values: { ...generated.values },
       baseValues: { ...generated.values },
       notes: generated.notes,
@@ -1285,6 +1300,7 @@
     activeState = {
       config: entry.config,
       profileLabel: entry.profileLabel || regenerated.profileLabel,
+      engineMode: entry.config.engineMode || "balanceado",
       values: { ...entry.values },
       baseValues: { ...regenerated.values },
       notes: regenerated.notes,
