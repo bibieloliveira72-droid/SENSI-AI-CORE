@@ -171,3 +171,20 @@ O diagnóstico não é um benchmark de FPS e não mede diretamente o desempenho 
 
 - VersionName: 2.0.0 (mantido)
 - VersionCode: 6 (incremento técnico para atualização Android)
+
+
+# SENSI.AI 2.1.1
+
+- **VersionName:** 2.1.1
+- **VersionCode:** 17
+- **Android mínimo:** 7.0 (API 24)
+- **Application ID:** `com.aistudio.mockcraft.kvwqnz`
+
+### Suporte restaurado
+- Central de suporte dentro de Configurações, com orientações para Android antigo e solução de problemas do Shizuku.
+- Compatibilidade declarada para Android 7.0 ou superior, mantendo o minSdk 24.
+- Orientação correta de inicialização do Shizuku: depuração sem fio no Android 11 ou superior; computador via ADB para Android 10 ou inferior sem root; método root quando disponível.
+- Fallback para abrir as configurações do aplicativo em Android anterior ao Android 8 ao acessar opções de notificações.
+- Application ID preservado para permitir atualização do mesmo pacote.
+
+O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.rikka.app/guide/setup/

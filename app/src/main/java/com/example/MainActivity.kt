@@ -284,8 +284,14 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
       "privacy" -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
         data = Uri.parse("package:${context.packageName}")
       }
-      "notifications" -> Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+      "notifications" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+          putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        }
+      } else {
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+          data = Uri.parse("package:${context.packageName}")
+        }
       }
       "updates" -> Intent(Settings.ACTION_SETTINGS)
       "accessibility" -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)

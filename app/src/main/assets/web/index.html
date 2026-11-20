@@ -427,6 +427,39 @@
           <div class="section-head"><div><h2>Privacidade e funcionamento</h2><p class="device-summary">O que o SENSI.AI faz no aparelho.</p></div><span class="badge">OFFLINE</span></div>
           <ul class="settings-info-list"><li>Perfis, histórico e preferências permanecem no armazenamento local do app.</li><li>O catálogo e o motor de sensibilidade não precisam de Wi-Fi.</li><li>O SENSI.AI não altera arquivos do Free Fire nem aplica comandos escondidos.</li><li>A abertura do jogo acontece somente após concluir o fluxo iniciado por você ou ao tocar em Abrir Jogo Agora.</li></ul>
         </section>
+        <section class="card boost-card legacy-support-card">
+          <div class="section-head"><div><h2>Central de suporte e compatibilidade</h2><p class="device-summary">Ajuda restaurada para aparelhos antigos e versões diferentes do Android.</p></div><span class="badge">SUPORTE</span></div>
+          <div class="support-version-line"><strong>SENSI.AI 2.1.1</strong><span>Build 17 · Android 7.0 ou superior</span></div>
+          <details class="support-topic" open>
+            <summary>Compatibilidade com celulares antigos</summary>
+            <p>O aplicativo mantém suporte a Android 7.0 (API 24) ou superior. Em aparelhos mais antigos, mantenha o Android System WebView atualizado quando houver atualização compatível. O desempenho e a disponibilidade de recursos variam conforme fabricante, memória e versão do sistema.</p>
+            <p>Se uma leitura não estiver disponível no seu aparelho, o SENSI.AI mostra um valor indisponível e mantém as funções principais de geração, biblioteca e comparação.</p>
+          </details>
+          <details class="support-topic">
+            <summary>Shizuku em versões antigas do Android</summary>
+            <ul>
+              <li><strong>Android 11 ou superior:</strong> pode iniciar o Shizuku pela Depuração sem fio, se o aparelho oferecer esse recurso, ou por root.</li>
+              <li><strong>Android 10 ou inferior:</strong> sem root, o início do Shizuku normalmente precisa ser feito por um computador conectado via ADB. A depuração sem fio integrada do Android não está disponível nessas versões.</li>
+              <li><strong>Aparelho com root:</strong> o Shizuku pode ser iniciado pelo método root, se a configuração do dispositivo permitir.</li>
+            </ul>
+            <p>Depois de iniciar o serviço, abra o Shizuku, volte ao SENSI.AI e toque em Solicitar autorização. Confirme o pedido no Shizuku e depois toque em Verificar Shizuku. Em aparelhos sem root, o serviço pode precisar ser iniciado novamente após reiniciar o celular.</p>
+          </details>
+          <details class="support-topic">
+            <summary>O SENSI.AI não aparece na lista de autorização</summary>
+            <ol>
+              <li>Confirme que o serviço Shizuku está indicado como ativo no próprio aplicativo Shizuku.</li>
+              <li>Abra o SENSI.AI instalado, entre em Boost e toque em Solicitar autorização.</li>
+              <li>Se não surgir a confirmação, feche e abra os dois aplicativos e tente novamente com o serviço ativo.</li>
+              <li>Confira se o Shizuku instalado é uma versão compatível e atualizada para seu Android.</li>
+            </ol>
+            <p>A lista de aplicativos autorizados só passa a mostrar o SENSI.AI depois que o pedido de permissão chega ao serviço. A autorização é necessária somente para os ajustes que usam Shizuku.</p>
+          </details>
+          <details class="support-topic">
+            <summary>O que funciona sem Shizuku?</summary>
+            <p>Gerador de sensibilidade, biblioteca, comparação, catálogo e orientações do Boost continuam disponíveis. Apenas a execução e a restauração dos ajustes que dependem de Shizuku ficam bloqueadas até a autorização.</p>
+          </details>
+          <p class="support-footnote">O suporte legado não promete compatibilidade universal. Alguns fabricantes limitam recursos do Android e podem exigir etapas adicionais no próprio sistema.</p>
+        </section>
       </section>
     </main>
   </div>
