@@ -647,6 +647,34 @@
     "ASUS ROG|ROG Phone 9": { chipset: "Snapdragon 8 Elite", category: "flagship", ram: 12, hz: 185 }
   };
 
+  // Cada modelo do catálogo possui uma ficha. Campos sem fonte técnica confirmada
+  // permanecem null e são exibidos como pendentes, nunca preenchidos por estimativa.
+  const DEVICE_TECHNICAL_SHEETS = DEVICE_CATALOG.map((device) => {
+    const reference = DEVICE_SPECS[device.brand + "|" + device.model] || {};
+    const hasReference = Boolean(reference.chipset || reference.category || reference.ram || reference.hz);
+    return {
+      brand: device.brand,
+      model: device.model,
+      chipset: reference.chipset || null,
+      category: reference.category || null,
+      ramGbReference: Number.isFinite(reference.ram) ? reference.ram : null,
+      refreshRateHz: Number.isFinite(reference.hz) ? reference.hz : null,
+      display: null,
+      resolution: null,
+      batteryMah: null,
+      network: null,
+      androidVersion: null,
+      status: hasReference ? "partial" : "pending",
+      note: hasReference
+        ? "Dados de referência parciais. Confirme a variante regional e a configuração de RAM."
+        : "Ficha criada. Especificações aguardam validação por fonte confiável."
+    };
+  });
+  const DEVICE_SHEETS_BY_KEY = Object.fromEntries(
+    DEVICE_TECHNICAL_SHEETS.map((sheet) => [sheet.brand + "|" + sheet.model, sheet])
+  );
+
+
   let activeDeviceBrand = "Todos";
 
   const els = {
@@ -960,7 +988,9 @@
       button.setAttribute("role", "option");
       button.innerHTML = '<span class="device-result-icon" aria-hidden="true">▯</span><span class="device-result-copy"><strong></strong><small></small></span><span class="device-result-arrow">›</span>';
       button.querySelector("strong").textContent = device.model;
-      button.querySelector("small").textContent = device.brand;
+      const sheet = DEVICE_SHEETS_BY_KEY[device.brand + "|" + device.model];
+      button.querySelector("small").textContent = device.brand + " · " +
+        (sheet && sheet.status === "partial" ? "ficha parcial" : "ficha pendente");
       button.addEventListener("click", () => selectCatalogDevice(device));
       els.deviceResults.appendChild(button);
     });
@@ -974,16 +1004,26 @@
   }
 
   function applyCatalogDeviceSpecs(device) {
+    const sheet = DEVICE_SHEETS_BY_KEY[device.brand + "|" + device.model];
     const specs = DEVICE_SPECS[device.brand + "|" + device.model];
-    if (!specs) {
-      els.selectedDeviceMeta.textContent = device.brand + " · ficha técnica não cadastrada; confira os dados manualmente";
+    if (!sheet) {
+      els.selectedDeviceMeta.textContent = device.brand + " · ficha técnica indisponível";
       return;
     }
-    els.processadorSelect.value = specs.category;
-    els.processadorDetalheInput.value = specs.chipset;
-    selectChipValue(els.ramChips, els.ramInput, specs.ram);
-    selectChipValue(els.hzChips, els.hzInput, specs.hz);
-    els.selectedDeviceMeta.textContent = device.brand + " · " + specs.chipset + " · " + specs.ram + " GB RAM* · " + specs.hz + " Hz";
+    if (specs) {
+      if (specs.category) els.processadorSelect.value = specs.category;
+      if (specs.chipset) els.processadorDetalheInput.value = specs.chipset;
+      if (Number.isFinite(specs.ram)) selectChipValue(els.ramChips, els.ramInput, specs.ram);
+      if (Number.isFinite(specs.hz)) selectChipValue(els.hzChips, els.hzInput, specs.hz);
+    }
+    const known = [
+      sheet.chipset,
+      sheet.ramGbReference ? sheet.ramGbReference + " GB RAM ref." : null,
+      sheet.refreshRateHz ? sheet.refreshRateHz + " Hz" : null
+    ].filter(Boolean);
+    const status = sheet.status === "partial" ? "ficha parcial" : "ficha pendente de validação";
+    els.selectedDeviceMeta.textContent = device.brand + " · " + status +
+      (known.length ? " · " + known.join(" · ") : "");
   }
 
   function selectCatalogDevice(device) {
@@ -998,9 +1038,10 @@
     els.devicePickerSearch.classList.add("hidden");
     els.deviceManualFields.classList.add("hidden");
     clearError();
-    showToast(DEVICE_SPECS[device.brand + "|" + device.model]
-      ? "Dados técnicos preenchidos. Confira a variante de RAM do seu aparelho."
-      : "Modelo selecionado. Complete os dados técnicos manualmente.");
+    const sheet = DEVICE_SHEETS_BY_KEY[device.brand + "|" + device.model];
+    showToast(sheet && sheet.status === "partial"
+      ? "Ficha parcial aplicada. Confira RAM e variante do aparelho."
+      : "Ficha criada; complete os campos técnicos ainda não validados.");
   }
 
   function syncDevicePickerFromForm() {
