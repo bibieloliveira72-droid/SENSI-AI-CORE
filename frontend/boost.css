@@ -28,3 +28,5 @@
 .boost-safety-note{font-size:10px;line-height:1.6;color:var(--muted,#98a5b5);margin-top:13px}
 @media(max-width:360px){.boost-multi-grid{grid-template-columns:1fr}.boost-selection-bar{align-items:flex-start;flex-direction:column}}
 @media(min-width:620px){.boost-multi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.boost-apply-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.boost-apply-actions button{flex:1 1 145px}.boost-apply-status{margin-top:10px;padding:12px 14px;border-radius:12px;background:rgba(25,217,183,.08);border:1px solid rgba(25,217,183,.2);color:var(--text,#f5f5f7);font-size:12px;line-height:1.55;min-height:42px}
