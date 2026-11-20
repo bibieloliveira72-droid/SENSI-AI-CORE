@@ -60,46 +60,40 @@
             <span class="badge">MOTOR LOCAL JS</span>
           </div>
 
-          <div class="field-grid">
-            <div class="field">
-              <label for="marcaSelect">Marca do Celular</label>
-              <select id="marcaSelect" name="marca" class="input-control" required>
-                <option value="Samsung">Samsung</option>
-                <option value="Xiaomi">Xiaomi / Redmi / POCO</option>
-                <option value="Motorola">Motorola</option>
-                <option value="Apple">Apple (iPhone)</option>
-                <option value="ASUS ROG">ASUS ROG / RedMagic</option>
-                <option value="Realme">Realme</option>
-                <option value="Infinix">Infinix</option>
-                <option value="OnePlus">OnePlus</option>
-                <option value="Outra">Outra marca</option>
-              </select>
+          <section class="device-picker" aria-label="Selecionar dispositivo">
+            <div class="device-picker-heading">
+              <div><span class="device-step">ETAPA 01</span><h3>Qual é o seu dispositivo?</h3><p>Escolha a marca e encontre o modelo exato.</p></div>
+              <span class="device-count">CATÁLOGO</span>
             </div>
-
-            <div class="field hidden" id="customBrandField">
-              <label for="customMarcaInput">Qual marca?</label>
-              <input
-                type="text"
-                id="customMarcaInput"
-                class="input-control"
-                placeholder="Ex.: Tecno, LG, Sony"
-                maxlength="50"
-              />
+            <div id="selectedDeviceCard" class="selected-device hidden">
+              <div class="device-phone-icon" aria-hidden="true">▯</div>
+              <div class="selected-device-copy"><strong id="selectedDeviceName">Dispositivo</strong><span id="selectedDeviceMeta">Selecionado</span></div>
+              <button type="button" id="changeDeviceBtn" class="device-change-btn">TROCAR</button>
             </div>
-
-            <div class="field">
-              <label for="modeloInput">Modelo do Celular</label>
-              <input
-                type="text"
-                id="modeloInput"
-                name="modelo"
-                class="input-control"
-                placeholder="Ex.: Poco X6 Pro, Galaxy A55"
-                maxlength="60"
-                required
-              />
+            <div id="devicePickerSearch" class="device-picker-search">
+              <label class="device-search-box"><span aria-hidden="true">⌕</span><input id="deviceSearchInput" class="input-control" type="search" placeholder="Buscar marca ou modelo..." autocomplete="off" /></label>
+              <div id="deviceBrandFilters" class="device-brand-filters" aria-label="Filtrar por marca"></div>
+              <div id="deviceResults" class="device-results" role="listbox" aria-label="Modelos disponíveis"></div>
+              <button type="button" id="manualDeviceBtn" class="device-manual-btn">Não encontrei meu aparelho · Informar manualmente</button>
             </div>
-          </div>
+            <div id="deviceManualFields" class="device-manual-fields hidden">
+              <p>Informe a marca e o modelo exatamente como aparecem nas configurações do celular.</p>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="marcaSelect">Marca do Celular</label>
+                  <select id="marcaSelect" name="marca" class="input-control" required>
+                    <option value="Samsung">Samsung</option><option value="Xiaomi">Xiaomi / Redmi / POCO</option><option value="Motorola">Motorola</option><option value="Apple">Apple (iPhone)</option><option value="ASUS ROG">ASUS ROG</option><option value="Realme">Realme</option><option value="Infinix">Infinix</option><option value="OnePlus">OnePlus</option><option value="Outra">Outra marca</option>
+                  </select>
+                </div>
+                <div class="field hidden" id="customBrandField"><label for="customMarcaInput">Qual marca?</label><input type="text" id="customMarcaInput" class="input-control" placeholder="Ex.: Tecno, LG, Sony" maxlength="50" /></div>
+                <div class="field">
+                  <label for="modeloInput">Modelo do Celular</label>
+                  <input type="text" id="modeloInput" name="modelo" class="input-control" placeholder="Ex.: Galaxy A07 4G, Poco X6 Pro" maxlength="60" required />
+                </div>
+              </div>
+              <button type="button" id="backToDeviceCatalogBtn" class="device-back-btn">← Voltar ao catálogo</button>
+            </div>
+          </section>
 
           <div class="field-grid">
             <div class="field">
