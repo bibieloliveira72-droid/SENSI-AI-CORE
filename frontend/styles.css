@@ -813,3 +813,26 @@ body {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+
+/* Device Intelligence Core */
+.device-catalog-intro { margin: 5px 0 0; color: var(--text-secondary); font-size: 0.82rem; }
+.device-results-list { display: grid; gap: 8px; margin: 14px 0; }
+.device-result-item { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; width: 100%; padding: 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-input); color: var(--text-primary); text-align: left; cursor: pointer; }
+.device-result-item.active { border-color: var(--red-bright); background: rgba(229, 9, 20, 0.10); }
+.device-result-name { font-size: 0.9rem; font-weight: 800; }
+.device-result-item small { color: var(--text-secondary); font-size: 0.76rem; }
+.device-detail-card { padding: 14px; border: 1px solid var(--border-subtle); border-radius: var(--radius-md); background: var(--bg-input); }
+.device-detail-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+.device-detail-header h3 { margin: 0; font-size: 1rem; }
+.device-detail-subtitle { margin: 4px 0 0; color: var(--text-muted); font: 0.68rem var(--font-mono); overflow-wrap: anywhere; }
+.device-status { flex: 0 0 auto; padding: 5px 8px; border-radius: 999px; font-size: 0.62rem; font-weight: 800; background: rgba(245, 158, 11, 0.12); color: #fcd34d; }
+.device-status.completo { background: rgba(34, 197, 94, 0.12); color: #86efac; }
+.device-spec-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.device-spec-row { min-width: 0; padding: 9px; border-radius: var(--radius-sm); background: var(--bg-elevated); }
+.device-spec-label { display: block; margin-bottom: 4px; color: var(--text-muted); font-size: 0.68rem; }
+.device-spec-value { display: block; color: var(--text-primary); font-size: 0.8rem; overflow-wrap: anywhere; }
+.device-source-note { margin: 12px 0; color: var(--text-secondary); font-size: 0.76rem; line-height: 1.45; }
+.device-detail-actions { display: flex; }
+.device-detail-actions .btn-primary { width: 100%; }
+@media (max-width: 380px) { .device-spec-grid { grid-template-columns: 1fr; } }
