@@ -152,3 +152,26 @@ test("Comparação calcula diferenças exatas por mira", () => {
   const genRow = cmp.rows.find((r) => r.scope === "General");
   assert.equal(genRow.diff, b.values.General - a.values.General);
 });
+
+
+test("Catálogo de aparelhos cobre as oito marcas do seletor, sem modelos duplicados", () => {
+  const app = fs.readFileSync(path.join(FRONTEND_DIR, "app.js"), "utf8");
+  const match = app.match(/const DEVICE_CATALOG = \[([\\s\\S]*?)\\n  \\]\\.map\\(\\(\\[brand, model\\]\\) => \\(\\{ brand, model \\}\\)\\);/);
+  assert.ok(match, "Catálogo de dispositivos não encontrado");
+  const entries = vm.runInNewContext("[" + match[1] + "]");
+  const brands = ["Samsung", "Xiaomi", "Motorola", "Apple", "ASUS ROG", "Realme", "Infinix", "OnePlus"];
+  const counts = new Map(brands.map((brand) => [brand, 0]));
+  const seen = new Set();
+  for (const [brand, model] of entries) {
+    assert.ok(counts.has(brand), "Marca fora do seletor: " + brand);
+    assert.ok(model.trim().length > 0);
+    const key = brand.toLocaleLowerCase("pt-BR") + "|" + model.toLocaleLowerCase("pt-BR");
+    assert.equal(seen.has(key), false, "Modelo duplicado: " + key);
+    seen.add(key);
+    counts.set(brand, counts.get(brand) + 1);
+  }
+  for (const [brand, count] of counts) {
+    assert.ok(count >= 20, brand + " precisa ter pelo menos 20 modelos no catálogo");
+  }
+  assert.ok(entries.length >= 250, "Catálogo deve conter pelo menos 250 modelos");
+});
