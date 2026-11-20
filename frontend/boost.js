@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id), bridge=window.AndroidBridge||null;
 const parse=v=>{try{return JSON.parse(v)}catch(_){return null}};
 const put=(id,v)=>{const e=$(id);if(e)e.textContent=v};
 const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
-let applyQueue=[],applyIndex=-1;
+
 const SETTINGS_KEY="sensi_ai_app_settings_v1";
 const defaultSettings={autoOpenFreeFire:true,gameEdition:"freefire"};
 function readSettings(){try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}}catch(_){return {...defaultSettings}}}
@@ -44,17 +44,27 @@ const recommended={stable:["game","memory","thermal","display","background","ref
 function selected(){return [...document.querySelectorAll("#boostMultiGrid input:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
 function setSelected(keys){document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
-function buildPlan(){const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
-const h=document.createElement("strong");h.textContent="Seu plano de otimização • "+keys.length+" etapa(s)";box.append(h);
-const p=document.createElement("p");p.textContent="Siga na ordem abaixo e marque mentalmente o que já conferiu. Você continua no controle de cada mudança.";box.append(p);
-const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
-applyStatus(label+": siga as instruções do plano. Este item é uma orientação manual, sem alteração automática.");$("boostNextTweak").disabled=false;return}
-applyStatus(label+": item informativo. Nenhuma tela de Configurações foi aberta e nenhuma alteração automática foi feita.");$("boostNextTweak").disabled=false;return;
+function buildPlan(){
+ const keys=selected(),box=$("boostPlanResult");
+ if(!box)return;
+ box.replaceChildren();
+ if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
+ const h=document.createElement("strong");h.textContent="Seu plano de otimização • "+keys.length+" etapa(s)";box.append(h);
+ const p=document.createElement("p");p.textContent="Confira cada etapa manualmente. O plano não executa ações escondidas.";box.append(p);
+ const ol=document.createElement("ol");
+ keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";span.textContent=guides[key][1];li.append(b,span);ol.append(li)});
+ box.append(ol);
 }
-function nextTweak(){applyIndex++;applyNextTweak()}
 function startApplyTweaks(){
-const keys=selected();if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de aplicar.");return}
-applyQueue=keys;applyIndex=-1;applyStatus("Iniciando. Ajustes compatíveis serão executados pelo Shizuku.");nextTweak()
+ const keys=selected();
+ if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
+ if(!keys.includes("animations")){applyStatus("Os itens selecionados são orientações manuais. Animações Leves é o único ajuste desta lista aplicado via Shizuku.");return}
+ if(!bridge||typeof bridge.applySafeTweak!=="function"){applyStatus("Animações Leves exige o APK Android e autorização Shizuku.");return}
+ if(!window.confirm("Aplicar Animações Leves em 0,5x? Os valores atuais serão salvos para restauração.")){applyStatus("Aplicação cancelada.");return}
+ try{
+  const result=parse(bridge.applySafeTweak("animations"));
+  applyStatus(result?.message||(result?.ok?"Animações Leves aplicadas.":"Não foi possível aplicar. Verifique o Shizuku."));
+ }catch(_){applyStatus("Falha ao aplicar Animações Leves. Verifique o Shizuku.")}
 }
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
@@ -90,7 +100,7 @@ $("massinhaCopyV2")?.addEventListener("click",()=>copyMassinha("v2"));
 massinhaCommands();
 $("boostBuildPlan")?.addEventListener("click",buildPlan);
 $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
-$("boostNextTweak")?.addEventListener("click",nextTweak);
+
 $("boostRestoreTweaks")?.addEventListener("click",()=>{
  if(!bridge||typeof bridge.restoreSafeTweak!=="function"){applyStatus("A restauração exige o APK Android com Shizuku.");return}
  try{const messages=[];const a=parse(bridge.restoreSafeTweak("animations"));if(a?.ok)messages.push(a.message);if(typeof bridge.restoreMassinhaTweak==="function"){const m=parse(bridge.restoreMassinhaTweak());if(m?.ok)messages.push(m.message);}applyStatus(messages.length?messages.join(" "):(a?.message||"Nenhum backup disponível."));}
