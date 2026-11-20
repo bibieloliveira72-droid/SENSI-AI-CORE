@@ -16,6 +16,18 @@
   ];
 
   const DEVICE_CATALOG = [
+    ["Google","Pixel 6"],["Google","Pixel 6 Pro"],["Google","Pixel 6a"],["Google","Pixel 7"],["Google","Pixel 7 Pro"],["Google","Pixel 7a"],["Google","Pixel 8"],["Google","Pixel 8 Pro"],["Google","Pixel 8a"],["Google","Pixel 9"],["Google","Pixel 9 Pro"],["Google","Pixel 9 Pro XL"],["Google","Pixel 9a"],["Google","Pixel 10"],["Google","Pixel 10 Pro"],
+    ["OPPO","Reno 8"],["OPPO","Reno 10"],["OPPO","Reno 11"],["OPPO","Reno 12"],["OPPO","Reno 13"],["OPPO","Reno 14"],["OPPO","A58"],["OPPO","A78"],["OPPO","A79"],["OPPO","A98"],["OPPO","Find X5"],["OPPO","Find X6 Pro"],["OPPO","Find X7 Ultra"],["OPPO","Find X8"],["OPPO","Find X8 Pro"],
+    ["vivo","V25"],["vivo","V27"],["vivo","V29"],["vivo","V30"],["vivo","V40"],["vivo","V50"],["vivo","Y17s"],["vivo","Y27"],["vivo","Y28"],["vivo","Y36"],["vivo","Y100"],["vivo","X80"],["vivo","X90 Pro"],["vivo","X100 Pro"],["vivo","X200 Pro"],
+    ["Tecno","Spark 10"],["Tecno","Spark 20"],["Tecno","Spark 20 Pro"],["Tecno","Spark 30"],["Tecno","Spark 30 Pro"],["Tecno","Spark 40"],["Tecno","Pova 5"],["Tecno","Pova 6"],["Tecno","Pova 6 Pro"],["Tecno","Pova 7"],["Tecno","Camon 20"],["Tecno","Camon 30"],["Tecno","Camon 40"],["Tecno","Phantom V Fold"],["Tecno","Phantom V Flip"],
+    ["HONOR","X7b"],["HONOR","X8b"],["HONOR","X9b"],["HONOR","X9c"],["HONOR","90"],["HONOR","200"],["HONOR","200 Pro"],["HONOR","Magic5 Pro"],["HONOR","Magic6 Pro"],["HONOR","Magic7 Pro"],["HONOR","Magic V2"],["HONOR","Magic V3"],
+    ["Nothing","Phone (1)"],["Nothing","Phone (2)"],["Nothing","Phone (2a)"],["Nothing","Phone (2a) Plus"],["Nothing","Phone (3)"],["Nothing","Phone (3a)"],["Nothing","Phone (3a) Pro"],
+    ["Sony","Xperia 1 IV"],["Sony","Xperia 1 V"],["Sony","Xperia 1 VI"],["Sony","Xperia 5 IV"],["Sony","Xperia 5 V"],["Sony","Xperia 10 V"],["Sony","Xperia 10 VI"],
+    ["ZTE Nubia","RedMagic 7"],["ZTE Nubia","RedMagic 8 Pro"],["ZTE Nubia","RedMagic 9 Pro"],["ZTE Nubia","RedMagic 10 Pro"],["ZTE Nubia","RedMagic 11 Pro"],["ZTE Nubia","Nubia Z50"],["ZTE Nubia","Nubia Z60 Ultra"],["ZTE Nubia","Nubia Z70 Ultra"],
+    ["Lenovo Legion","Legion Phone Duel 2"],["Lenovo Legion","Legion Y70"],["Huawei","P50 Pro"],["Huawei","P60 Pro"],["Huawei","Mate 50 Pro"],["Huawei","Mate 60 Pro"],["Huawei","Mate 70 Pro"],
+    ["Motorola","Moto G05"],["Motorola","Moto G15"],["Motorola","Moto G35"],["Motorola","Moto G55"],["Motorola","Moto G75"],["Motorola","Moto G85"],["Motorola","Edge 50 Fusion"],["Motorola","Edge 50 Pro"],["Motorola","Edge 50 Ultra"],["Motorola","Edge 60 Fusion"],["Motorola","Edge 60 Pro"],
+    ["Xiaomi","POCO X7"],["Xiaomi","POCO X7 Pro"],["Xiaomi","POCO F7"],["Xiaomi","POCO F7 Pro"],["Xiaomi","POCO F7 Ultra"],["Xiaomi","Redmi Note 14"],["Xiaomi","Redmi Note 14 Pro"],["Xiaomi","Redmi Note 14 Pro+"],["Xiaomi","Redmi Note 15"],["Xiaomi","Redmi Note 15 Pro"]
+  ];
     ["Samsung","Galaxy A02"],
     ["Samsung","Galaxy A02s"],
     ["Samsung","Galaxy A03"],
