@@ -54,8 +54,16 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
+  private val shizukuPermissionListener =
+    Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
+      if (requestCode == 2407) {
+        // The Hub reads the definitive state again when the user taps "Verificar".
+      }
+    }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
 
     val darkBar = AndroidColor.parseColor("#070709")
     enableEdgeToEdge(
@@ -69,9 +77,15 @@ class MainActivity : ComponentActivity() {
       }
     }
   }
+
+  override fun onDestroy() {
+    Shizuku.removeRequestPermissionResultListener(shizukuPermissionListener)
+    super.onDestroy()
+  }
 }
 
-private class AndroidClipboardBridge(private val context: Context) {
+private class AndroidClipboardBridge(private val activity: ComponentActivity) {
+  private val context: Context = activity.applicationContext
   @JavascriptInterface
   fun getDeviceSnapshot(): String {
     val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -109,10 +123,29 @@ private class AndroidClipboardBridge(private val context: Context) {
   }
 
   @JavascriptInterface
-  fun requestShizukuPermission() {
-    if (try { Shizuku.pingBinder() } catch (_: Throwable) { false }) {
-      try { Shizuku.requestPermission(2407) } catch (_: Throwable) { }
+  fun requestShizukuPermission(): String {
+    val result = arrayOf("Não foi possível iniciar a solicitação do Shizuku.")
+    val latch = CountDownLatch(1)
+    activity.runOnUiThread {
+      try {
+        if (!Shizuku.pingBinder()) {
+          result[0] = "Shizuku não está ativo. Inicie o serviço primeiro."
+        } else if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+          result[0] = "O SENSI.AI já está autorizado no Shizuku."
+        } else {
+          Shizuku.requestPermission(2407)
+          result[0] = "Pedido de autorização enviado ao Shizuku. Conclua a confirmação exibida."
+        }
+      } catch (error: Throwable) {
+        result[0] = "Falha ao solicitar autorização: ${error.message ?: "erro desconhecido"}"
+      } finally {
+        latch.countDown()
+      }
     }
+    try { latch.await(3, TimeUnit.SECONDS) } catch (_: InterruptedException) {
+      Thread.currentThread().interrupt()
+    }
+    return result[0]
   }
 
 
@@ -329,7 +362,7 @@ fun SensiOfflineWebHost() {
             cacheMode = WebSettings.LOAD_NO_CACHE
           }
 
-          addJavascriptInterface(AndroidClipboardBridge(context.applicationContext), "AndroidBridge")
+          addJavascriptInterface(AndroidClipboardBridge(context as ComponentActivity), "AndroidBridge")
 
           webChromeClient = WebChromeClient()
           webViewClient =
