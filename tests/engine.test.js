@@ -152,3 +152,30 @@ test("Comparação calcula diferenças exatas por mira", () => {
   const genRow = cmp.rows.find((r) => r.scope === "General");
   assert.equal(genRow.diff, b.values.General - a.values.General);
 });
+
+
+test("Catálogo offline localiza aparelhos por nome e código e preserva campos desconhecidos", () => {
+  const code = fs.readFileSync(path.join(FRONTEND_DIR, "device-catalog.js"), "utf8");
+  const context = { globalThis: {} };
+  vm.runInNewContext(code, context);
+  const catalog = context.globalThis.DeviceCatalog;
+  assert.ok(catalog);
+  const byName = catalog.search("Galaxy A07");
+  const byCode = catalog.search("SM-A075M");
+  assert.equal(byName.length, 1);
+  assert.equal(byCode.length, 1);
+  assert.equal(byName[0].chipset, "MediaTek Helio G99");
+  assert.equal(byName[0].display.refreshRateHz, null);
+  assert.equal(byName[0].sourceStatus, "parcial");
+});
+
+test("Banco e interface do catálogo estão sincronizados nos assets Android e não usam rede", () => {
+  for (const file of ["device-catalog.js", "device-catalog-ui.js"]) {
+    const frontend = fs.readFileSync(path.join(FRONTEND_DIR, file), "utf8");
+    const android = fs.readFileSync(path.join(ANDROID_WEB_DIR, file), "utf8");
+    assert.equal(android, frontend, `${file} precisa estar sincronizado no APK`);
+    assert.equal(/\\bfetch\\s*\\(/.test(frontend), false);
+    assert.equal(/XMLHttpRequest/.test(frontend), false);
+    assert.equal(/https?:\\/\\//i.test(frontend), false);
+  }
+});
