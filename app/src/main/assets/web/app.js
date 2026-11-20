@@ -578,6 +578,63 @@
     ["OnePlus","OnePlus Open"]
   ].map(([brand, model]) => ({ brand, model }));
 
+  // Especificações de referência para modelos com ficha técnica identificada.
+  // RAM pode variar por região/variante; o valor preenchido é uma configuração comum.
+  const DEVICE_SPECS = {
+    "Samsung|Galaxy A06": { chipset: "MediaTek Helio G85", category: "entrada", ram: 4, hz: 60 },
+    "Samsung|Galaxy A07 4G": { chipset: "MediaTek Helio G99", category: "intermediario", ram: 4, hz: 90 },
+    "Samsung|Galaxy A07 5G": { chipset: "MediaTek Dimensity 6300", category: "intermediario", ram: 4, hz: 120 },
+    "Samsung|Galaxy A14": { chipset: "Exynos 850", category: "entrada", ram: 4, hz: 90 },
+    "Samsung|Galaxy A15": { chipset: "MediaTek Helio G99", category: "intermediario", ram: 4, hz: 90 },
+    "Samsung|Galaxy A16": { chipset: "MediaTek Helio G99", category: "intermediario", ram: 4, hz: 90 },
+    "Samsung|Galaxy A24": { chipset: "MediaTek Helio G99", category: "intermediario", ram: 6, hz: 90 },
+    "Samsung|Galaxy A25": { chipset: "Exynos 1280", category: "intermediario_plus", ram: 6, hz: 120 },
+    "Samsung|Galaxy A26": { chipset: "Exynos 1380", category: "intermediario_plus", ram: 6, hz: 120 },
+    "Samsung|Galaxy A34": { chipset: "MediaTek Dimensity 1080", category: "intermediario_plus", ram: 6, hz: 120 },
+    "Samsung|Galaxy A35": { chipset: "Exynos 1380", category: "intermediario_plus", ram: 6, hz: 120 },
+    "Samsung|Galaxy A54": { chipset: "Exynos 1380", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Samsung|Galaxy A55": { chipset: "Exynos 1480", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Samsung|Galaxy A56": { chipset: "Exynos 1580", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Samsung|Galaxy S23": { chipset: "Snapdragon 8 Gen 2 for Galaxy", category: "flagship", ram: 8, hz: 120 },
+    "Samsung|Galaxy S24": { chipset: "Exynos 2400", category: "flagship", ram: 8, hz: 120 },
+    "Samsung|Galaxy S25": { chipset: "Snapdragon 8 Elite", category: "flagship", ram: 12, hz: 120 },
+    "Xiaomi|Redmi 12": { chipset: "MediaTek Helio G88", category: "entrada", ram: 4, hz: 90 },
+    "Xiaomi|Redmi 13": { chipset: "MediaTek Helio G91 Ultra", category: "intermediario", ram: 6, hz: 90 },
+    "Xiaomi|Redmi Note 12": { chipset: "Snapdragon 685", category: "intermediario", ram: 6, hz: 120 },
+    "Xiaomi|Redmi Note 13": { chipset: "Snapdragon 685", category: "intermediario", ram: 8, hz: 120 },
+    "Xiaomi|Redmi Note 13 Pro 5G": { chipset: "Snapdragon 7s Gen 2", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Xiaomi|Redmi Note 14": { chipset: "MediaTek Helio G99 Ultra", category: "intermediario", ram: 8, hz: 120 },
+    "Xiaomi|Redmi Note 14 Pro 5G": { chipset: "MediaTek Dimensity 7300 Ultra", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Xiaomi|POCO X5 Pro": { chipset: "Snapdragon 778G", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Xiaomi|POCO X6": { chipset: "Snapdragon 7s Gen 2", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Xiaomi|POCO X6 Pro": { chipset: "MediaTek Dimensity 8300 Ultra", category: "flagship", ram: 12, hz: 120 },
+    "Xiaomi|POCO X7 Pro": { chipset: "MediaTek Dimensity 8400 Ultra", category: "flagship", ram: 8, hz: 120 },
+    "Xiaomi|POCO F6": { chipset: "Snapdragon 8s Gen 3", category: "flagship", ram: 8, hz: 120 },
+    "Motorola|Moto G24": { chipset: "MediaTek Helio G85", category: "entrada", ram: 4, hz: 90 },
+    "Motorola|Moto G34 5G": { chipset: "Snapdragon 695", category: "intermediario", ram: 8, hz: 120 },
+    "Motorola|Moto G54 5G": { chipset: "MediaTek Dimensity 7020", category: "intermediario", ram: 8, hz: 120 },
+    "Motorola|Moto G84 5G": { chipset: "Snapdragon 695", category: "intermediario", ram: 8, hz: 120 },
+    "Motorola|Moto G85 5G": { chipset: "Snapdragon 6s Gen 3", category: "intermediario", ram: 8, hz: 120 },
+    "Motorola|Moto G86": { chipset: "MediaTek Dimensity 7300", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Motorola|Edge 50 Fusion": { chipset: "Snapdragon 7s Gen 2", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Motorola|Edge 50 Pro": { chipset: "Snapdragon 7 Gen 3", category: "intermediario_plus", ram: 12, hz: 144 },
+    "Realme|Realme C55": { chipset: "MediaTek Helio G88", category: "entrada", ram: 6, hz: 90 },
+    "Realme|Realme C67": { chipset: "Snapdragon 685", category: "intermediario", ram: 8, hz: 90 },
+    "Realme|Realme 12 Pro+": { chipset: "Snapdragon 7s Gen 2", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Realme|Realme GT 6": { chipset: "Snapdragon 8s Gen 3", category: "flagship", ram: 12, hz: 120 },
+    "Infinix|Infinix Hot 40 Pro": { chipset: "MediaTek Helio G99", category: "intermediario", ram: 8, hz: 120 },
+    "Infinix|Infinix Hot 50 Pro+": { chipset: "MediaTek Helio G100", category: "intermediario", ram: 8, hz: 120 },
+    "Infinix|Infinix Note 40 Pro": { chipset: "MediaTek Helio G99 Ultimate", category: "intermediario", ram: 8, hz: 120 },
+    "Infinix|Infinix GT 20 Pro": { chipset: "MediaTek Dimensity 8200 Ultimate", category: "intermediario_plus", ram: 12, hz: 144 },
+    "OnePlus|OnePlus 11": { chipset: "Snapdragon 8 Gen 2", category: "flagship", ram: 16, hz: 120 },
+    "OnePlus|OnePlus 12": { chipset: "Snapdragon 8 Gen 3", category: "flagship", ram: 16, hz: 120 },
+    "OnePlus|OnePlus Nord 3": { chipset: "MediaTek Dimensity 9000", category: "flagship", ram: 16, hz: 120 },
+    "OnePlus|OnePlus Nord CE 4": { chipset: "Snapdragon 7 Gen 3", category: "intermediario_plus", ram: 8, hz: 120 },
+    "ASUS ROG|ROG Phone 7": { chipset: "Snapdragon 8 Gen 2", category: "flagship", ram: 12, hz: 165 },
+    "ASUS ROG|ROG Phone 8": { chipset: "Snapdragon 8 Gen 3", category: "flagship", ram: 16, hz: 165 },
+    "ASUS ROG|ROG Phone 9": { chipset: "Snapdragon 8 Elite", category: "flagship", ram: 12, hz: 185 }
+  };
+
   let activeDeviceBrand = "Todos";
 
   const els = {
@@ -875,6 +932,19 @@
     els.deviceSearchInput.focus();
   }
 
+  function applyCatalogDeviceSpecs(device) {
+    const specs = DEVICE_SPECS[device.brand + "|" + device.model];
+    if (!specs) {
+      els.selectedDeviceMeta.textContent = device.brand + " · ficha técnica não cadastrada; confira os dados manualmente";
+      return;
+    }
+    els.processadorSelect.value = specs.category;
+    els.processadorDetalheInput.value = specs.chipset;
+    selectChipValue(els.ramChips, els.ramInput, specs.ram);
+    selectChipValue(els.hzChips, els.hzInput, specs.hz);
+    els.selectedDeviceMeta.textContent = device.brand + " · " + specs.chipset + " · " + specs.ram + " GB RAM* · " + specs.hz + " Hz";
+  }
+
   function selectCatalogDevice(device) {
     els.marcaSelect.value = device.brand;
     els.customBrandField.classList.add("hidden");
@@ -882,10 +952,14 @@
     els.modeloInput.value = device.model;
     els.selectedDeviceName.textContent = device.model;
     els.selectedDeviceMeta.textContent = device.brand + " · modelo selecionado";
+    applyCatalogDeviceSpecs(device);
     els.selectedDeviceCard.classList.remove("hidden");
     els.devicePickerSearch.classList.add("hidden");
     els.deviceManualFields.classList.add("hidden");
     clearError();
+    showToast(DEVICE_SPECS[device.brand + "|" + device.model]
+      ? "Dados técnicos preenchidos. Confira a variante de RAM do seu aparelho."
+      : "Modelo selecionado. Complete os dados técnicos manualmente.");
   }
 
   function syncDevicePickerFromForm() {
