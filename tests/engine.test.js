@@ -251,3 +251,13 @@ test("Boost Center inclui diagnóstico e solicitação explícita de permissão 
   assert.match(native, /Shizuku\.requestPermission/);
   assert.match(native, /getDeviceSnapshot/);
 });
+
+test("Cada modelo do catálogo possui ficha técnica estruturada e dados ausentes ficam pendentes", () => {
+  const app = fs.readFileSync(path.join(FRONTEND_DIR, "app.js"), "utf8");
+  assert.match(app, /const DEVICE_TECHNICAL_SHEETS = DEVICE_CATALOG\.map/);
+  assert.match(app, /display: null/);
+  assert.match(app, /resolution: null/);
+  assert.match(app, /batteryMah: null/);
+  assert.match(app, /status: hasReference \? "partial" : "pending"/);
+  assert.match(app, /ficha pendente de validação/);
+});
