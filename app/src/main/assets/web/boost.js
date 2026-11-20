@@ -29,6 +29,7 @@ battery:["Cuidar da bateria","Use brilho confortável, confira consumo por app e
 network:["Rede e conexão","Prefira conexão estável, pause downloads iniciados por você e evite alternar de rede durante a partida."],
 touch:["Controles e toque","Ajuste HUD dentro do jogo, teste uma mudança por vez e mantenha acessibilidade e opções de toque nos padrões se não souber a função."],
 display:["Tela e fluidez","Use apenas taxas de atualização oferecidas pelo fabricante. Se houver aquecimento ou instabilidade, volte para uma opção mais equilibrada."],
+massinha:["Gráfico Massinha","Abra as configurações gráficas do Free Fire e selecione Gráficos Suave, desligue sombras se essa opção existir e escolha apenas uma taxa de FPS oferecida pelo próprio jogo e estável no aparelho. Teste uma partida curta. Este preset é uma orientação manual: não altera ANGLE, propriedades globais nem arquivos do jogo."],
 storage:["Armazenamento","Revise arquivos que reconhece e não precisa. Não apague pastas Android/data ou dados de jogos para liberar espaço."],
 background:["Apps em segundo plano","Revise apps recentes e encerre manualmente somente os que não precisa. Não restrinja serviços importantes, música ou acessibilidade."],
 sound:["Áudio","Confira volume, saída de som e Bluetooth. Evite alterações extremas de volume."],
@@ -39,7 +40,7 @@ notifications:["Notificações","Configure Não Perturbe manualmente e permita c
 updates:["Atualizações","Agende downloads e atualizações para um horário conveniente. Não desative atualizações de segurança."],
 accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os que você usa. Não desative serviços essenciais para tentar ganhar desempenho."]
 };
-const recommended={stable:["game","memory","thermal","display","background","refresh"],cool:["thermal","display","battery","game"],battery:["battery","display","background","updates"],network:["network","updates","notifications"],balanced:["game","memory","thermal","network","display","refresh"]};
+const recommended={stable:["game","memory","thermal","display","massinha","background","refresh"],cool:["thermal","display","battery","game"],battery:["battery","display","background","updates"],network:["network","updates","notifications"],balanced:["game","memory","thermal","network","display","refresh"]};
 function selected(){return [...document.querySelectorAll("#boostMultiGrid input:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
 function setSelected(keys){document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
