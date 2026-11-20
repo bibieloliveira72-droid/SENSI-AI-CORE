@@ -1,1 +1,14 @@
-/* Boost Center extension point. */
+/* SENSI.AI Boost Toolbox */
+.boost-tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:16px 0}
+.boost-tool{display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-height:112px;padding:14px;border:1px solid rgba(125,155,180,.2);border-radius:14px;background:linear-gradient(145deg,rgba(23,32,45,.92),rgba(12,18,27,.96));color:var(--text,#f5f5f7);text-align:left;cursor:pointer;transition:border-color .18s,transform .18s,background .18s}
+.boost-tool:active{transform:scale(.98)}
+.boost-tool:hover,.boost-tool:focus-visible{border-color:#18d7b5;outline:none;background:rgba(18,49,51,.75)}
+.boost-tool>span{font-size:21px;color:#19d9b7}
+.boost-tool strong{font-size:13px;letter-spacing:.02em}
+.boost-tool small{font-size:11px;line-height:1.35;color:var(--muted,#98a5b5)}
+.boost-tool-detail{margin-top:12px;padding:16px;border:1px solid rgba(25,217,183,.28);border-radius:14px;background:rgba(11,24,31,.82)}
+.boost-tool-detail strong{display:block;color:#24dfbd;font-size:14px;margin-bottom:7px}
+.boost-tool-detail p{margin:0;color:var(--muted,#a7b2c0);font-size:12px;line-height:1.6}
+.boost-tool-detail ul{margin:10px 0 0;padding-left:18px;color:var(--text,#e8edf2);font-size:12px;line-height:1.7}
+.boost-tool-detail .boost-tool-note{display:block;margin-top:12px;color:#e9c77b;font-size:11px;line-height:1.5}
+@media(min-width:560px){.boost-tool-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
