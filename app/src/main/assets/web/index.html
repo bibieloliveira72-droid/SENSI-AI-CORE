@@ -9,6 +9,7 @@
   <meta name="theme-color" content="#090D13" />
   <title>SENSI.AI — Motor de Sensibilidade Free Fire</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./boost.css" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
@@ -48,6 +49,7 @@
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="compare">
         <span class="tab-icon">⇄</span><span>Comparar</span>
       </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="boost"><span class="tab-icon">⚡</span><span>Boost</span></button>
     </nav>
 
     <main class="main-content">
@@ -351,6 +353,37 @@
           <div id="compareResultBox" class="compare-result"></div>
         </div>
       </section>
+
+      <section id="tab-boost" class="tab-panel hidden" role="tabpanel">
+        <section class="hero-panel boost-hero"><div class="hero-copy"><span class="eyebrow"><i></i> DEVICE CARE / 04</span><h2>Boost <em>Center.</em></h2><p>Diagnóstico do aparelho, dicas práticas e integração transparente com Shizuku.</p><div class="hero-meta"><span>DIAGNÓSTICO LOCAL</span><span>SEM ROOT</span><span>CONTROLE DO USUÁRIO</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">⚡</div><i class="orbit-dot"></i></div></section>
+        <section class="card boost-card">
+          <div class="section-head"><div><h2>Diagnóstico do dispositivo</h2><p class="device-summary">Leitura local. Nenhuma configuração será alterada.</p></div><span class="badge">LIVE CHECK</span></div>
+          <div class="boost-device" id="boostDevice">Aguardando diagnóstico…</div>
+          <div class="boost-stats">
+            <div class="boost-stat"><span>Memória livre</span><strong id="boostMemory">--</strong><small id="boostMemoryHint">Aguardando leitura</small></div>
+            <div class="boost-stat"><span>Bateria</span><strong id="boostBattery">--</strong><small id="boostBatteryHint">Aguardando leitura</small></div>
+            <div class="boost-stat"><span>Temperatura</span><strong id="boostTemp">--</strong><small id="boostTempHint">Aguardando leitura</small></div>
+            <div class="boost-stat"><span>Android</span><strong id="boostAndroid">--</strong><small id="boostAndroidHint">Versão do sistema</small></div>
+          </div>
+          <div id="boostAdvice" class="boost-advice" aria-live="polite">Toque em atualizar para analisar os dados disponíveis.</div>
+          <button type="button" id="boostRefreshBtn" class="btn-primary">ATUALIZAR DIAGNÓSTICO</button>
+        </section>
+        <section class="card boost-card">
+          <div class="section-head"><div><h2>Shizuku Hub</h2><p class="device-summary">Permissão opcional, solicitada somente por ação sua.</p></div><span class="badge">OPCIONAL</span></div>
+          <div class="shizuku-status" id="shizukuStatus"><span class="status-dot"></span><div><strong>Verificando compatibilidade…</strong><small>O estado será consultado no Android.</small></div></div>
+          <div class="shizuku-actions"><button type="button" id="shizukuCheckBtn" class="btn-secondary">VERIFICAR SHIZUKU</button><button type="button" id="shizukuGrantBtn" class="btn-ghost-sm" disabled>SOLICITAR AUTORIZAÇÃO</button></div>
+          <p class="field-help">Nesta versão, a integração verifica o serviço e a autorização. Não executa comandos, não altera propriedades do sistema, não desativa proteções e não modifica o Free Fire. A autorização é opcional.</p>
+        </section>
+        <section class="card boost-card">
+          <div class="section-head"><h2>Kit de otimização segura</h2><span class="badge">MANUAL</span></div>
+          <div class="boost-checklist">
+            <article><strong>Antes de jogar</strong><p>Feche somente apps que você não está usando, mantenha espaço livre e evite jogar enquanto o aparelho estiver muito quente.</p></article>
+            <article><strong>Dentro do Free Fire</strong><p>Comece com gráficos compatíveis com o aparelho e teste a estabilidade antes de aumentar efeitos ou FPS.</p></article>
+            <article><strong>Toque e sensibilidade</strong><p>Ajuste a sensi no treinamento, um valor por vez. Não altere opções de acessibilidade sem saber sua função.</p></article>
+            <article><strong>O que o SENSI.AI não faz</strong><p>Não promete FPS extra, não encerra processos à força, não altera arquivos do jogo e não oferece mira automática.</p></article>
+          </div>
+        </section>
+      </section>
     </main>
   </div>
 
@@ -358,5 +391,6 @@
 
   <script src="./sensi-engine.js" defer></script>
   <script src="./app.js" defer></script>
+  <script src="./boost.js" defer></script>
 </body>
 </html>
