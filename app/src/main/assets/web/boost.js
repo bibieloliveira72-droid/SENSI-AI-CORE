@@ -29,7 +29,7 @@ battery:["Cuidar da bateria","Use brilho confortável, confira consumo por app e
 network:["Rede e conexão","Prefira conexão estável, pause downloads iniciados por você e evite alternar de rede durante a partida."],
 touch:["Controles e toque","Ajuste HUD dentro do jogo, teste uma mudança por vez e mantenha acessibilidade e opções de toque nos padrões se não souber a função."],
 display:["Tela e fluidez","Use apenas taxas de atualização oferecidas pelo fabricante. Se houver aquecimento ou instabilidade, volte para uma opção mais equilibrada."],
-massinha:["Gráfico Massinha","Abra as configurações gráficas do Free Fire e selecione Gráficos Suave, desligue sombras se essa opção existir e escolha apenas uma taxa de FPS oferecida pelo próprio jogo e estável no aparelho. Teste uma partida curta. Este preset é uma orientação manual: não altera ANGLE, propriedades globais nem arquivos do jogo."],
+massinha:["Gráfico Massinha",""],
 storage:["Armazenamento","Revise arquivos que reconhece e não precisa. Não apague pastas Android/data ou dados de jogos para liberar espaço."],
 background:["Apps em segundo plano","Revise apps recentes e encerre manualmente somente os que não precisa. Não restrinja serviços importantes, música ou acessibilidade."],
 sound:["Áudio","Confira volume, saída de som e Bluetooth. Evite alterações extremas de volume."],
@@ -47,7 +47,7 @@ function setSelected(keys){document.querySelectorAll("#boostMultiGrid input").fo
 function buildPlan(){const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
 const h=document.createElement("strong");h.textContent="Seu plano de otimização • "+keys.length+" etapa(s)";box.append(h);
 const p=document.createElement("p");p.textContent="Siga na ordem abaixo e marque mentalmente o que já conferiu. Você continua no controle de cada mudança.";box.append(p);
-const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";span.textContent=guides[key][1];li.append(b,span);ol.append(li)});box.append(ol);
+const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";if(key==="massinha"){const version=document.querySelector('input[name="massinhaVersion"]:checked')?.value||"v1";b.textContent+="Variante "+version.toUpperCase()+". ";span.textContent=version==="v1"?"Perfil sem a opção adicional nearest. Compare a aparência e a estabilidade usando somente as opções gráficas do próprio Free Fire.":"Perfil com opção adicional nearest. Compare com a V1, observando nitidez, artefatos e estabilidade usando somente as opções gráficas do próprio Free Fire.";}else{span.textContent=guides[key][1]}li.append(b,span);ol.append(li)});box.append(ol);
 const note=document.createElement("small");note.textContent="Plano de orientação. Nenhum comando ou ajuste foi aplicado pelo aplicativo.";box.append(note)}
 function applyStatus(message){put("boostApplyStatus",message)}
 function applyNextTweak(){
@@ -58,6 +58,7 @@ if(appSettings.autoOpenFreeFire){openFreeFire(false)}else{applyStatus("Plano con
 return}
 const key=applyQueue[applyIndex],label=guides[key]?.[0]||key;
 if(key==="refresh"){refresh();applyStatus(label+": diagnóstico atualizado. Nenhuma configuração foi alterada.");$("boostNextTweak").disabled=false;return}
+if(key==="massinha"){const version=document.querySelector('input[name="massinhaVersion"]:checked')?.value||"v1";applyStatus("Gráfico Massinha "+version.toUpperCase()+" selecionado. Compare o perfil manualmente nas configurações gráficas do Free Fire. Nenhum comando do sistema foi executado.");$("boostNextTweak").disabled=false;return}
 if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
 applyStatus(label+": siga as instruções do plano. Este item é uma orientação manual, sem alteração automática.");$("boostNextTweak").disabled=false;return}
 if(!bridge||typeof bridge.openTweakSettings!=="function"){applyStatus("Este ajuste precisa da versão APK Android. Nenhuma mudança foi feita.");$("boostNextTweak").disabled=true;return}
@@ -78,7 +79,12 @@ const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. F
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
 function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Serviço ativo e autorização concedida","A autorização está disponível, mas este app ainda não executa comandos privilegiados.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
 document.addEventListener("DOMContentLoaded",()=>{
-document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.addEventListener("change",syncCount));
+const massinhaToggle=document.querySelector('#boostMultiGrid input[value="massinha"]');
+const massinhaPanel=$("massinhaVersionPanel");
+function syncMassinhaPanel(){if(massinhaPanel)massinhaPanel.classList.toggle("hidden",!massinhaToggle?.checked)}
+document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.addEventListener("change",()=>{syncCount();syncMassinhaPanel()}));
+document.querySelectorAll('input[name="massinhaVersion"]').forEach(x=>x.addEventListener("change",()=>{if(massinhaToggle?.checked)applyStatus("Variante Gráfico Massinha "+x.value.toUpperCase()+" selecionada para comparação manual.")}));
+syncMassinhaPanel();
 $("boostSelectRecommended")?.addEventListener("click",()=>setSelected(recommended[$("boostUseCase")?.value||"stable"]||recommended.stable));
 $("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides)));
 $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
