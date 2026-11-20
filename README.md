@@ -99,3 +99,16 @@ Plataforma: Android
 ## Observação sobre os resultados
 
 O motor produz pontos de partida com base nos dados informados. Ele não mede diretamente o toque, não acessa os dados internos do Free Fire e não aprende automaticamente com partidas. A calibração depende do retorno selecionado pelo jogador.
+
+
+## Versão atual
+
+**SENSI.AI 1.2.0**
+
+### Novidades da 1.2.0
+- Catálogo ampliado de smartphones das oito marcas disponíveis no seletor.
+- Busca por fabricante e modelo mantida.
+- Cadastro manual continua disponível para aparelhos ausentes e variantes regionais.
+- Catálogo offline, integrado tanto à versão web quanto ao Android WebView.
+
+> O catálogo é uma seleção ampla de modelos conhecidos, não uma garantia de cobertura de todas as variantes regionais, operadoras ou aparelhos já fabricados. Novos modelos podem ser adicionados em atualizações futuras.
