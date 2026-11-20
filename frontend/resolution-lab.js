@@ -1,6 +1,28 @@
 (function (root) {
   "use strict";
 
+  function buildEvenSamples(min, max, count, required) {
+    const values = Array.from({ length: count }, function (_, i) {
+      return min + Math.round(i * (max - min) / (count - 1));
+    });
+    const protectedValues = new Set(required);
+    required.forEach(function (target) {
+      if (values.includes(target)) return;
+      let bestIndex = -1;
+      let bestDistance = Infinity;
+      values.forEach(function (value, index) {
+        if (protectedValues.has(value)) return;
+        const distance = Math.abs(value - target);
+        if (distance < bestDistance) {
+          bestDistance = distance;
+          bestIndex = index;
+        }
+      });
+      if (bestIndex >= 0) values[bestIndex] = target;
+    });
+    return values.sort(function (a, b) { return a - b; });
+  }
+
   const RATIOS = [
     {
       id: "4:3", label: "4:3 · Clássica",
@@ -16,9 +38,9 @@
     {
       id: "16:9", label: "16:9 · Widescreen",
       build: function () {
-        return Array.from({ length: 100 }, function (_, i) {
-          const width = 640 + Math.round(i * 1920 / 99 / 16) * 16;
-          return { width: width, height: Math.round(width * 9 / 16) };
+        return buildEvenSamples(40, 160, 100, [40, 60, 80, 100, 120, 160]).map(function (unit) {
+          const width = unit * 16;
+          return { width: width, height: unit * 9 };
         });
       },
       references: ["640x360", "960x540", "1280x720", "1600x900", "1920x1080", "2560x1440"]
@@ -26,8 +48,7 @@
     {
       id: "19.5:9", label: "19.5:9 · Tela ampla",
       build: function () {
-        return Array.from({ length: 100 }, function (_, i) {
-          const unit = 90 + Math.round(i * 150 / 99);
+        return buildEvenSamples(90, 240, 100, [180, 200, 240]).map(function (unit) {
           return { width: 13 * unit, height: 6 * unit };
         });
       },
@@ -36,8 +57,7 @@
     {
       id: "20:9", label: "20:9 · Ultrawide",
       build: function () {
-        return Array.from({ length: 100 }, function (_, i) {
-          const unit = 40 + Math.round(i * 120 / 99);
+        return buildEvenSamples(40, 160, 100, [120, 126, 140, 160]).map(function (unit) {
           return { width: 20 * unit, height: 9 * unit };
         });
       },
@@ -114,14 +134,6 @@
 
     favorites = readFavorites();
 
-    function persistFavorites() {
-      try {
-        root.localStorage.setItem(favoriteKey, JSON.stringify(favorites));
-      } catch (_error) {
-        notify("Favoritos disponíveis apenas durante esta sessão.");
-      }
-    }
-
     function notify(message) {
       const toast = byId("toast");
       if (!toast) return;
@@ -130,19 +142,12 @@
       toast.setAttribute("aria-live", "polite");
     }
 
-    function copyText(value) {
+    function persistFavorites() {
       try {
-        if (root.AndroidBridge && typeof root.AndroidBridge.copyText === "function") {
-          root.AndroidBridge.copyText(value);
-          return Promise.resolve(true);
-        }
-      } catch (_error) {}
-      if (root.navigator && root.navigator.clipboard && root.isSecureContext) {
-        return root.navigator.clipboard.writeText(value).then(function () { return true; }).catch(function () {
-          return fallbackCopy(value);
-        });
+        root.localStorage.setItem(favoriteKey, JSON.stringify(favorites));
+      } catch (_error) {
+        notify("Favoritos disponíveis apenas durante esta sessão.");
       }
-      return fallbackCopy(value);
     }
 
     function fallbackCopy(value) {
@@ -158,6 +163,21 @@
       try { ok = doc.execCommand("copy"); } catch (_error) { ok = false; }
       doc.body.removeChild(field);
       return Promise.resolve(ok);
+    }
+
+    function copyText(value) {
+      try {
+        if (root.AndroidBridge && typeof root.AndroidBridge.copyText === "function") {
+          root.AndroidBridge.copyText(value);
+          return Promise.resolve(true);
+        }
+      } catch (_error) {}
+      if (root.navigator && root.navigator.clipboard && root.isSecureContext) {
+        return root.navigator.clipboard.writeText(value).then(function () { return true; }).catch(function () {
+          return fallbackCopy(value);
+        });
+      }
+      return fallbackCopy(value);
     }
 
     function updateSelected() {
