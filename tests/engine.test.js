@@ -215,3 +215,26 @@ test("Aprendizado local reduz o passo em correções repetidas por mira e manté
   assert.equal(second.learningState.AWM.sameDirectionCount, 0);
 });
 
+
+
+test("Motor híbrido 2.0 oferece modos Controle, Balanceado e Ágil", () => {
+  const engine = loadEngine();
+  const base = { marca: "Samsung", modelo: "Galaxy A07 4G", dpi: 600, fireButtonSize: 52, profile: "equilibrado" };
+  const control = engine.generateSensitivity({ ...base, engineMode: "controle" });
+  const balanced = engine.generateSensitivity({ ...base, engineMode: "balanceado" });
+  const agile = engine.generateSensitivity({ ...base, engineMode: "agil" });
+  assert.ok(agile.values.General > balanced.values.General);
+  assert.ok(control.values["4x"] < balanced.values["4x"]);
+  assert.equal(control.engineMode, "controle");
+  for (const result of [control, balanced, agile]) for (const key of engine.SCOPE_KEYS) assert.ok(result.values[key] >= 0 && result.values[key] <= 200);
+});
+
+test("Personalização direta altera somente a mira selecionada", () => {
+  const engine = loadEngine();
+  const initial = { General: 150, "Red Dot": 140, "2x": 130, "4x": 120, AWM: 80, Olhadinha: 110 };
+  const next = engine.setScopeValue(initial, "4x", 177);
+  assert.equal(next["4x"], 177);
+  for (const key of engine.SCOPE_KEYS.filter((key) => key !== "4x")) assert.equal(next[key], initial[key]);
+  assert.equal(engine.setScopeValue(initial, "4x", 999)["4x"], 200);
+  assert.throws(() => engine.setScopeValue(initial, "invalid", 100));
+});
