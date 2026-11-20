@@ -644,7 +644,22 @@
     "OnePlus|OnePlus Nord CE 4": { chipset: "Snapdragon 7 Gen 3", category: "intermediario_plus", ram: 8, hz: 120 },
     "ASUS ROG|ROG Phone 7": { chipset: "Snapdragon 8 Gen 2", category: "flagship", ram: 12, hz: 165 },
     "ASUS ROG|ROG Phone 8": { chipset: "Snapdragon 8 Gen 3", category: "flagship", ram: 16, hz: 165 },
-    "ASUS ROG|ROG Phone 9": { chipset: "Snapdragon 8 Elite", category: "flagship", ram: 12, hz: 185 }
+    "ASUS ROG|ROG Phone 9": { chipset: "Snapdragon 8 Elite", category: "flagship", ram: 12, hz: 185 },
+    "Google|Pixel 7": { chipset: "Google Tensor G2", category: "flagship", ram: 8, hz: 90 },
+    "Google|Pixel 7 Pro": { chipset: "Google Tensor G2", category: "flagship", ram: 12, hz: 120 },
+    "Google|Pixel 8": { chipset: "Google Tensor G3", category: "flagship", ram: 8, hz: 120 },
+    "Google|Pixel 8 Pro": { chipset: "Google Tensor G3", category: "flagship", ram: 12, hz: 120 },
+    "Google|Pixel 9": { chipset: "Google Tensor G4", category: "flagship", ram: 12, hz: 120 },
+    "Google|Pixel 9 Pro": { chipset: "Google Tensor G4", category: "flagship", ram: 16, hz: 120 },
+    "OPPO|Reno 11": { chipset: "MediaTek Dimensity 7050", category: "intermediario_plus", ram: 8, hz: 120 },
+    "OPPO|Reno 12": { chipset: "MediaTek Dimensity 7300", category: "intermediario_plus", ram: 8, hz: 120 },
+    "vivo|V30": { chipset: "Snapdragon 7 Gen 3", category: "intermediario_plus", ram: 12, hz: 120 },
+    "Tecno|Pova 6 Pro": { chipset: "MediaTek Dimensity 6080", category: "intermediario", ram: 8, hz: 120 },
+    "HONOR|200 Pro": { chipset: "Snapdragon 8s Gen 3", category: "flagship", ram: 12, hz: 120 },
+    "Nothing|Phone (2a)": { chipset: "MediaTek Dimensity 7200 Pro", category: "intermediario_plus", ram: 8, hz: 120 },
+    "Sony|Xperia 1 VI": { chipset: "Snapdragon 8 Gen 3", category: "flagship", ram: 12, hz: 120 },
+    "ZTE Nubia|RedMagic 9 Pro": { chipset: "Snapdragon 8 Gen 3", category: "flagship", ram: 12, hz: 120 },
+    "Huawei|P60 Pro": { chipset: "Snapdragon 8+ Gen 1 4G", category: "flagship", ram: 8, hz: 120 }
   };
 
   let activeDeviceBrand = "Todos";
