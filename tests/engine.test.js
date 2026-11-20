@@ -181,7 +181,7 @@ test("Catálogo de aparelhos cobre as oito marcas do seletor, sem modelos duplic
 
 test("Autopreenchimento de ficha técnica inclui Galaxy A07 4G e valida dados suportados", () => {
   const app = fs.readFileSync(path.join(FRONTEND_DIR, "app.js"), "utf8");
-  const match = app.match(/const DEVICE_SPECS = \{([\\s\\S]*?)\\n  \};/);
+  const match = app.match(/const DEVICE_SPECS = \{([\s\S]*?)\n  \};/);
   assert.ok(match, "Tabela de especificações dos dispositivos não encontrada");
   const specs = vm.runInNewContext("({" + match[1] + "})");
   const a07 = specs["Samsung|Galaxy A07 4G"];
