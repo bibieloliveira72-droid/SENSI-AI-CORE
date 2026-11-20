@@ -30,6 +30,21 @@ const h=document.createElement("strong");h.textContent="Seu plano de otimizaçã
 const p=document.createElement("p");p.textContent="Siga na ordem abaixo e marque mentalmente o que já conferiu. Você continua no controle de cada mudança.";box.append(p);
 const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";span.textContent=guides[key][1];li.append(b,span);ol.append(li)});box.append(ol);
 const note=document.createElement("small");note.textContent="Plano de orientação. Nenhum comando ou ajuste foi aplicado pelo aplicativo.";box.append(note)}
+let applyQueue=[],applyIndex=0;
+function updateApplyButton(){const btn=$("boostApplyBtn");if(!btn)return;const count=selected().length;btn.disabled=count===0;btn.textContent=applyQueue.length&&applyIndex<applyQueue.length?"CONTINUAR APLICAÇÃO ("+(applyIndex+1)+"/"+applyQueue.length+")":"APLICAR MODIFICAÇÕES"}
+function applyNext(){
+ const keys=selected(),status=$("boostApplyStatus");
+ if(!keys.length){if(status)status.textContent="Selecione ao menos uma opção antes de aplicar.";return}
+ if(!applyQueue.length||applyIndex>=applyQueue.length){applyQueue=keys;applyIndex=0}
+ const key=applyQueue[applyIndex];
+ if(key==="refresh"){refresh();applyIndex++;if(status)status.textContent="Diagnóstico atualizado. "+(applyIndex<applyQueue.length?"Volte e toque em continuar para a próxima etapa.":"Todas as etapas selecionadas foram processadas.");updateApplyButton();return}
+ if(!bridge||typeof bridge.openBoostSettings!=="function"){if(status)status.textContent="Esta ação exige a versão APK Android. Nenhuma alteração foi feita.";return}
+ const result=parse(bridge.openBoostSettings(key));
+ if(!result||!result.ok){if(status)status.textContent=(result&&result.message)||"Não foi possível abrir a tela correspondente do Android.";return}
+ applyIndex++;
+ if(status)status.textContent=result.message+" "+(applyIndex<applyQueue.length?"Conclua a etapa no Android e volte para continuar.":"Fim da lista. Revise as alterações feitas nas telas do Android.");
+ updateApplyButton();
+}
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
 if(!d){put("boostDevice","Modo navegador: diagnóstico Android nativo indisponível.");put("boostMemory","N/D");put("boostMemoryHint","Disponível no APK");put("boostBattery","N/D");put("boostBatteryHint","Disponível no APK");put("boostTemp","N/D");put("boostTempHint","Disponível no APK");put("boostAndroid",/Android/i.test(navigator.userAgent)?"Android":"Web");put("boostAndroidHint","Sem leitura nativa");put("boostAdvice","Abra a versão APK para consultar os dados do Android.");return}
@@ -38,7 +53,7 @@ const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. F
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
 function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Serviço ativo e autorização concedida","A autorização está disponível, mas este app ainda não executa comandos privilegiados.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
 document.addEventListener("DOMContentLoaded",()=>{
-document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.addEventListener("change",syncCount));
+document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.addEventListener("change",()=>{applyQueue=[];applyIndex=0;syncCount();updateApplyButton()}));
 $("boostSelectRecommended")?.addEventListener("click",()=>setSelected(recommended[$("boostUseCase")?.value||"stable"]||recommended.stable));
 $("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides)));
 $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
@@ -46,6 +61,6 @@ $("boostBuildPlan")?.addEventListener("click",buildPlan);
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
 $("shizukuGrantBtn")?.addEventListener("click",()=>{try{if(bridge&&typeof bridge.requestShizukuPermission==="function"){bridge.requestShizukuPermission();shizuku("","Solicitação enviada","Conclua ou negue no Shizuku e depois toque em verificar.",false)}}catch(_){shizuku("","Falha ao solicitar","O app continua funcionando sem Shizuku.",false)}});
-put("boostDevice","Diagnóstico pronto. Atualize quando quiser.");put("boostAdvice","Toque em Atualizar diagnóstico para consultar o Android.");shizuku("","Consulta sob demanda","Toque em verificar Shizuku quando quiser.",false);syncCount();
+put("boostDevice","Diagnóstico pronto. Atualize quando quiser.");put("boostAdvice","Toque em Atualizar diagnóstico para consultar o Android.");shizuku("","Consulta sob demanda","Toque em verificar Shizuku quando quiser.",false);syncCount();updateApplyButton();
 });
 })();
