@@ -103,12 +103,12 @@ O motor produz pontos de partida com base nos dados informados. Ele não mede di
 
 ## Versão atual
 
-**SENSI.AI 1.2.0**
+**SENSI.AI 1.3.0**
 
-### Novidades da 1.2.0
-- Catálogo ampliado de smartphones das oito marcas disponíveis no seletor.
-- Busca por fabricante e modelo mantida.
-- Cadastro manual continua disponível para aparelhos ausentes e variantes regionais.
-- Catálogo offline, integrado tanto à versão web quanto ao Android WebView.
+### Novidades da 1.3.0
+- Preenchimento automático de chipset, categoria do processador, RAM de referência e taxa de atualização para modelos com ficha técnica cadastrada.
+- Dados técnicos sincronizados entre a versão web e o Android WebView.
+- Aviso para confirmar a variante de RAM e ajustar manualmente os modelos sem ficha técnica cadastrada.
+- DPI permanece manual, pois é uma configuração do Android que pode mudar independentemente do modelo.
 
-> O catálogo é uma seleção ampla de modelos conhecidos, não uma garantia de cobertura de todas as variantes regionais, operadoras ou aparelhos já fabricados. Novos modelos podem ser adicionados em atualizações futuras.
+> As especificações preenchidas são referências para variantes comuns. RAM e algumas características podem variar por região e configuração; confirme os dados do seu aparelho antes de gerar a sensibilidade.
