@@ -226,14 +226,14 @@
     ["Xiaomi","Redmi Note 13 Pro 4G"],
     ["Xiaomi","Redmi Note 13 Pro 5G"],
     ["Xiaomi","Redmi Note 13 Pro+"],
-    ,
+
     ["Xiaomi","Redmi Note 14 4G"],
     ["Xiaomi","Redmi Note 14 5G"],
-    ,
+
     ["Xiaomi","Redmi Note 14 Pro 5G"],
-    ,
-    ,
-    ,
+
+
+
     ["Xiaomi","Redmi Note 15 Pro 5G"],
     ["Xiaomi","POCO C40"],
     ["Xiaomi","POCO C50"],
@@ -257,8 +257,8 @@
     ["Xiaomi","POCO X5 Pro"],
     ["Xiaomi","POCO X6"],
     ["Xiaomi","POCO X6 Pro"],
-    ,
-    ,
+
+
     ["Xiaomi","POCO X8 Pro"],
     ["Xiaomi","POCO X8 Pro Max"],
     ["Xiaomi","POCO F3"],
@@ -267,8 +267,8 @@
     ["Xiaomi","POCO F5 Pro"],
     ["Xiaomi","POCO F6"],
     ["Xiaomi","POCO F6 Pro"],
-    ,
-    ,
+
+
     ["Xiaomi","POCO F8 Ultra"],
     ["Motorola","Moto E6 Play"],
     ["Motorola","Moto E7"],
@@ -303,9 +303,9 @@
     ["Motorola","Moto G84 5G"],
     ["Motorola","Moto G04"],
     ["Motorola","Moto G04s"],
-    ,
+
     ["Motorola","Moto G14"],
-    ,
+
     ["Motorola","Moto G24"],
     ["Motorola","Moto G24 Power"],
     ["Motorola","Moto G34 5G"],
@@ -338,13 +338,13 @@
     ["Motorola","Edge 40 Neo"],
     ["Motorola","Edge 40 Pro"],
     ["Motorola","Edge 50"],
-    ,
+
     ["Motorola","Edge 50 Neo"],
-    ,
-    ,
+
+
     ["Motorola","Edge 60"],
-    ,
-    ,
+
+
     ["Motorola","Edge 70"],
     ["Motorola","Edge 70 Fusion"],
     ["Motorola","Edge 70 Pro"],
