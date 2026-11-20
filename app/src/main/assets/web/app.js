@@ -644,6 +644,7 @@
       generator: document.getElementById("tab-generator"),
       saved: document.getElementById("tab-saved"),
       compare: document.getElementById("tab-compare"),
+      boost: document.getElementById("tab-boost"),
     },
 
     form: document.getElementById("sensiForm"),
