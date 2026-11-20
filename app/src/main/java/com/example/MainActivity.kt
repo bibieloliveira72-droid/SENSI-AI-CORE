@@ -156,6 +156,34 @@ private class AndroidClipboardBridge(private val context: Context) {
     }
   }
 
+
+  @JavascriptInterface
+  fun applyMassinhaTweak(version: String, packageName: String): String {
+    if (version != "v1" && version != "v2") return JSONObject().put("ok", false).put("message", "Variante inválida.").toString()
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    if (prefs.contains("massinha_backup")) return JSONObject().put("ok", false).put("message", "Restaure o backup anterior antes de aplicar outro perfil.").toString()
+    return try {
+      val result = callSafeTweakService(3, JSONObject().put("version", version).put("package", packageName).toString())
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) json.optJSONObject("backup")?.let { prefs.edit().putString("massinha_backup", it.toString()).apply() }
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
+  fun restoreMassinhaTweak(): String {
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val backup = prefs.getString("massinha_backup", null) ?: return JSONObject().put("ok", false).put("message", "Backup Massinha não encontrado.").toString()
+    return try {
+      val result = callSafeTweakService(4, backup)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove("massinha_backup").apply()
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha ao restaurar: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
   @JavascriptInterface
   fun restoreSafeTweak(key: String): String {
     if (key != "animations") return JSONObject().put("ok", false).put("message", "Restauração não permitida.").toString()
