@@ -38,6 +38,8 @@ jobs:
           cmp frontend/styles.css app/src/main/assets/web/styles.css
           cmp frontend/app.js app/src/main/assets/web/app.js
           cmp frontend/sensi-engine.js app/src/main/assets/web/sensi-engine.js
+          cmp frontend/boost.js app/src/main/assets/web/boost.js
+          cmp frontend/boost.css app/src/main/assets/web/boost.css
 
       - name: Setup Java 21
         uses: actions/setup-java@v6
