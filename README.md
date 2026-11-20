@@ -197,3 +197,12 @@ O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.ri
 - Seleção entre Free Fire e Free Fire MAX para montar o comando correto.
 - A seção Gráficos Massinha não depende da autorização Shizuku e não executa comandos automaticamente.
 - O painel avisa sobre backup dos valores ANGLE atuais e sobre o encerramento do jogo selecionado.
+
+
+## SENSI.AI 2.1.3
+
+- **VersionName:** 2.1.3
+- **VersionCode:** 19
+- Ao gerar a sensibilidade, o app também apresenta uma resolução de referência e um DPI sugerido conforme a categoria do processador e a RAM informadas.
+- Botões independentes para copiar resolução e DPI; ambos também entram em **COPIAR TUDO**.
+- As recomendações são referências de configuração, não alteram automaticamente o Android ou o jogo e devem ser validadas nas opções disponíveis no aparelho.

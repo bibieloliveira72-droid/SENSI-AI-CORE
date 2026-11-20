@@ -212,6 +212,40 @@
     };
   }
 
+  function recommendDisplaySetup(cfg) {
+    const tier = cfg.processador || "intermediario";
+    const ram = sanitizeNumber(cfg.ram, 8, 1, 32);
+    let resolution = "1280 × 720";
+    let resolutionLabel = "HD equilibrado";
+    let dpi = 420;
+    let reason = "Perfil conservador para priorizar estabilidade em aparelhos de entrada.";
+
+    if (tier === "flagship" && ram >= 8) {
+      resolution = "1920 × 1080";
+      resolutionLabel = "Full HD";
+      dpi = 560;
+      reason = "Perfil de maior capacidade; confirme se o jogo e a tela oferecem essa opção.";
+    } else if ((tier === "intermediario_plus" && ram >= 6) || (tier === "flagship" && ram < 8)) {
+      resolution = "1600 × 900";
+      resolutionLabel = "HD+";
+      dpi = 500;
+      reason = "Equilíbrio sugerido entre nitidez e fluidez para hardware intermediário/premium.";
+    } else if (tier === "intermediario" && ram >= 6) {
+      resolution = "1600 × 900";
+      resolutionLabel = "HD+";
+      dpi = 480;
+      reason = "Base intermediária; reduza a carga gráfica se houver quedas de fluidez.";
+    }
+
+    return {
+      resolution,
+      resolutionLabel,
+      dpi,
+      reason,
+      note: "Referência de configuração, não altera a resolução nem o DPI do Android. Use apenas opções disponíveis no jogo/aparelho; a sensibilidade depende também do toque e da preferência pessoal."
+    };
+  }
+
   function generateSensitivity(rawInput) {
     const cfg = normalizeInput(rawInput);
     const profile = PROFILES[cfg.profile];
@@ -242,6 +276,7 @@
     const insights = buildTechnicalNotes(cfg, values);
     return {
       config: cfg,
+      recommendations: recommendDisplaySetup(cfg),
       profileLabel: profile.label,
       engineMode: cfg.engineMode,
       values,
@@ -434,6 +469,7 @@
     PROCESSOR_TIERS,
     normalizeInput,
     generateSensitivity,
+    recommendDisplaySetup,
     adjustSingleScope,
     setScopeValue(currentValues, scopeKey, value) { if (!SCOPE_KEYS.includes(scopeKey)) throw new Error("Mira inválida: " + scopeKey); return { ...currentValues, [scopeKey]: sanitizeNumber(value, currentValues[scopeKey], MIN_SENSI, MAX_SENSI) }; },
     applyAdaptiveCalibration,

@@ -716,6 +716,13 @@
     resultsSection: document.getElementById("resultsSection"),
     deviceSummary: document.getElementById("deviceSummary"),
     sensiGrid: document.getElementById("sensiGrid"),
+    recommendedResolution: document.getElementById("recommendedResolution"),
+    recommendedResolutionLabel: document.getElementById("recommendedResolutionLabel"),
+    recommendedDpi: document.getElementById("recommendedDpi"),
+    recommendedSetupReason: document.getElementById("recommendedSetupReason"),
+    recommendedSetupNote: document.getElementById("recommendedSetupNote"),
+    copyResolutionBtn: document.getElementById("copyResolutionBtn"),
+    copyRecommendedDpiBtn: document.getElementById("copyRecommendedDpiBtn"),
     copyAllBtn: document.getElementById("copyAllBtn"),
 
     calibrationButtons: document.getElementById("calibrationButtons"),
@@ -833,9 +840,12 @@
   function buildCopyBlock(entry) {
     const cfg = entry.config;
     const v = entry.values;
+    const setup = cfg.recommendedSetup || window.SensiEngine.recommendDisplaySetup(cfg);
     return [
       `SENSI.AI — ${cfg.marca} ${cfg.modelo} (${entry.profileLabel})`,
-      `Hardware: ${cfg.ram}GB RAM | ${cfg.hz}Hz | ${cfg.dpi} DPI | Botão de tiro: ${cfg.fireButtonSize}%`,
+      `Hardware: ${cfg.ram}GB RAM | ${cfg.hz}Hz | ${cfg.dpi} DPI atual | Botão de tiro: ${cfg.fireButtonSize}%`,
+      `Resolução de referência: ${setup.resolution} (${setup.resolutionLabel})`,
+      `DPI sugerido: ${setup.dpi}`,
       `Geral (General): ${v.General}`,
       `Red Dot: ${v["Red Dot"]}`,
       `Mira 2x: ${v["2x"]}`,
@@ -1087,7 +1097,14 @@
     if (!activeState) return;
     const { config, profileLabel, values, notes, disclaimer } = activeState;
 
-    els.deviceSummary.textContent = `${config.marca} ${config.modelo} • ${profileLabel} • ${config.ram}GB • ${config.hz}Hz • ${config.dpi} DPI • Botão ${config.fireButtonSize}%`;
+    const setup = config.recommendedSetup || window.SensiEngine.recommendDisplaySetup(config);
+    config.recommendedSetup = setup;
+    els.deviceSummary.textContent = `${config.marca} ${config.modelo} • ${profileLabel} • ${config.ram}GB • ${config.hz}Hz • ${config.dpi} DPI atual • Botão ${config.fireButtonSize}%`;
+    els.recommendedResolution.textContent = setup.resolution;
+    els.recommendedResolutionLabel.textContent = setup.resolutionLabel;
+    els.recommendedDpi.textContent = String(setup.dpi);
+    els.recommendedSetupReason.textContent = setup.reason;
+    els.recommendedSetupNote.textContent = setup.note;
     els.sensiGrid.innerHTML = "";
 
     SCOPE_LABELS.forEach(({ key, label }) => {
@@ -1221,7 +1238,7 @@
 
     const generated = window.SensiEngine.generateSensitivity(raw);
     activeState = {
-      config: generated.config,
+      config: { ...generated.config, recommendedSetup: generated.recommendations },
       profileLabel: generated.profileLabel,
       engineMode: generated.engineMode || raw.engineMode || "balanceado",
       values: { ...generated.values },
@@ -1662,6 +1679,18 @@
 
     els.resetBaseBtn.addEventListener("click", handleResetBase);
     els.saveProfileBtn.addEventListener("click", handleSaveProfile);
+
+    els.copyResolutionBtn.addEventListener("click", () => {
+      if (!activeState) return;
+      const setup = activeState.config.recommendedSetup || window.SensiEngine.recommendDisplaySetup(activeState.config);
+      copyToClipboard(setup.resolution, "Resolução copiada!");
+    });
+
+    els.copyRecommendedDpiBtn.addEventListener("click", () => {
+      if (!activeState) return;
+      const setup = activeState.config.recommendedSetup || window.SensiEngine.recommendDisplaySetup(activeState.config);
+      copyToClipboard(String(setup.dpi), "DPI sugerido copiado!");
+    });
 
     els.copyAllBtn.addEventListener("click", () => {
       if (!activeState) return;
