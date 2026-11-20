@@ -213,110 +213,37 @@
   function generateSensitivity(rawInput) {
     const cfg = normalizeInput(rawInput);
     const profile = PROFILES[cfg.profile];
-    const brandCurve = resolveBrandCurve(cfg.marca, cfg.modelo);
-    const procTier = resolveProcessorTier(cfg.processador, cfg.processadorDetalhe);
-    const modelOffset = resolveModelSignatureOffset(cfg.modelo);
 
-    // Compensação não linear de DPI em relação à base Android padrão (450 DPI)
-    // DPI maior reduz necessidade de sensibilidade alta no jogo; curva suave evita saturação extrema.
+    // Hardware descreve desempenho e fluidez, não mede diretamente a resposta do toque.
+    // Por isso, apenas DPI e tamanho do botão entram na sugestão inicial de sensibilidade.
     const dpiDelta = 450 - cfg.dpi;
     const smoothDpiDelta = Math.tanh(dpiDelta / 380) * 380;
-
-    // Taxa de atualização: telas 90–165 Hz entregam leitura mais limpa e exigem leve redução no overshoot
-    const hzFactor = ((120 - cfg.hz) / 30) * 2.2;
-
-    // RAM: aparelhos com menos RAM ganham leve estabilidade extra nas miras longas e compensação leve na puxada
-    const ramClamp = Math.min(12, Math.max(2, cfg.ram));
-    const ramStability = (ramClamp - 6) * 0.7;
-
-    // Tamanho do botão de tiro (%):
-    // Botão menor (30–45%) oferece mais curso vertical de tela -> puxada mais limpa (leve redução de excesso).
-    // Botão maior (60–85%) encurta o espaço livre de arraste -> compensação vertical positiva em General/Red Dot.
     const buttonDelta = (cfg.fireButtonSize - 52) * 0.36;
-
     const values = {};
 
-    // Cálculo independente por mira respeitando os limites válidos do jogo (0 a 200)
-    values.General = clamp(
-      profile.bases.General +
-        smoothDpiDelta * profile.dpiWeights.General +
-        brandCurve.touchGain +
-        procTier.responsiveness +
-        hzFactor * 1.1 +
-        buttonDelta * 0.95 +
-        modelOffset,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values["Red Dot"] = clamp(
-      profile.bases["Red Dot"] +
-        smoothDpiDelta * profile.dpiWeights["Red Dot"] +
-        brandCurve.touchGain * 0.85 +
-        procTier.responsiveness * 0.8 +
-        hzFactor * 0.9 +
-        buttonDelta * 1.05 +
-        ramStability * 0.4 +
-        modelOffset * 0.5,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values["2x"] = clamp(
-      profile.bases["2x"] +
-        smoothDpiDelta * profile.dpiWeights["2x"] +
-        brandCurve.scopeControl +
-        procTier.stability * 0.8 +
-        hzFactor * 0.6 +
-        buttonDelta * 0.55 +
-        ramStability * 0.7,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values["4x"] = clamp(
-      profile.bases["4x"] +
-        smoothDpiDelta * profile.dpiWeights["4x"] +
-        brandCurve.scopeControl * 1.2 +
-        procTier.stability * 1.1 +
-        hzFactor * 0.35 +
-        buttonDelta * 0.3 +
-        ramStability * 0.9,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values.AWM = clamp(
-      profile.bases.AWM +
-        smoothDpiDelta * profile.dpiWeights.AWM +
-        brandCurve.scopeControl * 0.8 +
-        procTier.stability * 0.6 +
-        hzFactor * 0.25 +
-        ramStability * 0.5,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values.Olhadinha = clamp(
-      profile.bases.Olhadinha +
-        smoothDpiDelta * profile.dpiWeights.Olhadinha +
-        brandCurve.touchGain * 0.9 +
-        procTier.responsiveness * 0.7 +
-        hzFactor * 0.95 +
-        modelOffset,
-      MIN_SENSI,
-      MAX_SENSI
-    );
+    for (const scope of SCOPE_KEYS) {
+      const dpiAdjustment = smoothDpiDelta * profile.dpiWeights[scope];
+      const buttonWeight = scope === "General" ? 0.95
+        : scope === "Red Dot" ? 1.05
+        : scope === "2x" ? 0.55
+        : scope === "4x" ? 0.30
+        : scope === "AWM" ? 0.12
+        : 0.95;
+      values[scope] = clamp(
+        profile.bases[scope] + dpiAdjustment + buttonDelta * buttonWeight,
+        MIN_SENSI,
+        MAX_SENSI
+      );
+    }
 
     const insights = buildTechnicalNotes(cfg, values);
-
     return {
       config: cfg,
       profileLabel: profile.label,
       values,
       notes: insights,
       disclaimer:
-        "Sugestão inicial gerada localmente para testes no modo treinamento. O SENSI.AI não promete mira automática ou capa garantida — use a calibração interativa e ajustes de 1 em 1 ponto conforme sua pegada.",
+        "Sugestão inicial local para testes no modo treinamento. Hardware não determina a sensibilidade do toque; ajuste os valores conforme sua resposta real. O SENSI.AI não promete mira automática ou capa garantida.",
     };
   }
 
@@ -381,6 +308,8 @@
     const damping = Math.max(0.5, 1 - iteration * 0.1);
     const dpiGain = dpi >= 750 ? 0.85 : dpi <= 420 ? 1.15 : 1.0;
 
+    const memoryInput = context.learningState && typeof context.learningState === "object"
+      ? context.learningState : {};
     const rawDeltas = {
       General: 0,
       "Red Dot": 0,
@@ -449,17 +378,39 @@
 
     const nextValues = {};
     const appliedDeltas = {};
+    const learningState = {};
+
     for (const key of SCOPE_KEYS) {
-      nextValues[key] = clamp(prev[key] + rawDeltas[key], MIN_SENSI, MAX_SENSI);
+      const previous = memoryInput[key] && typeof memoryInput[key] === "object"
+        ? memoryInput[key] : {};
+      const direction = Math.sign(rawDeltas[key]);
+      const sameDirectionCount = direction !== 0 && Number(previous.lastDirection) === direction
+        ? Math.min(5, Math.max(0, Number(previous.sameDirectionCount) || 0)) : 0;
+      const learningFactor = sameDirectionCount === 0 ? 1 : Math.max(0.45, 1 - sameDirectionCount * 0.15);
+      const learnedDelta = rawDeltas[key] === 0 ? 0 : Math.sign(rawDeltas[key]) *
+        Math.max(1, Math.round(Math.abs(rawDeltas[key]) * learningFactor));
+
+      nextValues[key] = clamp(prev[key] + learnedDelta, MIN_SENSI, MAX_SENSI);
       appliedDeltas[key] = nextValues[key] - prev[key];
+      learningState[key] = direction === 0
+        ? { lastDirection: Number(previous.lastDirection) || 0, sameDirectionCount }
+        : {
+            lastDirection: direction,
+            sameDirectionCount: sameDirectionCount + 1,
+          };
     }
 
     return {
       values: nextValues,
       deltas: appliedDeltas,
+      learningState,
       reason,
-      tip,
+      tip: sameDirectionCountForTip(learningState) ? tip + " O motor reduziu gradualmente o passo nas miras que receberam correções repetidas na mesma direção." : tip,
     };
+  }
+
+  function sameDirectionCountForTip(state) {
+    return SCOPE_KEYS.some((key) => state[key].sameDirectionCount > 1);
   }
 
   function compareConfigurations(entryA, entryB) {
