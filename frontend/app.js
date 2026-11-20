@@ -14,6 +14,19 @@
     { key: "Olhadinha", label: "Olhadinha" },
   ];
 
+  const DEVICE_CATALOG = [
+    ["Samsung","Galaxy A07 4G"],["Samsung","Galaxy A06"],["Samsung","Galaxy A05"],["Samsung","Galaxy A15"],["Samsung","Galaxy A16"],["Samsung","Galaxy A25"],["Samsung","Galaxy A35"],["Samsung","Galaxy A55"],["Samsung","Galaxy S24 FE"],["Samsung","Galaxy S24 Ultra"],["Samsung","Galaxy S25 Ultra"],
+    ["Xiaomi","Redmi 13C"],["Xiaomi","Redmi Note 13 4G"],["Xiaomi","Redmi Note 13 Pro 5G"],["Xiaomi","Redmi Note 14 4G"],["Xiaomi","POCO C65"],["Xiaomi","POCO X6 Pro"],["Xiaomi","POCO F6"],
+    ["Motorola","Moto G24"],["Motorola","Moto G34 5G"],["Motorola","Moto G54 5G"],["Motorola","Moto G84 5G"],["Motorola","Edge 50 Fusion"],["Motorola","Edge 50 Pro"],
+    ["Apple","iPhone 11"],["Apple","iPhone 12"],["Apple","iPhone 13"],["Apple","iPhone 14"],["Apple","iPhone 15"],["Apple","iPhone 16"],
+    ["ASUS ROG","ROG Phone 6"],["ASUS ROG","ROG Phone 7"],["ASUS ROG","ROG Phone 8"],
+    ["Realme","C55"],["Realme","C67"],["Realme","12 Pro+"],["Realme","GT 6"],
+    ["Infinix","Hot 40i"],["Infinix","Note 40"],["Infinix","GT 20 Pro"],
+    ["OnePlus","Nord CE 3 Lite"],["OnePlus","Nord 4"],["OnePlus","12R"]
+  ].map(([brand, model]) => ({ brand, model }));
+
+  let activeDeviceBrand = "Todos";
+
   const els = {
     tabBtns: document.querySelectorAll(".tab-btn"),
     tabPanels: {
@@ -26,6 +39,17 @@
     marcaSelect: document.getElementById("marcaSelect"),
     customBrandField: document.getElementById("customBrandField"),
     customMarcaInput: document.getElementById("customMarcaInput"),
+    devicePickerSearch: document.getElementById("devicePickerSearch"),
+    deviceSearchInput: document.getElementById("deviceSearchInput"),
+    deviceBrandFilters: document.getElementById("deviceBrandFilters"),
+    deviceResults: document.getElementById("deviceResults"),
+    selectedDeviceCard: document.getElementById("selectedDeviceCard"),
+    selectedDeviceName: document.getElementById("selectedDeviceName"),
+    selectedDeviceMeta: document.getElementById("selectedDeviceMeta"),
+    changeDeviceBtn: document.getElementById("changeDeviceBtn"),
+    manualDeviceBtn: document.getElementById("manualDeviceBtn"),
+    deviceManualFields: document.getElementById("deviceManualFields"),
+    backToDeviceCatalogBtn: document.getElementById("backToDeviceCatalogBtn"),
     modeloInput: document.getElementById("modeloInput"),
     processadorSelect: document.getElementById("processadorSelect"),
     processadorDetalheInput: document.getElementById("processadorDetalheInput"),
@@ -250,6 +274,79 @@
       });
   }
 
+  function renderDeviceBrandFilters() {
+    const brands = ["Todos", ...new Set(DEVICE_CATALOG.map((item) => item.brand))];
+    els.deviceBrandFilters.innerHTML = "";
+    brands.forEach((brand) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "device-brand-chip" + (activeDeviceBrand === brand ? " active" : "");
+      button.dataset.deviceBrand = brand;
+      button.textContent = brand;
+      els.deviceBrandFilters.appendChild(button);
+    });
+  }
+
+  function renderDeviceResults() {
+    const query = els.deviceSearchInput.value.trim().toLocaleLowerCase("pt-BR");
+    const filtered = DEVICE_CATALOG.filter((item) => {
+      const matchesBrand = activeDeviceBrand === "Todos" || item.brand === activeDeviceBrand;
+      const haystack = (item.brand + " " + item.model).toLocaleLowerCase("pt-BR");
+      return matchesBrand && (!query || haystack.includes(query));
+    });
+    els.deviceResults.innerHTML = "";
+    if (!filtered.length) {
+      const empty = document.createElement("div");
+      empty.className = "device-empty";
+      empty.textContent = "Nenhum modelo encontrado. Você pode informar seu aparelho manualmente.";
+      els.deviceResults.appendChild(empty);
+      return;
+    }
+    filtered.forEach((device) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "device-result";
+      button.setAttribute("role", "option");
+      button.innerHTML = '<span class="device-result-icon" aria-hidden="true">▯</span><span class="device-result-copy"><strong></strong><small></small></span><span class="device-result-arrow">›</span>';
+      button.querySelector("strong").textContent = device.model;
+      button.querySelector("small").textContent = device.brand;
+      button.addEventListener("click", () => selectCatalogDevice(device));
+      els.deviceResults.appendChild(button);
+    });
+  }
+
+  function showDeviceCatalog() {
+    els.devicePickerSearch.classList.remove("hidden");
+    els.deviceManualFields.classList.add("hidden");
+    els.selectedDeviceCard.classList.add("hidden");
+    els.deviceSearchInput.focus();
+  }
+
+  function selectCatalogDevice(device) {
+    els.marcaSelect.value = device.brand;
+    els.customBrandField.classList.add("hidden");
+    els.customMarcaInput.value = "";
+    els.modeloInput.value = device.model;
+    els.selectedDeviceName.textContent = device.model;
+    els.selectedDeviceMeta.textContent = device.brand + " · modelo selecionado";
+    els.selectedDeviceCard.classList.remove("hidden");
+    els.devicePickerSearch.classList.add("hidden");
+    els.deviceManualFields.classList.add("hidden");
+    clearError();
+  }
+
+  function syncDevicePickerFromForm() {
+    const brand = els.marcaSelect.value === "Outra" ? els.customMarcaInput.value.trim() : els.marcaSelect.value;
+    const model = els.modeloInput.value.trim();
+    if (!brand || !model) return;
+    const match = DEVICE_CATALOG.find((item) => item.brand.toLocaleLowerCase("pt-BR") === brand.toLocaleLowerCase("pt-BR") && item.model.toLocaleLowerCase("pt-BR") === model.toLocaleLowerCase("pt-BR"));
+    els.selectedDeviceName.textContent = model;
+    els.selectedDeviceMeta.textContent = match ? brand + " · modelo selecionado" : brand + " · aparelho personalizado";
+    els.selectedDeviceCard.classList.remove("hidden");
+    els.devicePickerSearch.classList.add("hidden");
+    els.deviceManualFields.classList.add("hidden");
+  }
+
   function collectFormInput() {
     const selectedBrand = els.marcaSelect.value;
     const marca =
@@ -290,6 +387,7 @@
     syncDpiPresetHighlight();
     syncFireButtonUi(config.fireButtonSize || 52);
     syncProfileCardSelection(config.profile || "capa");
+    syncDevicePickerFromForm();
   }
 
   function renderActiveResults() {
@@ -791,6 +889,24 @@
     els.tabBtns.forEach((btn) => {
       btn.addEventListener("click", () => switchTab(btn.dataset.tab));
     });
+
+    renderDeviceBrandFilters();
+    renderDeviceResults();
+    els.deviceSearchInput.addEventListener("input", renderDeviceResults);
+    els.deviceBrandFilters.addEventListener("click", (event) => {
+      const button = event.target.closest("button[data-device-brand]");
+      if (!button) return;
+      activeDeviceBrand = button.dataset.deviceBrand;
+      renderDeviceBrandFilters();
+      renderDeviceResults();
+    });
+    els.changeDeviceBtn.addEventListener("click", showDeviceCatalog);
+    els.manualDeviceBtn.addEventListener("click", () => {
+      els.devicePickerSearch.classList.add("hidden");
+      els.selectedDeviceCard.classList.add("hidden");
+      els.deviceManualFields.classList.remove("hidden");
+    });
+    els.backToDeviceCatalogBtn.addEventListener("click", showDeviceCatalog);
 
     els.marcaSelect.addEventListener("change", () => {
       const isOther = els.marcaSelect.value === "Outra";
