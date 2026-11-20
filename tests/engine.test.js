@@ -157,7 +157,7 @@ test("Comparação calcula diferenças exatas por mira", () => {
 test("Catálogo de aparelhos cobre as oito marcas do seletor, sem modelos duplicados", () => {
   const app = fs.readFileSync(path.join(FRONTEND_DIR, "app.js"), "utf8");
   const catalogStart = app.indexOf("  const DEVICE_CATALOG = [");
-  const catalogEnd = app.indexOf("\\n  ].map", catalogStart);
+  const catalogEnd = app.indexOf("\n  ].map", catalogStart);
   assert.ok(catalogStart >= 0 && catalogEnd > catalogStart, "Catálogo de dispositivos não encontrado");
   const arrayStart = app.indexOf("[", catalogStart);
   const entries = vm.runInNewContext("(" + app.slice(arrayStart, catalogEnd + 4).trim() + ")");
