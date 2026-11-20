@@ -34,20 +34,20 @@ const ol=document.createElement("ol");keys.forEach(key=>{const li=document.creat
 const note=document.createElement("small");note.textContent="Plano de orientação. Nenhum comando ou ajuste foi aplicado pelo aplicativo.";box.append(note)}
 function applyStatus(message){put("boostApplyStatus",message)}
 function applyNextTweak(){
-if(applyIndex<0||applyIndex>=applyQueue.length){applyStatus("Todos os itens selecionados foram percorridos. Você pode revisar o resultado nas Configurações.");$("boostNextTweak").disabled=true;return}
+if(applyIndex<0||applyIndex>=applyQueue.length){applyStatus("Fila concluída. Revise as alterações feitas nas Configurações do Android.");$("boostNextTweak").disabled=true;return}
 const key=applyQueue[applyIndex],label=guides[key]?.[0]||key;
-if(key==="refresh"){refresh();applyStatus("Diagnóstico atualizado. Nenhuma configuração foi alterada.");advanceQueue();return}
+if(key==="refresh"){refresh();applyStatus(label+": diagnóstico atualizado. Nenhuma configuração foi alterada.");$("boostNextTweak").disabled=false;return}
 if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
-applyStatus(label+": siga as instruções do plano. Este item não possui uma alteração automática segura no Android.");advanceQueue();return}
+applyStatus(label+": siga as instruções do plano. Este item é uma orientação manual, sem alteração automática.");$("boostNextTweak").disabled=false;return}
 if(!bridge||typeof bridge.openTweakSettings!=="function"){applyStatus("Este ajuste precisa da versão APK Android. Nenhuma mudança foi feita.");$("boostNextTweak").disabled=true;return}
 let opened=false;try{opened=bridge.openTweakSettings(key)===true}catch(_){opened=false}
-if(opened){applyStatus(label+": painel do Android aberto. Faça a alteração que desejar e volte ao SENSI.AI para avançar.");$("boostNextTweak").disabled=false}
-else{applyStatus(label+": não foi possível abrir esse painel nesta versão do Android. Nenhuma mudança foi feita.");advanceQueue()}
+if(opened){applyStatus(label+": painel do Android aberto. Faça a alteração desejada e volte para tocar em Próximo Ajuste.");$("boostNextTweak").disabled=false}
+else{applyStatus(label+": painel indisponível nesta versão do Android. Nenhuma mudança foi feita. Toque em Próximo Ajuste.");$("boostNextTweak").disabled=false}
 }
-function advanceQueue(){applyIndex++;if(applyIndex>=applyQueue.length){$("boostNextTweak").disabled=true;applyStatus("Fila concluída. Os ajustes foram apresentados sem alterar nada automaticamente.")}else{$("boostNextTweak").disabled=false}}
+function nextTweak(){applyIndex++;applyNextTweak()}
 function startApplyTweaks(){
 const keys=selected();if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de aplicar.");return}
-applyQueue=keys;applyIndex=0;applyStatus("Iniciando "+keys.length+" ajuste(s). O Android poderá abrir as Configurações para você confirmar cada um.");applyNextTweak()
+applyQueue=keys;applyIndex=-1;applyStatus("Iniciando "+keys.length+" ajuste(s). Cada alteração será confirmada por você no Android.");nextTweak()
 }
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
@@ -63,7 +63,7 @@ $("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides
 $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
 $("boostBuildPlan")?.addEventListener("click",buildPlan);
 $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
-$("boostNextTweak")?.addEventListener("click",applyNextTweak);
+$("boostNextTweak")?.addEventListener("click",nextTweak);
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
 $("shizukuGrantBtn")?.addEventListener("click",()=>{try{if(bridge&&typeof bridge.requestShizukuPermission==="function"){bridge.requestShizukuPermission();shizuku("","Solicitação enviada","Conclua ou negue no Shizuku e depois toque em verificar.",false)}}catch(_){shizuku("","Falha ao solicitar","O app continua funcionando sem Shizuku.",false)}});
