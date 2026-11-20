@@ -87,3 +87,15 @@ Sua configuração. Seu estilo. Sua precisão.
 Versão: 1.0.0
 Categoria: Ferramentas de configuração para jogos
 Plataforma: Android
+
+## Identificação da versão oficial
+
+- Nome do aplicativo: SENSI.AI
+- Versão: 1.0.0
+- Application ID Android: `com.sensiai.freefire`
+- Motor: algoritmo local determinístico em JavaScript
+- Conexão com serviços externos: não necessária para gerar e calibrar configurações
+
+## Observação sobre os resultados
+
+O motor produz pontos de partida com base nos dados informados. Ele não mede diretamente o toque, não acessa os dados internos do Free Fire e não aprende automaticamente com partidas. A calibração depende do retorno selecionado pelo jogador.
