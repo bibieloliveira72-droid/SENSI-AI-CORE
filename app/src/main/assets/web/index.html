@@ -50,6 +50,7 @@
         <span class="tab-icon">⇄</span><span>Comparar</span>
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="boost"><span class="tab-icon">⚡</span><span>Boost</span></button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="settings"><span class="tab-icon">⚙</span><span>Ajustes</span></button>
     </nav>
 
     <main class="main-content">
@@ -400,6 +401,21 @@
           <div class="boost-apply-actions"><button type="button" id="boostBuildPlan" class="btn-secondary">MONTAR MEU PLANO</button><button type="button" id="boostApplyTweaks" class="btn-primary">APLICAR TWEAKS</button><button type="button" id="boostNextTweak" class="btn-ghost-sm" disabled>PRÓXIMO AJUSTE</button></div><div id="boostApplyStatus" class="boost-apply-status" aria-live="polite">Selecione os ajustes e toque em Aplicar Tweaks. O Android pedirá sua confirmação em cada tela.</div>
           <div id="boostPlanResult" class="boost-plan-result" aria-live="polite"><strong>Seu plano aparece aqui</strong><p>Selecione uma ou mais opções e toque em “Montar meu plano”.</p></div>
           <p class="boost-safety-note">O botão Aplicar Tweaks abre painéis oficiais do Android para os ajustes compatíveis. Você confirma cada mudança no sistema. Itens de orientação continuam como checklist. Tudo funciona offline; Shizuku não executa comandos privilegiados.</p>
+        </section>
+      </section>
+
+      <section id="tab-settings" class="tab-panel hidden" role="tabpanel">
+        <section class="hero-panel"><div class="hero-copy"><span class="eyebrow"><i></i> PERSONAL PREFERENCES / 05</span><h2>Configurações <em>do app.</em></h2><p>Personalize como o SENSI.AI se comporta. Suas escolhas ficam salvas neste aparelho.</p><div class="hero-meta"><span>ARMAZENAMENTO LOCAL</span><span>OFFLINE</span><span>CONTROLE DO USUÁRIO</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">⚙</div><i class="orbit-dot"></i></div></section>
+        <section class="card boost-card app-settings-card">
+          <div class="section-head"><div><h2>Ao concluir os tweaks</h2><p class="device-summary">Automatize a próxima etapa da sua sessão.</p></div><span class="badge">PREFERÊNCIAS</span></div>
+          <label class="app-setting-row"><span><strong>Abrir Free Fire ao terminar</strong><small>Quando todos os itens do plano forem concluídos e você voltar ao SENSI.AI, o jogo será iniciado automaticamente.</small></span><input id="settingAutoOpenFF" type="checkbox" checked></label>
+          <div class="field app-setting-field"><label for="settingGameEdition">Versão do jogo</label><select id="settingGameEdition" class="input-control"><option value="freefire">Free Fire</option><option value="freefiremax">Free Fire MAX</option></select><p class="field-help">O app tenta abrir a versão escolhida. Ela precisa estar instalada no aparelho.</p></div>
+          <div class="app-setting-actions"><button type="button" id="settingsOpenFF" class="btn-secondary">ABRIR JOGO AGORA</button><button type="button" id="settingsReset" class="btn-ghost-sm">RESTAURAR PADRÕES</button></div>
+          <div id="settingsStatus" class="boost-apply-status" aria-live="polite">As preferências são guardadas localmente e funcionam sem internet.</div>
+        </section>
+        <section class="card boost-card">
+          <div class="section-head"><div><h2>Privacidade e funcionamento</h2><p class="device-summary">O que o SENSI.AI faz no aparelho.</p></div><span class="badge">OFFLINE</span></div>
+          <ul class="settings-info-list"><li>Perfis, histórico e preferências permanecem no armazenamento local do app.</li><li>O catálogo e o motor de sensibilidade não precisam de Wi-Fi.</li><li>O SENSI.AI não altera arquivos do Free Fire nem aplica comandos escondidos.</li><li>A abertura do jogo acontece somente após concluir o fluxo iniciado por você ou ao tocar em Abrir Jogo Agora.</li></ul>
         </section>
       </section>
     </main>

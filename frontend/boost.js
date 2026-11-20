@@ -5,6 +5,22 @@ const parse=v=>{try{return JSON.parse(v)}catch(_){return null}};
 const put=(id,v)=>{const e=$(id);if(e)e.textContent=v};
 const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
 let applyQueue=[],applyIndex=-1;
+const SETTINGS_KEY="sensi_ai_app_settings_v1";
+const defaultSettings={autoOpenFreeFire:true,gameEdition:"freefire"};
+function readSettings(){try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}}catch(_){return {...defaultSettings}}}
+let appSettings=readSettings();
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(appSettings))}catch(_){}}
+function syncSettingsUI(){
+const auto=$("settingAutoOpenFF"),edition=$("settingGameEdition");
+if(auto)auto.checked=!!appSettings.autoOpenFreeFire;
+if(edition)edition.value=appSettings.gameEdition;
+}
+function openFreeFire(manual){
+if(!bridge||typeof bridge.openFreeFire!=="function"){put("settingsStatus","A abertura automática está disponível apenas no APK Android.");if(manual)applyStatus("Instale e abra o SENSI.AI pelo APK para iniciar o Free Fire.");return false}
+let opened=false;try{opened=bridge.openFreeFire(appSettings.gameEdition)==="opened"}catch(_){}
+const message=opened?"Free Fire iniciado. Boa partida!": "Não encontrei essa versão do Free Fire instalada. Confira a versão escolhida nas Configurações.";
+put("settingsStatus",message);if(!manual)applyStatus(message);return opened
+}
 const guides={
 game:["Preparar jogo","Escolha gráficos que o aparelho mantenha estáveis, teste uma partida curta e desligue apenas sobreposições que você não usa."],
 memory:["Revisar memória","Atualize o diagnóstico. Feche manualmente apenas apps que você abriu e não está usando. Mantenha música e comunicação se precisar delas."],
@@ -34,7 +50,11 @@ const ol=document.createElement("ol");keys.forEach(key=>{const li=document.creat
 const note=document.createElement("small");note.textContent="Plano de orientação. Nenhum comando ou ajuste foi aplicado pelo aplicativo.";box.append(note)}
 function applyStatus(message){put("boostApplyStatus",message)}
 function applyNextTweak(){
-if(applyIndex<0||applyIndex>=applyQueue.length){applyStatus("Fila concluída. Revise as alterações feitas nas Configurações do Android.");$("boostNextTweak").disabled=true;return}
+if(applyIndex<0||applyIndex>=applyQueue.length){
+applyStatus("Todos os itens do plano foram concluídos. Preparando sua sessão…");
+$("boostNextTweak").disabled=true;
+if(appSettings.autoOpenFreeFire){openFreeFire(false)}else{applyStatus("Plano concluído. A abertura automática está desativada nas Configurações.")}
+return}
 const key=applyQueue[applyIndex],label=guides[key]?.[0]||key;
 if(key==="refresh"){refresh();applyStatus(label+": diagnóstico atualizado. Nenhuma configuração foi alterada.");$("boostNextTweak").disabled=false;return}
 if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
@@ -67,6 +87,11 @@ $("boostNextTweak")?.addEventListener("click",nextTweak);
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
 $("shizukuGrantBtn")?.addEventListener("click",()=>{try{if(bridge&&typeof bridge.requestShizukuPermission==="function"){bridge.requestShizukuPermission();shizuku("","Solicitação enviada","Conclua ou negue no Shizuku e depois toque em verificar.",false)}}catch(_){shizuku("","Falha ao solicitar","O app continua funcionando sem Shizuku.",false)}});
+$("settingAutoOpenFF")?.addEventListener("change",e=>{appSettings.autoOpenFreeFire=e.target.checked;saveSettings();put("settingsStatus",e.target.checked?"O Free Fire será aberto ao concluir os tweaks.":"A abertura automática foi desativada.")});
+$("settingGameEdition")?.addEventListener("change",e=>{appSettings.gameEdition=e.target.value;saveSettings();put("settingsStatus","Versão preferida salva neste aparelho.")});
+$("settingsOpenFF")?.addEventListener("click",()=>openFreeFire(true));
+$("settingsReset")?.addEventListener("click",()=>{appSettings={...defaultSettings};saveSettings();syncSettingsUI();put("settingsStatus","Preferências restauradas para os padrões.")});
+syncSettingsUI();
 put("boostDevice","Diagnóstico pronto. Atualize quando quiser.");put("boostAdvice","Toque em Atualizar diagnóstico para consultar o Android.");shizuku("","Consulta sob demanda","Toque em verificar Shizuku quando quiser.",false);syncCount();
 });
 })();

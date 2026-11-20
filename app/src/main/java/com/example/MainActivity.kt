@@ -137,6 +137,25 @@ private class AndroidClipboardBridge(private val context: Context) {
   }
 
   @JavascriptInterface
+  fun openFreeFire(edition: String): String {
+    val packages = when (edition) {
+      "freefiremax" -> listOf("com.dts.freefiremax", "com.dts.freefireth")
+      else -> listOf("com.dts.freefireth", "com.dts.freefiremax")
+    }
+    for (packageName in packages) {
+      val launchIntent = try { context.packageManager.getLaunchIntentForPackage(packageName) } catch (_: Throwable) { null }
+      if (launchIntent != null) {
+        return try {
+          launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+          context.startActivity(launchIntent)
+          "opened"
+        } catch (_: Throwable) { "failed" }
+      }
+    }
+    return "not_installed"
+  }
+
+  @JavascriptInterface
   fun copyText(text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
     clipboard?.setPrimaryClip(ClipData.newPlainText("SENSI.AI", text))

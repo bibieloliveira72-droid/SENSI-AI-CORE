@@ -30,3 +30,13 @@
 @media(min-width:620px){.boost-multi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 
 .boost-apply-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.boost-apply-actions button{flex:1 1 145px}.boost-apply-status{margin-top:10px;padding:12px 14px;border-radius:12px;background:rgba(25,217,183,.08);border:1px solid rgba(25,217,183,.2);color:var(--text,#f5f5f7);font-size:12px;line-height:1.55;min-height:42px}
+
+.app-setting-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:15px 0;border-bottom:1px solid rgba(125,155,180,.16);cursor:pointer}
+.app-setting-row>span{display:grid;gap:6px;min-width:0}
+.app-setting-row strong{font-size:13px;color:var(--text,#f5f5f7)}
+.app-setting-row small{font-size:11px;line-height:1.5;color:var(--muted,#98a5b5)}
+.app-setting-row input{width:22px;height:22px;flex:0 0 22px;accent-color:#19cfae}
+.app-setting-field{margin-top:17px}
+.app-setting-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.app-setting-actions button{flex:1 1 145px}
+.settings-info-list{padding-left:19px;display:grid;gap:10px;color:var(--muted,#a7b2c0);font-size:12px;line-height:1.55}
