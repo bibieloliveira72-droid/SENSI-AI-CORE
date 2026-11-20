@@ -65,15 +65,20 @@ jobs:
         run: |
           gradle :app:assembleDebug :app:assembleUnsigned --no-daemon --stacktrace
 
-      - name: Verify APKs exist
+      - name: Verify APK outputs
         run: |
           test -s app/build/outputs/apk/debug/app-debug.apk
           test -s app/build/outputs/apk/unsigned/app-unsigned-unsigned.apk
+          if unzip -Z1 app/build/outputs/apk/unsigned/app-unsigned-unsigned.apk | grep -Eq '^META-INF/.*\.(RSA|DSA|EC)$'; then
+            echo "Unsigned Release unexpectedly contains a signing certificate."
+            exit 1
+          fi
           cp app/build/outputs/apk/unsigned/app-unsigned-unsigned.apk app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk
-          ! unzip -Z1 app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk | grep -E '^META-INF/.*\\.(RSA|DSA|EC)
 
       - name: Calculate APK SHA-256
-        run: sha256sum app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk
+        run: |
+          sha256sum app/build/outputs/apk/debug/app-debug.apk
+          sha256sum app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk
 
       - name: Upload SENSI.AI Debug APK artifact
         uses: actions/upload-artifact@v7
@@ -88,25 +93,5 @@ jobs:
         with:
           name: SENSI-AI-2.0.1-RELEASE-UNSIGNED
           path: app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk
-          if-no-files-found: error
-          retention-days: 14
-
-
-      - name: Calculate APK SHA-256
-        run: sha256sum app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release.apk
-
-      - name: Upload SENSI.AI Debug APK artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: SENSI-AI-2.0.0-DEBUG
-          path: app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload SENSI.AI signed Release APK artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: SENSI-AI-2.0.0-RELEASE
-          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
