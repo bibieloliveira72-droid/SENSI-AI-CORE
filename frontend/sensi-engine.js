@@ -196,6 +196,7 @@
     const hz = sanitizeNumber(input.hz, 120, 60, 165);
     const fireButtonSize = sanitizeNumber(input.fireButtonSize, 52, 25, 90);
     const profileKey = PROFILES[input.profile] ? input.profile : "capa";
+    const engineMode = ["controle", "balanceado", "agil"].includes(input.engineMode) ? input.engineMode : "balanceado";
 
     return {
       marca,
@@ -207,6 +208,7 @@
       hz,
       fireButtonSize,
       profile: profileKey,
+      engineMode,
     };
   }
 
@@ -220,6 +222,7 @@
     const smoothDpiDelta = Math.tanh(dpiDelta / 380) * 380;
     const buttonDelta = (cfg.fireButtonSize - 52) * 0.36;
     const values = {};
+    const modeWeights = { controle: { General: -3, "Red Dot": -2, "2x": -3, "4x": -4, AWM: -3, Olhadinha: -2 }, balanceado: { General: 0, "Red Dot": 0, "2x": 0, "4x": 0, AWM: 0, Olhadinha: 0 }, agil: { General: 3, "Red Dot": 2, "2x": 2, "4x": 1, AWM: 1, Olhadinha: 4 } }[cfg.engineMode];
 
     for (const scope of SCOPE_KEYS) {
       const dpiAdjustment = smoothDpiDelta * profile.dpiWeights[scope];
@@ -230,7 +233,7 @@
         : scope === "AWM" ? 0.12
         : 0.95;
       values[scope] = clamp(
-        profile.bases[scope] + dpiAdjustment + buttonDelta * buttonWeight,
+        profile.bases[scope] + dpiAdjustment + buttonDelta * buttonWeight + modeWeights[scope],
         MIN_SENSI,
         MAX_SENSI
       );
@@ -240,8 +243,9 @@
     return {
       config: cfg,
       profileLabel: profile.label,
+      engineMode: cfg.engineMode,
       values,
-      notes: insights,
+      notes: insights.concat(["Modo híbrido 2.0: " + cfg.engineMode + " combinado ao perfil " + profile.label + "."]),
       disclaimer:
         "Sugestão inicial local para testes no modo treinamento. Hardware não determina a sensibilidade do toque; ajuste os valores conforme sua resposta real. O SENSI.AI não promete mira automática ou capa garantida.",
     };
@@ -431,6 +435,7 @@
     normalizeInput,
     generateSensitivity,
     adjustSingleScope,
+    setScopeValue(currentValues, scopeKey, value) { if (!SCOPE_KEYS.includes(scopeKey)) throw new Error("Mira inválida: " + scopeKey); return { ...currentValues, [scopeKey]: sanitizeNumber(value, currentValues[scopeKey], MIN_SENSI, MAX_SENSI) }; },
     applyAdaptiveCalibration,
     compareConfigurations,
   };
