@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.content.ComponentName
 import android.content.ServiceConnection
 import android.os.IBinder
@@ -325,6 +326,12 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
   }
 }
 
+private tailrec fun Context.findComponentActivity(): ComponentActivity? = when (this) {
+  is ComponentActivity -> this
+  is ContextWrapper -> baseContext.findComponentActivity()
+  else -> null
+}
+
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 fun SensiOfflineWebHost() {
@@ -362,7 +369,8 @@ fun SensiOfflineWebHost() {
             cacheMode = WebSettings.LOAD_NO_CACHE
           }
 
-          addJavascriptInterface(AndroidClipboardBridge(context as ComponentActivity), "AndroidBridge")
+          val hostActivity = context.findComponentActivity() ?: error("Activity Android indisponível para o Shizuku.")
+          addJavascriptInterface(AndroidClipboardBridge(hostActivity), "AndroidBridge")
 
           webChromeClient = WebChromeClient()
           webViewClient =
