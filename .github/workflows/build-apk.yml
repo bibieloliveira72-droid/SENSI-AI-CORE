@@ -58,27 +58,40 @@ jobs:
         with:
           gradle-version: "9.3.1"
 
+      - name: Prepare signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64" || { echo "Missing KEYSTORE_BASE64 repository secret"; exit 1; }
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$GITHUB_WORKSPACE/release-key.jks"
+          test -s "$GITHUB_WORKSPACE/release-key.jks"
+
       - name: Prepare debug keystore
         run: keytool -genkeypair -v -keystore "$GITHUB_WORKSPACE/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
-      - name: Build signed Debug and unsigned Release APKs
+      - name: Build signed Debug and signed Release APKs
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/release-key.jks
+          STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          gradle :app:assembleDebug :app:assembleUnsigned --no-daemon --stacktrace
+          test -n "$STORE_PASSWORD" || { echo "Missing KEYSTORE_PASSWORD repository secret"; exit 1; }
+          test -n "$KEY_ALIAS" || { echo "Missing KEY_ALIAS repository secret"; exit 1; }
+          test -n "$KEY_PASSWORD" || { echo "Missing KEY_PASSWORD repository secret"; exit 1; }
+          gradle :app:assembleDebug :app:assembleRelease --no-daemon --stacktrace
 
-      - name: Verify APK outputs
+      - name: Verify APK outputs and release signature
         run: |
           test -s app/build/outputs/apk/debug/app-debug.apk
-          test -s app/build/outputs/apk/unsigned/app-unsigned-unsigned.apk
-          if unzip -Z1 app/build/outputs/apk/unsigned/app-unsigned-unsigned.apk | grep -Eq '^META-INF/.*\.(RSA|DSA|EC)$'; then
-            echo "Unsigned Release unexpectedly contains a signing certificate."
-            exit 1
-          fi
-          cp app/build/outputs/apk/unsigned/app-unsigned-unsigned.apk app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk
+          test -s app/build/outputs/apk/release/app-release.apk
+          apksigner verify --verbose app/build/outputs/apk/release/app-release.apk
+          cp app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/SENSI-AI-2.0.1-RELEASE-SIGNED.apk
 
       - name: Calculate APK SHA-256
         run: |
           sha256sum app/build/outputs/apk/debug/app-debug.apk
-          sha256sum app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk
+          sha256sum app/build/outputs/apk/release/SENSI-AI-2.0.1-RELEASE-SIGNED.apk
 
       - name: Upload SENSI.AI Debug APK artifact
         uses: actions/upload-artifact@v7
@@ -88,10 +101,10 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload SENSI.AI unsigned Release APK artifact
+      - name: Upload SENSI.AI signed Release APK
         uses: actions/upload-artifact@v7
         with:
-          name: SENSI-AI-2.0.1-RELEASE-UNSIGNED
-          path: app/build/outputs/apk/unsigned/SENSI-AI-2.0.1-RELEASE-UNSIGNED.apk
+          name: SENSI-AI-2.0.1-RELEASE-SIGNED
+          path: app/build/outputs/apk/release/SENSI-AI-2.0.1-RELEASE-SIGNED.apk
           if-no-files-found: error
           retention-days: 14
