@@ -188,3 +188,12 @@ O diagnóstico não é um benchmark de FPS e não mede diretamente o desempenho 
 - Application ID preservado para permitir atualização do mesmo pacote.
 
 O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.rikka.app/guide/setup/
+
+
+## SENSI.AI 2.1.2
+
+- Gráficos Massinha movido para um painel independente na aba Boost.
+- Comandos V1 e V2 visíveis e copiáveis para uso manual no Brevent.
+- Seleção entre Free Fire e Free Fire MAX para montar o comando correto.
+- A seção Gráficos Massinha não depende da autorização Shizuku e não executa comandos automaticamente.
+- O painel avisa sobre backup dos valores ANGLE atuais e sobre o encerramento do jogo selecionado.

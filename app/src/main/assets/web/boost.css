@@ -58,3 +58,14 @@
 .support-topic ul,.support-topic ol{padding-left:20px;display:grid;gap:7px;margin:10px 0 0}
 .support-topic strong{color:var(--text,#f5f5f7)}
 .support-footnote{font-size:10px;line-height:1.6;color:var(--muted,#98a5b5);margin:10px 0 0}
+
+/* Standalone Gráficos Massinha copy panel */
+.massinha-copy-card{border-color:rgba(229,9,20,.28)}
+.massinha-command-card{display:grid;gap:10px;padding:14px;margin:12px 0;border:1px solid rgba(125,155,180,.2);border-radius:14px;background:rgba(18,25,36,.72)}
+.massinha-command-title{display:grid;gap:5px}
+.massinha-command-title strong{font-size:13px;color:var(--text,#f5f5f7)}
+.massinha-command-title small{font-size:11px;line-height:1.5;color:var(--muted,#a7b2c0)}
+.massinha-command-card pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:150px;overflow:auto;margin:0;padding:11px;border-radius:10px;background:rgba(0,0,0,.28);color:#d8e5ef;font-size:10px;line-height:1.55}
+.massinha-command-card button{width:100%}
+.massinha-copy-status{margin:8px 0;padding:11px 12px;border-radius:10px;background:rgba(25,217,183,.08);border:1px solid rgba(25,217,183,.2);font-size:11px;line-height:1.5;color:var(--text,#f5f5f7)}
+.massinha-copy-warning{font-size:10px;line-height:1.6;color:#e9c77b;margin:10px 0}

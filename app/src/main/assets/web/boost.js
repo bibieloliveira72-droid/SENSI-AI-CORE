@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id), bridge=window.AndroidBridge||null;
 const parse=v=>{try{return JSON.parse(v)}catch(_){return null}};
 const put=(id,v)=>{const e=$(id);if(e)e.textContent=v};
 const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
-let applyQueue=[],applyIndex=-1,massinhaRestarted=false;
+let applyQueue=[],applyIndex=-1;
 const SETTINGS_KEY="sensi_ai_app_settings_v1";
 const defaultSettings={autoOpenFreeFire:true,gameEdition:"freefire"};
 function readSettings(){try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}}catch(_){return {...defaultSettings}}}
@@ -30,7 +30,6 @@ network:["Rede e conexão","Prefira conexão estável, pause downloads iniciados
 touch:["Controles e toque","Ajuste HUD dentro do jogo, teste uma mudança por vez e mantenha acessibilidade e opções de toque nos padrões se não souber a função."],
 display:["Tela e fluidez","Use apenas taxas de atualização oferecidas pelo fabricante. Se houver aquecimento ou instabilidade, volte para uma opção mais equilibrada."],
 animations:["Animações Leves","Reduz as três escalas de animação da interface Android para 0,5x. Isso pode deixar menus e transições mais rápidos visualmente, mas não aumenta o FPS do jogo."],
-massinha:["Gráfico Massinha",""],
 storage:["Armazenamento","Revise arquivos que reconhece e não precisa. Não apague pastas Android/data ou dados de jogos para liberar espaço."],
 background:["Apps em segundo plano","Revise apps recentes e encerre manualmente somente os que não precisa. Não restrinja serviços importantes, música ou acessibilidade."],
 sound:["Áudio","Confira volume, saída de som e Bluetooth. Evite alterações extremas de volume."],
@@ -41,29 +40,21 @@ notifications:["Notificações","Configure Não Perturbe manualmente e permita c
 updates:["Atualizações","Agende downloads e atualizações para um horário conveniente. Não desative atualizações de segurança."],
 accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os que você usa. Não desative serviços essenciais para tentar ganhar desempenho."]
 };
-const recommended={stable:["game","memory","thermal","display","massinha","background","refresh"],cool:["thermal","display","battery","game"],battery:["battery","display","background","updates"],network:["network","updates","notifications"],balanced:["game","memory","thermal","network","display","refresh"]};
+const recommended={stable:["game","memory","thermal","display","background","refresh"],cool:["thermal","display","battery","game"],battery:["battery","display","background","updates"],network:["network","updates","notifications"],balanced:["game","memory","thermal","network","display","refresh"]};
 function selected(){return [...document.querySelectorAll("#boostMultiGrid input:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
-function setSelected(keys){document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.checked=keys.includes(x.value));syncCount();syncMassinhaPanel()}
+function setSelected(keys){document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
 function buildPlan(){const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
 const h=document.createElement("strong");h.textContent="Seu plano de otimização • "+keys.length+" etapa(s)";box.append(h);
 const p=document.createElement("p");p.textContent="Siga na ordem abaixo e marque mentalmente o que já conferiu. Você continua no controle de cada mudança.";box.append(p);
-const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";if(key==="massinha"){
-const version=document.querySelector('input[name="massinhaVersion"]:checked')?.value||"v1";
-const packageName=appSettings.gameEdition==="freefiremax"?"com.dts.freefiremax":"com.dts.freefireth";
-if(!bridge||typeof bridge.applyMassinhaTweak!=="function"){applyStatus("Gráfico Massinha exige APK Android e autorização Shizuku.");$("boostNextTweak").disabled=false;return}
-if(!window.confirm("Aplicar Gráfico Massinha "+version.toUpperCase()+"? O Free Fire será encerrado. Uma partida em andamento será perdida. Continue somente fora de uma partida.")){applyStatus("Aplicação cancelada.");$("boostNextTweak").disabled=false;return}
-try{const result=parse(bridge.applyMassinhaTweak(version,packageName));if(result?.ok){massinhaRestarted=true;applyStatus(result.message+" Abrindo o jogo…");if(!openFreeFire(false))applyStatus(result.message+" Abra o jogo manualmente.");}else applyStatus(result?.message||"Falha ao aplicar.");}catch(_){applyStatus("Falha ao aplicar. Verifique o Shizuku.");}
-$("boostNextTweak").disabled=false;return
-}
-if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
+const ol=document.createElement("ol");keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
 applyStatus(label+": siga as instruções do plano. Este item é uma orientação manual, sem alteração automática.");$("boostNextTweak").disabled=false;return}
 applyStatus(label+": item informativo. Nenhuma tela de Configurações foi aberta e nenhuma alteração automática foi feita.");$("boostNextTweak").disabled=false;return;
 }
 function nextTweak(){applyIndex++;applyNextTweak()}
 function startApplyTweaks(){
 const keys=selected();if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de aplicar.");return}
-applyQueue=keys;applyIndex=-1;massinhaRestarted=false;applyStatus("Iniciando. Ajustes compatíveis serão executados pelo Shizuku.");nextTweak()
+applyQueue=keys;applyIndex=-1;applyStatus("Iniciando. Ajustes compatíveis serão executados pelo Shizuku.");nextTweak()
 }
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
@@ -73,15 +64,30 @@ const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. F
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
 function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado","Autorização confirmada. Os tweaks via Shizuku estão liberados para execução.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
 document.addEventListener("DOMContentLoaded",()=>{
-const massinhaToggle=document.querySelector('#boostMultiGrid input[value="massinha"]');
-const massinhaPanel=$("massinhaVersionPanel");
-function syncMassinhaPanel(){if(massinhaPanel)massinhaPanel.classList.toggle("hidden",!massinhaToggle?.checked)}
-document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.addEventListener("change",()=>{syncCount();syncMassinhaPanel()}));
-document.querySelectorAll('input[name="massinhaVersion"]').forEach(x=>x.addEventListener("change",()=>{if(massinhaToggle?.checked)applyStatus("Variante Gráfico Massinha "+x.value.toUpperCase()+" selecionada para comparação manual.")}));
-syncMassinhaPanel();
+document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.addEventListener("change",syncCount));
+const massinhaPackage=$("massinhaTargetPackage");
+function massinhaCommands(){
+ const pkg=massinhaPackage?.value||"com.dts.freefireth";
+ const v1="settings put global angle_gl_driver_selection_pkgs "+pkg+" && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop "+pkg;
+ const v2="settings put global angle_gl_driver_selection_pkgs "+pkg+" && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled forceNearestFiltering:disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop "+pkg;
+ put("massinhaCommandV1",v1);put("massinhaCommandV2",v2);
+ return {v1,v2};
+}
+async function copyMassinha(version){
+ const commands=massinhaCommands(),value=version==="v2"?commands.v2:commands.v1;
+ try{
+  if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(value);
+  else {const field=document.createElement("textarea");field.value=value;field.setAttribute("readonly","");field.style.position="fixed";field.style.opacity="0";document.body.append(field);field.select();const ok=document.execCommand("copy");field.remove();if(!ok)throw new Error("Cópia indisponível neste aparelho.");}
+  put("massinhaCopyStatus","Comando "+version.toUpperCase()+" copiado. Cole no terminal do Brevent.");
+ }catch(_){put("massinhaCopyStatus","Não foi possível copiar automaticamente. Selecione e copie o comando exibido.");}
+}
 $("boostSelectRecommended")?.addEventListener("click",()=>setSelected(recommended[$("boostUseCase")?.value||"stable"]||recommended.stable));
 $("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides)));
 $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
+$("massinhaTargetPackage")?.addEventListener("change",massinhaCommands);
+$("massinhaCopyV1")?.addEventListener("click",()=>copyMassinha("v1"));
+$("massinhaCopyV2")?.addEventListener("click",()=>copyMassinha("v2"));
+massinhaCommands();
 $("boostBuildPlan")?.addEventListener("click",buildPlan);
 $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
 $("boostNextTweak")?.addEventListener("click",nextTweak);

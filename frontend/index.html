@@ -375,6 +375,29 @@
           <div class="shizuku-actions"><button type="button" id="shizukuCheckBtn" class="btn-secondary">VERIFICAR SHIZUKU</button><button type="button" id="shizukuGrantBtn" class="btn-ghost-sm" disabled>SOLICITAR AUTORIZAÇÃO</button></div>
           <p class="field-help">O Hub apenas consulta se o serviço está ativo e se o SENSI.AI recebeu autorização. Não executa teste de compatibilidade. A autorização é obrigatória para aplicar ou restaurar tweaks que usam Shizuku; as demais funções do app continuam disponíveis.</p>
         </section>
+        <section class="card boost-card massinha-copy-card">
+          <div class="section-head"><div><h2>🎨 Gráficos Massinha</h2><p class="device-summary">Comandos independentes do Shizuku. Copie e cole no Brevent.</p></div><span class="badge">V1 / V2</span></div>
+          <div class="field">
+            <label for="massinhaTargetPackage">Versão do Free Fire</label>
+            <select id="massinhaTargetPackage" class="input-control">
+              <option value="com.dts.freefireth">Free Fire</option>
+              <option value="com.dts.freefiremax">Free Fire MAX</option>
+            </select>
+          </div>
+          <article class="massinha-command-card">
+            <div class="massinha-command-title"><strong>V1 · Gráfico Massinha</strong><small>Perfil base: desativa filtro anisotrópico e ajusta LOD da textura.</small></div>
+            <pre><code id="massinhaCommandV1">settings put global angle_gl_driver_selection_pkgs com.dts.freefireth && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop com.dts.freefireth</code></pre>
+            <button type="button" class="btn-secondary" id="massinhaCopyV1">COPIAR COMANDO V1</button>
+          </article>
+          <article class="massinha-command-card">
+            <div class="massinha-command-title"><strong>V2 · Gráfico Massinha</strong><small>Perfil alternativo: adiciona filtragem nearest ao ajuste da V1.</small></div>
+            <pre><code id="massinhaCommandV2">settings put global angle_gl_driver_selection_pkgs com.dts.freefireth && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled forceNearestFiltering:disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop com.dts.freefireth</code></pre>
+            <button type="button" class="btn-secondary" id="massinhaCopyV2">COPIAR COMANDO V2</button>
+          </article>
+          <p id="massinhaCopyStatus" class="massinha-copy-status" aria-live="polite">Escolha a versão do jogo e copie apenas um perfil.</p>
+          <p class="massinha-copy-warning"><strong>Antes de executar:</strong> salve os valores atuais de <code>angle_gl_driver_selection_pkgs</code>, <code>angle_gl_driver_selection_values</code> e <code>debug.angle.feature_overrides_enabled</code> para poder restaurá-los. O comando altera configurações globais ANGLE e encerra o jogo selecionado para recarregar. Execute fora de uma partida. Compatibilidade e resultado visual variam por aparelho; não há garantia de aumento de FPS.</p>
+          <p class="field-help">No Brevent, cole o comando no terminal e execute por sua conta. O SENSI.AI apenas copia o texto: não aplica o ajuste, não verifica permissões e não precisa de Shizuku para esta seção.</p>
+        </section>
         <section class="card boost-card boost-workspace">
           <div class="section-head"><div><h2>Monte seu Boost</h2><p class="device-summary">Escolha várias otimizações e monte um plano para seu aparelho.</p></div><span class="badge">MULTISELECT</span></div>
           <div class="boost-welcome"><span class="boost-welcome-icon">✦</span><div><strong>Seu aparelho, suas escolhas.</strong><p>Marque o que deseja revisar. O SENSI.AI organiza tudo em uma lista simples, sem aplicar mudanças escondidas.</p></div></div>
@@ -389,7 +412,6 @@
             <label class="boost-option"><input type="checkbox" value="touch"><span class="boost-option-icon">✣</span><span><strong>Controles e toque</strong><small>HUD e sensibilidade</small></span></label>
             <label class="boost-option"><input type="checkbox" value="display"><span class="boost-option-icon">▣</span><span><strong>Tela e fluidez</strong><small>Hz e brilho suportados</small></span></label>
             <label class="boost-option"><input type="checkbox" value="animations"><span class="boost-option-icon">✨</span><span><strong>Animações Leves</strong><small>Reduz animações do Android para 0,5x via Shizuku, com restauração</small></span></label>
-            <label class="boost-option"><input type="checkbox" value="massinha"><span class="boost-option-icon">🎨</span><span><strong>Gráfico Massinha</strong><small>Preset visual leve e compatível, sem comandos ocultos</small></span></label>
             <label class="boost-option"><input type="checkbox" value="storage"><span class="boost-option-icon">▤</span><span><strong>Armazenamento</strong><small>Espaço e arquivos</small></span></label>
             <label class="boost-option"><input type="checkbox" value="background"><span class="boost-option-icon">◷</span><span><strong>Apps em segundo plano</strong><small>Escolhas manuais</small></span></label>
             <label class="boost-option"><input type="checkbox" value="sound"><span class="boost-option-icon">♫</span><span><strong>Áudio</strong><small>Som e dispositivos</small></span></label>
@@ -400,14 +422,6 @@
             <label class="boost-option"><input type="checkbox" value="updates"><span class="boost-option-icon">⇧</span><span><strong>Atualizações</strong><small>Downloads e processos agendados</small></span></label>
             <label class="boost-option"><input type="checkbox" value="accessibility"><span class="boost-option-icon">◎</span><span><strong>Acessibilidade</strong><small>Revisar recursos ativos</small></span></label>
           </div>
-          <section id="massinhaVersionPanel" class="massinha-version-panel hidden" aria-live="polite">
-            <div class="massinha-version-heading"><span>🎨</span><div><strong>Escolha a variante do Gráfico Massinha</strong><small>Selecione o perfil que será aplicado via Shizuku.</small></div></div>
-            <div class="massinha-version-options">
-              <label class="massinha-version-option"><input type="radio" name="massinhaVersion" value="v1" checked><span><strong>V1 · Filtro leve</strong><small>Perfil com desativação do filtro anisotrópico e ajuste de nível de textura.</small></span></label>
-              <label class="massinha-version-option"><input type="radio" name="massinhaVersion" value="v2"><span><strong>V2 · Filtro nearest</strong><small>Inclui também a opção de filtragem nearest. O resultado visual pode variar por aparelho.</small></span></label>
-            </div>
-            <p class="massinha-version-note">Aplica o driver ANGLE ao pacote selecionado, salva os valores anteriores e encerra/reabre o jogo após sua confirmação. Compatibilidade varia por aparelho. Use Restaurar Tweaks para desfazer.</p>
-          </section>
           <div class="boost-apply-actions"><button type="button" id="boostBuildPlan" class="btn-secondary">MONTAR MEU PLANO</button><button type="button" id="boostApplyTweaks" class="btn-primary">APLICAR TWEAKS</button><button type="button" id="boostNextTweak" class="btn-ghost-sm" disabled>PRÓXIMO AJUSTE</button><button type="button" id="boostRestoreTweaks" class="btn-ghost-sm">RESTAURAR TWEAKS</button></div><div id="boostApplyStatus" class="boost-apply-status" aria-live="polite">Selecione os ajustes e toque em Aplicar Tweaks. O Android pedirá sua confirmação em cada tela.</div>
           <div id="boostPlanResult" class="boost-plan-result" aria-live="polite"><strong>Seu plano aparece aqui</strong><p>Selecione uma ou mais opções e toque em “Montar meu plano”.</p></div>
           <p class="boost-safety-note">O botão Aplicar Tweaks abre painéis oficiais do Android para os ajustes compatíveis. Você confirma cada mudança no sistema. Itens de orientação continuam como checklist. Tudo funciona offline; Shizuku não executa comandos privilegiados.</p>
