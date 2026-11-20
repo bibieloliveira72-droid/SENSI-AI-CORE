@@ -61,6 +61,7 @@
 
     savedCountBadge: document.getElementById("savedCountBadge"),
     savedProfilesList: document.getElementById("savedProfilesList"),
+    profileSearch: document.getElementById("profileSearch"),
     historyList: document.getElementById("historyList"),
     clearHistoryBtn: document.getElementById("clearHistoryBtn"),
 
@@ -540,33 +541,31 @@
   function renderSavedAndHistory() {
     const saved = readStorageArray(STORAGE_SAVED);
     const history = readStorageArray(STORAGE_HISTORY);
+    const query = (els.profileSearch?.value || "").trim().toLocaleLowerCase("pt-BR");
+    const matchesQuery = (item) => !query || [item.name, item.config?.marca, item.config?.modelo, item.profileLabel].some((value) => String(value || "").toLocaleLowerCase("pt-BR").includes(query));
+    const filteredSaved = saved.filter(matchesQuery);
+    const filteredHistory = history.filter(matchesQuery);
 
     els.savedCountBadge.textContent = `${saved.length} SALVO${saved.length === 1 ? "" : "S"}`;
     els.savedProfilesList.innerHTML = "";
 
-    if (saved.length === 0) {
+    if (filteredSaved.length === 0) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent =
-        "Nenhum perfil salvo ainda. Gere uma sensibilidade e toque em SALVAR PERFIL.";
+      empty.textContent = saved.length && query ? "Nenhum perfil corresponde à busca." : "Nenhum perfil salvo ainda. Gere uma sensibilidade e toque em SALVAR PERFIL.";
       els.savedProfilesList.appendChild(empty);
     } else {
-      saved.forEach((item) => {
-        els.savedProfilesList.appendChild(buildEntryCard(item, "saved"));
-      });
+      filteredSaved.forEach((item) => els.savedProfilesList.appendChild(buildEntryCard(item, "saved")));
     }
 
     els.historyList.innerHTML = "";
-    if (history.length === 0) {
+    if (filteredHistory.length === 0) {
       const empty = document.createElement("div");
       empty.className = "empty-state";
-      empty.textContent =
-        "O histórico local ainda está vazio. Suas gerações e calibrações aparecerão aqui automaticamente.";
+      empty.textContent = history.length && query ? "Nenhum registro do histórico corresponde à busca." : "O histórico local ainda está vazio. Suas gerações e calibrações aparecerão aqui automaticamente.";
       els.historyList.appendChild(empty);
     } else {
-      history.forEach((item) => {
-        els.historyList.appendChild(buildEntryCard(item, "history"));
-      });
+      filteredHistory.forEach((item) => els.historyList.appendChild(buildEntryCard(item, "history")));
     }
   }
 
@@ -843,6 +842,8 @@
         "Todas as sensibilidades copiadas!"
       );
     });
+
+    els.profileSearch.addEventListener("input", renderSavedAndHistory);
 
     els.clearHistoryBtn.addEventListener("click", () => {
       writeStorageArray(STORAGE_HISTORY, []);
