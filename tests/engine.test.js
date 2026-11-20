@@ -177,3 +177,25 @@ test("Catálogo de aparelhos cobre as oito marcas do seletor, sem modelos duplic
   }
   assert.ok(entries.length >= 250, "Catálogo deve conter pelo menos 250 modelos");
 });
+
+
+test("Autopreenchimento de ficha técnica inclui Galaxy A07 4G e valida dados suportados", () => {
+  const app = fs.readFileSync(path.join(FRONTEND_DIR, "app.js"), "utf8");
+  const match = app.match(/const DEVICE_SPECS = \{([\\s\\S]*?)\\n  \};/);
+  assert.ok(match, "Tabela de especificações dos dispositivos não encontrada");
+  const specs = vm.runInNewContext("({" + match[1] + "})");
+  const a07 = specs["Samsung|Galaxy A07 4G"];
+  assert.ok(a07, "Galaxy A07 4G precisa ter ficha técnica");
+  assert.equal(a07.chipset, "MediaTek Helio G99");
+  assert.equal(a07.category, "intermediario");
+  assert.equal(a07.hz, 90);
+  for (const [device, item] of Object.entries(specs)) {
+    assert.ok(["flagship", "intermediario_plus", "intermediario", "entrada"].includes(item.category), device + " tem categoria inválida");
+    assert.ok([2, 3, 4, 6, 8, 12, 16].includes(item.ram), device + " tem RAM fora das opções");
+    assert.ok([60, 90, 120, 144, 165, 185].includes(item.hz), device + " tem Hz fora das opções");
+    assert.ok(item.chipset && item.chipset.length > 2, device + " sem chipset");
+  }
+  assert.match(app, /applyCatalogDeviceSpecs\(device\)/);
+  assert.match(app, /selectChipValue\(els\.ramChips, els\.ramInput, specs\.ram\)/);
+  assert.match(app, /selectChipValue\(els\.hzChips, els\.hzInput, specs\.hz\)/);
+});
