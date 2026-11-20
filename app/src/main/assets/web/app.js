@@ -678,6 +678,7 @@
       saved: document.getElementById("tab-saved"),
       compare: document.getElementById("tab-compare"),
       boost: document.getElementById("tab-boost"),
+      settings: document.getElementById("tab-settings"),
     },
 
     form: document.getElementById("sensiForm"),
