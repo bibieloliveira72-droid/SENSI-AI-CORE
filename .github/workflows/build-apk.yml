@@ -57,19 +57,46 @@ jobs:
       - name: Prepare debug keystore
         run: keytool -genkeypair -v -keystore "$GITHUB_WORKSPACE/debug.keystore" -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
 
-      - name: Build Debug APK
-        run: gradle :app:assembleDebug --no-daemon --stacktrace
+      - name: Prepare permanent release keystore
+        env:
+          SENSI_KEYSTORE_BASE64: ${{ secrets.SENSI_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$SENSI_KEYSTORE_BASE64" || { echo "Missing SENSI_KEYSTORE_BASE64 repository secret"; exit 1; }
+          printf '%s' "$SENSI_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/sensiai-release.jks"
+          test -s "$RUNNER_TEMP/sensiai-release.jks"
+          echo "KEYSTORE_PATH=$RUNNER_TEMP/sensiai-release.jks" >> "$GITHUB_ENV"
 
-      - name: Verify APK exists
-        run: test -s app/build/outputs/apk/debug/app-debug.apk
+      - name: Build signed Debug and Release APKs
+        env:
+          STORE_PASSWORD: ${{ secrets.SENSI_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.SENSI_KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.SENSI_KEY_ALIAS }}
+        run: |
+          test -n "$STORE_PASSWORD" || { echo "Missing SENSI_STORE_PASSWORD repository secret"; exit 1; }
+          test -n "$KEY_PASSWORD" || { echo "Missing SENSI_KEY_PASSWORD repository secret"; exit 1; }
+          test -n "$KEY_ALIAS" || { echo "Missing SENSI_KEY_ALIAS repository secret"; exit 1; }
+          gradle :app:assembleDebug :app:assembleRelease --no-daemon --stacktrace
+
+      - name: Verify APKs exist
+        run: |
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          test -s app/build/outputs/apk/release/app-release.apk
 
       - name: Calculate APK SHA-256
-        run: sha256sum app/build/outputs/apk/debug/app-debug.apk
+        run: sha256sum app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/release/app-release.apk
 
-      - name: Upload SENSI.AI APK artifact
+      - name: Upload SENSI.AI Debug APK artifact
         uses: actions/upload-artifact@v7
         with:
           name: SENSI-AI-1.2.0-DEBUG
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload SENSI.AI signed Release APK artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: SENSI-AI-1.2.0-RELEASE
+          path: app/build/outputs/apk/release/app-release.apk
           if-no-files-found: error
           retention-days: 14
