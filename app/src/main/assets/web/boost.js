@@ -55,7 +55,10 @@ function applyNextTweak(){
 if(applyIndex<0||applyIndex>=applyQueue.length){
 applyStatus("Todos os itens do plano foram concluídos. Preparando sua sessão…");
 $("boostNextTweak").disabled=true;
-if(appSettings.autoOpenFreeFire){openFreeFire(false)}else{applyStatus("Plano concluído. A abertura automática está desativada nas Configurações.")}
+if(appSettings.autoOpenFreeFire){
+const confirmed=window.confirm("Plano concluído. Deseja abrir o Free Fire agora?\\n\\nO SENSI.AI não encerrará uma partida em andamento. O Gráfico Massinha ainda exige comparação manual nas configurações do jogo.");
+if(confirmed){openFreeFire(false)}else{applyStatus("Plano concluído. Free Fire não foi aberto. Você pode iniciá-lo manualmente quando quiser.")}
+}else{applyStatus("Plano concluído. A abertura automática está desativada nas Configurações.")}
 return}
 const key=applyQueue[applyIndex],label=guides[key]?.[0]||key;
 if(key==="animations"){
