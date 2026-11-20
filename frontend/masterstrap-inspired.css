@@ -213,3 +213,19 @@ html, body {
   .orbit-ring, .orbit-dot { animation: none !important; }
   .tab-btn, .btn-primary, .rl-result-card { transition: none !important; }
 }
+
+/* Canvas de partículas e fios: camada fixa atrás dos controles */
+.touch-trail-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: .86;
+  mix-blend-mode: screen;
+}
+@media (prefers-reduced-motion: reduce) {
+  .touch-trail-canvas { display: none !important; }
+}
