@@ -127,3 +127,24 @@ O motor produz pontos de partida com base nos dados informados. Ele não mede di
 - Reset da base também reinicia o aprendizado daquele aparelho e perfil.
 
 O aprendizado é uma heurística local baseada no feedback selecionado, não um modelo de IA treinado nem uma medição automática da partida. O resultado deve ser validado pelo jogador no modo treinamento.
+
+# SENSI.AI 2.0.0
+
+A versão 2.0 inaugura o motor híbrido local, combinando perfis-base, modo de resposta e personalização manual de cada mira.
+
+## Novidades da 2.0.0
+- Três modos do motor: Controle, Balanceado e Ágil.
+- Combinação do modo selecionado com os quatro perfis de jogo existentes.
+- Controles deslizantes individuais de 0 a 200 para Geral, Red Dot, 2x, 4x, AWM e Olhadinha.
+- Ajuste fino imediato sem modificar as outras miras.
+- Preservação do catálogo de aparelhos, preenchimento técnico, perfis salvos, histórico, comparação e calibração adaptativa.
+- Funcionamento offline mantido, com dados no armazenamento local.
+- Testes automatizados para modos híbridos, limites e independência dos ajustes.
+
+## Arquitetura e limites
+O motor híbrido combina regras determinísticas e controles do jogador. Não é um modelo de aprendizado de máquina treinado, não mede diretamente o toque e não acessa dados internos do Free Fire. RAM, chipset e taxa de atualização são dados informativos, não medidas de sensibilidade. As configurações são pontos de partida para testar e ajustar.
+
+## Versionamento
+- VersionName: 2.0.0
+- VersionCode: 5
+- Branch: release/sensi-ai-2.0.0
