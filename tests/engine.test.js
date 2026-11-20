@@ -174,8 +174,8 @@ test("Banco e interface do catálogo estão sincronizados nos assets Android e n
     const frontend = fs.readFileSync(path.join(FRONTEND_DIR, file), "utf8");
     const android = fs.readFileSync(path.join(ANDROID_WEB_DIR, file), "utf8");
     assert.equal(android, frontend, `${file} precisa estar sincronizado no APK`);
-    assert.equal(/\\bfetch\\s*\\(/.test(frontend), false);
+    assert.equal(/\bfetch\s*\(/.test(frontend), false);
     assert.equal(/XMLHttpRequest/.test(frontend), false);
-    assert.equal(/https?:\\/\\//i.test(frontend), false);
+    assert.equal(/https?:\/\//i.test(frontend), false);
   }
 });
