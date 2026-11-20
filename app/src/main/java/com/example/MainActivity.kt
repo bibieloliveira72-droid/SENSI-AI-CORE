@@ -4,6 +4,15 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.app.ActivityManager
+import android.content.Intent
+import android.content.IntentFilter
+import android.os.BatteryManager
+import android.os.Build
+import android.os.PowerManager
+import android.content.pm.PackageManager
+import org.json.JSONObject
+import rikka.shizuku.Shizuku
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import android.view.ViewGroup
@@ -54,6 +63,49 @@ class MainActivity : ComponentActivity() {
 }
 
 private class AndroidClipboardBridge(private val context: Context) {
+  @JavascriptInterface
+  fun getDeviceSnapshot(): String {
+    val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val memory = ActivityManager.MemoryInfo()
+    manager.getMemoryInfo(memory)
+    val battery = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+    val temp = battery?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1) ?: -1
+    val level = battery?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+    val scale = battery?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+    val percent = if (level >= 0 && scale > 0) (level * 100) / scale else -1
+    val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      (context.getSystemService(Context.POWER_SERVICE) as PowerManager).currentThermalStatus
+    } else -1
+    return JSONObject().apply {
+      put("manufacturer", Build.MANUFACTURER)
+      put("model", Build.MODEL)
+      put("android", Build.VERSION.RELEASE)
+      put("sdk", Build.VERSION.SDK_INT)
+      put("totalMemoryMb", memory.totalMem / (1024 * 1024))
+      put("availableMemoryMb", memory.availMem / (1024 * 1024))
+      put("lowMemory", memory.lowMemory)
+      put("batteryPercent", percent)
+      put("batteryTempC", if (temp >= 0) temp / 10.0 else -1)
+      put("thermalStatus", thermal)
+    }.toString()
+  }
+
+  @JavascriptInterface
+  fun getShizukuStatus(): String {
+    val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
+    val granted = running && try {
+      Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+    } catch (_: Throwable) { false }
+    return JSONObject().put("running", running).put("granted", granted).toString()
+  }
+
+  @JavascriptInterface
+  fun requestShizukuPermission() {
+    if (try { Shizuku.pingBinder() } catch (_: Throwable) { false }) {
+      try { Shizuku.requestPermission(2407) } catch (_: Throwable) { }
+    }
+  }
+
   @JavascriptInterface
   fun copyText(text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
