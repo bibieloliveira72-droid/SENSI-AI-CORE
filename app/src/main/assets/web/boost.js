@@ -29,6 +29,7 @@ battery:["Cuidar da bateria","Use brilho confortável, confira consumo por app e
 network:["Rede e conexão","Prefira conexão estável, pause downloads iniciados por você e evite alternar de rede durante a partida."],
 touch:["Controles e toque","Ajuste HUD dentro do jogo, teste uma mudança por vez e mantenha acessibilidade e opções de toque nos padrões se não souber a função."],
 display:["Tela e fluidez","Use apenas taxas de atualização oferecidas pelo fabricante. Se houver aquecimento ou instabilidade, volte para uma opção mais equilibrada."],
+animations:["Animações Leves","Reduz as três escalas de animação da interface Android para 0,5x. Isso pode deixar menus e transições mais rápidos visualmente, mas não aumenta o FPS do jogo."],
 massinha:["Gráfico Massinha",""],
 storage:["Armazenamento","Revise arquivos que reconhece e não precisa. Não apague pastas Android/data ou dados de jogos para liberar espaço."],
 background:["Apps em segundo plano","Revise apps recentes e encerre manualmente somente os que não precisa. Não restrinja serviços importantes, música ou acessibilidade."],
@@ -57,6 +58,10 @@ $("boostNextTweak").disabled=true;
 if(appSettings.autoOpenFreeFire){openFreeFire(false)}else{applyStatus("Plano concluído. A abertura automática está desativada nas Configurações.")}
 return}
 const key=applyQueue[applyIndex],label=guides[key]?.[0]||key;
+if(key==="animations"){
+if(!bridge||typeof bridge.applySafeTweak!=="function"){applyStatus("Este tweak exige o APK Android com Shizuku autorizado.");$("boostNextTweak").disabled=false;return}
+try{const result=parse(bridge.applySafeTweak("animations"));if(result?.ok){applyStatus("Animações Leves aplicadas: 0,5x. Os valores anteriores foram salvos. Use RESTAURAR TWEAKS para voltar ao estado anterior.");}else{applyStatus(result?.message||"Não foi possível aplicar. Confira Shizuku e tente novamente.");}}catch(_){applyStatus("Falha ao aplicar Animações Leves. Nenhuma confirmação de alteração foi recebida.");}
+$("boostNextTweak").disabled=false;return}
 if(key==="refresh"){refresh();applyStatus(label+": diagnóstico atualizado. Nenhuma configuração foi alterada.");$("boostNextTweak").disabled=false;return}
 if(key==="massinha"){const version=document.querySelector('input[name="massinhaVersion"]:checked')?.value||"v1";applyStatus("Gráfico Massinha "+version.toUpperCase()+" selecionado. Compare o perfil manualmente nas configurações gráficas do Free Fire. Nenhum comando do sistema foi executado.");$("boostNextTweak").disabled=false;return}
 if(key==="report"||key==="game"||key==="memory"||key==="thermal"||key==="touch"){
@@ -91,6 +96,11 @@ $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
 $("boostBuildPlan")?.addEventListener("click",buildPlan);
 $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
 $("boostNextTweak")?.addEventListener("click",nextTweak);
+$("boostRestoreTweaks")?.addEventListener("click",()=>{
+ if(!bridge||typeof bridge.restoreSafeTweak!=="function"){applyStatus("A restauração exige o APK Android com Shizuku.");return}
+ try{const result=parse(bridge.restoreSafeTweak("animations"));applyStatus(result?.ok?result.message:(result?.message||"Não foi possível restaurar os valores."));}
+ catch(_){applyStatus("Falha ao restaurar. Verifique se Shizuku está ativo e autorizado.")}
+});
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
 $("shizukuTestBtn")?.addEventListener("click",()=>{

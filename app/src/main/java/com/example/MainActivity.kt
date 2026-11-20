@@ -4,6 +4,13 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
+import android.os.Parcel
+import android.os.RemoteException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import android.app.ActivityManager
 import android.content.Intent
 import android.content.IntentFilter
@@ -128,6 +135,76 @@ private class AndroidClipboardBridge(private val context: Context) {
       }.toString()
     } catch (error: Throwable) {
       JSONObject().put("ok", false).put("message", "Falha no diagnóstico: ${error.message ?: "erro desconhecido"}").toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun applySafeTweak(key: String): String {
+    if (key != "animations") return JSONObject().put("ok", false).put("message", "Tweak não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Inicie o Shizuku e conceda autorização ao SENSI.AI.").toString()
+    return try {
+      val result = callSafeTweakService(1, null)
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) {
+        val backup = json.optJSONObject("backup")
+        if (backup != null) context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).edit().putString("animations_backup", backup.toString()).apply()
+      }
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Não foi possível executar via Shizuku: ${error.message ?: "erro desconhecido"}").toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun restoreSafeTweak(key: String): String {
+    if (key != "animations") return JSONObject().put("ok", false).put("message", "Restauração não permitida.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val backup = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).getString("animations_backup", null)
+      ?: return JSONObject().put("ok", false).put("message", "Não há backup de Animações Leves neste aparelho.").toString()
+    return try {
+      val result = callSafeTweakService(2, backup)
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).edit().remove("animations_backup").apply()
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao restaurar: ${error.message ?: "erro desconhecido"}").toString()
+    }
+  }
+
+  private fun isShizukuAuthorized(): Boolean {
+    return try { Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED } catch (_: Throwable) { false }
+  }
+
+  private fun callSafeTweakService(code: Int, payload: String?): String {
+    val args = Shizuku.UserServiceArgs(ComponentName(context, SafeTweakUserService::class.java))
+      .daemon(false)
+      .processNameSuffix("safe_tweaks")
+      .tag("sensi_safe_tweaks")
+      .version(1)
+    val latch = CountDownLatch(1)
+    var remote: IBinder? = null
+    val connection = object : ServiceConnection {
+      override fun onServiceConnected(name: ComponentName?, service: IBinder?) { remote = service; latch.countDown() }
+      override fun onServiceDisconnected(name: ComponentName?) { remote = null; latch.countDown() }
+    }
+    try {
+      Shizuku.bindUserService(args, connection)
+      if (!latch.await(10, TimeUnit.SECONDS)) throw IllegalStateException("Tempo esgotado ao conectar ao serviço Shizuku.")
+      val binder = remote ?: throw IllegalStateException("Serviço Shizuku indisponível.")
+      val data = Parcel.obtain()
+      val reply = Parcel.obtain()
+      try {
+        data.writeInterfaceToken(SafeTweakUserService.DESCRIPTOR)
+        if (payload != null) data.writeString(payload)
+        if (!binder.transact(code, data, reply, 0)) throw RemoteException("Operação não suportada pelo serviço.")
+        reply.readException()
+        return reply.readString() ?: JSONObject().put("ok", false).put("message", "Resposta vazia do serviço.").toString()
+      } finally {
+        data.recycle()
+        reply.recycle()
+      }
+    } finally {
+      try { Shizuku.unbindUserService(args, connection, true) } catch (_: Throwable) { }
     }
   }
 
