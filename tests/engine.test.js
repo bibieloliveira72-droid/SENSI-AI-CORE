@@ -167,7 +167,7 @@ test("Catálogo de aparelhos cobre as 18 marcas do seletor, sem modelos duplicad
   const brands = ["Google","OPPO","vivo","Tecno","HONOR","Nothing","Sony","ZTE Nubia","Lenovo Legion","Huawei","Motorola","Xiaomi","Samsung","Apple","ASUS ROG","Realme","Infinix","OnePlus"];
   const counts = new Map(brands.map((brand) => [brand, 0]));
   const seen = new Set();
-  for (const [brand, model] of entries) {
+  for (const { brand, model } of entries) {
     assert.ok(counts.has(brand), "Marca fora do seletor: " + brand);
     assert.ok(model.trim().length > 0);
     const key = brand.toLocaleLowerCase("pt-BR") + "|" + model.toLocaleLowerCase("pt-BR");
