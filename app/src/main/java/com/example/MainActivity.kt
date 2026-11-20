@@ -142,6 +142,7 @@ private class AndroidClipboardBridge(private val context: Context) {
   fun applySafeTweak(key: String): String {
     if (key != "animations") return JSONObject().put("ok", false).put("message", "Tweak não permitido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Inicie o Shizuku e conceda autorização ao SENSI.AI.").toString()
+    if (context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).contains("animations_backup")) return JSONObject().put("ok", false).put("message", "Animações Leves já foi aplicado. Restaure os valores anteriores antes de aplicar novamente, para não sobrescrever o backup.").toString()
     return try {
       val result = callSafeTweakService(1, null)
       val json = JSONObject(result)
