@@ -238,3 +238,16 @@ test("Personalização direta altera somente a mira selecionada", () => {
   assert.equal(engine.setScopeValue(initial, "4x", 999)["4x"], 200);
   assert.throws(() => engine.setScopeValue(initial, "invalid", 100));
 });
+
+
+test("Boost Center inclui diagnóstico e solicitação explícita de permissão Shizuku", () => {
+  const html = fs.readFileSync(path.join(FRONTEND_DIR, "index.html"), "utf8");
+  const boost = fs.readFileSync(path.join(FRONTEND_DIR, "boost.js"), "utf8");
+  const native = fs.readFileSync(path.join(__dirname, "../app/src/main/java/com/example/MainActivity.kt"), "utf8");
+  assert.match(html, /id="tab-boost"/);
+  assert.match(html, /id="shizukuGrantBtn"/);
+  assert.match(boost, /getDeviceSnapshot/);
+  assert.match(boost, /requestShizukuPermission/);
+  assert.match(native, /Shizuku\.requestPermission/);
+  assert.match(native, /getDeviceSnapshot/);
+});
