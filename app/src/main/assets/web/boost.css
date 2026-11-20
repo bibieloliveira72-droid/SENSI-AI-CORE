@@ -28,3 +28,5 @@
 .boost-safety-note{font-size:10px;line-height:1.6;color:var(--muted,#98a5b5);margin-top:13px}
 @media(max-width:360px){.boost-multi-grid{grid-template-columns:1fr}.boost-selection-bar{align-items:flex-start;flex-direction:column}}
 @media(min-width:620px){.boost-multi-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+.boost-apply-status{font-size:11px;line-height:1.55;color:var(--muted,#a7b2c0);margin:10px 2px 0}.boost-apply-status[aria-live]{min-height:18px}#boostApplyBtn{margin-top:10px}#boostApplyBtn:disabled{opacity:.45;cursor:not-allowed}
