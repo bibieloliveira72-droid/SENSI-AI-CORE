@@ -215,34 +215,35 @@
   function recommendDisplaySetup(cfg) {
     const tier = cfg.processador || "intermediario";
     const ram = sanitizeNumber(cfg.ram, 8, 1, 32);
-    let resolution = "960 × 720";
-    let resolutionLabel = "Esticada 4:3 · leve";
+    const options = [
+      { id: "800x600", resolution: "800 × 600", label: "4:3 · ultra leve" },
+      { id: "960x720", resolution: "960 × 720", label: "4:3 · leve" },
+      { id: "1024x768", resolution: "1024 × 768", label: "4:3 · leve nítida" },
+      { id: "1152x864", resolution: "1152 × 864", label: "4:3 · equilibrada" },
+      { id: "1280x960", resolution: "1280 × 960", label: "4:3 · média" },
+      { id: "1360x1020", resolution: "1360 × 1020", label: "4:3 · média nítida" },
+      { id: "1440x1080", resolution: "1440 × 1080", label: "4:3 · alta" },
+      { id: "1600x1200", resolution: "1600 × 1200", label: "4:3 · muito alta" },
+      { id: "1920x1440", resolution: "1920 × 1440", label: "4:3 · máxima" },
+    ];
+    let selectedOptionId = "960x720";
     let dpi = 420;
     let reason = "Perfil 4:3 de menor carga, indicado como ponto de partida para aparelhos de entrada.";
-
     if (tier === "flagship" && ram >= 8) {
-      resolution = "1440 × 1080";
-      resolutionLabel = "Esticada 4:3 · alta";
-      dpi = 560;
+      selectedOptionId = "1440x1080"; dpi = 560;
       reason = "Perfil 4:3 de maior definição para aparelhos de alto desempenho.";
     } else if ((tier === "intermediario_plus" && ram >= 6) || (tier === "flagship" && ram < 8)) {
-      resolution = "1280 × 960";
-      resolutionLabel = "Esticada 4:3 · média";
-      dpi = 500;
+      selectedOptionId = "1280x960"; dpi = 500;
       reason = "Perfil 4:3 intermediário, buscando equilibrar definição e fluidez.";
     } else if (tier === "intermediario" && ram >= 6) {
-      resolution = "1280 × 960";
-      resolutionLabel = "Esticada 4:3 · média";
-      dpi = 480;
+      selectedOptionId = "1280x960"; dpi = 480;
       reason = "Perfil 4:3 intermediário; reduza a carga gráfica se houver perda de fluidez.";
     }
-
+    const selected = options.find((item) => item.id === selectedOptionId) || options[1];
     return {
-      resolution,
-      resolutionLabel,
-      dpi,
-      reason,
-      note: "Prioridade para proporção esticada 4:3, não para a proporção original da tela. A imagem pode ficar deformada ou cortada e nem todo jogo/aparelho aceita essas dimensões. É apenas uma recomendação: não altera o Android automaticamente."
+      resolution: selected.resolution, resolutionLabel: selected.label,
+      selectedOptionId: selected.id, options, dpi, reason,
+      note: "Todas as opções priorizam proporção 4:3 esticada. Resoluções maiores podem exigir mais processamento e memória; a imagem pode deformar ou ser cortada. Nem todo aparelho/jogo aceita esses valores. A recomendação não altera o Android automaticamente."
     };
   }
 

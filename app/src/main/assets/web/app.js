@@ -718,6 +718,7 @@
     sensiGrid: document.getElementById("sensiGrid"),
     recommendedResolution: document.getElementById("recommendedResolution"),
     recommendedResolutionLabel: document.getElementById("recommendedResolutionLabel"),
+    resolutionOptionSelect: document.getElementById("resolutionOptionSelect"),
     recommendedDpi: document.getElementById("recommendedDpi"),
     recommendedSetupReason: document.getElementById("recommendedSetupReason"),
     recommendedSetupNote: document.getElementById("recommendedSetupNote"),
@@ -1102,6 +1103,14 @@
     els.deviceSummary.textContent = `${config.marca} ${config.modelo} • ${profileLabel} • ${config.ram}GB • ${config.hz}Hz • ${config.dpi} DPI atual • Botão ${config.fireButtonSize}%`;
     els.recommendedResolution.textContent = setup.resolution;
     els.recommendedResolutionLabel.textContent = setup.resolutionLabel;
+    els.resolutionOptionSelect.innerHTML = "";
+    (setup.options || []).forEach((option) => {
+      const optionEl = document.createElement("option");
+      optionEl.value = option.id;
+      optionEl.textContent = option.resolution + " · " + option.label;
+      els.resolutionOptionSelect.appendChild(optionEl);
+    });
+    els.resolutionOptionSelect.value = setup.selectedOptionId || "";
     els.recommendedDpi.textContent = String(setup.dpi);
     els.recommendedSetupReason.textContent = setup.reason;
     els.recommendedSetupNote.textContent = setup.note;
@@ -1680,6 +1689,19 @@
     els.resetBaseBtn.addEventListener("click", handleResetBase);
     els.saveProfileBtn.addEventListener("click", handleSaveProfile);
 
+    els.resolutionOptionSelect.addEventListener("change", () => {
+      if (!activeState) return;
+      const setup = activeState.config.recommendedSetup || window.SensiEngine.recommendDisplaySetup(activeState.config);
+      const selected = (setup.options || []).find((option) => option.id === els.resolutionOptionSelect.value);
+      if (!selected) return;
+      setup.selectedOptionId = selected.id;
+      setup.resolution = selected.resolution;
+      setup.resolutionLabel = selected.label;
+      activeState.config.recommendedSetup = setup;
+      els.recommendedResolution.textContent = selected.resolution;
+      els.recommendedResolutionLabel.textContent = selected.label;
+      els.recommendedSetupReason.textContent = "Opção selecionada manualmente. Teste a compatibilidade e a fluidez no seu aparelho.";
+    });
     els.copyResolutionBtn.addEventListener("click", () => {
       if (!activeState) return;
       const setup = activeState.config.recommendedSetup || window.SensiEngine.recommendDisplaySetup(activeState.config);

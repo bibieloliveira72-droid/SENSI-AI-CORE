@@ -216,3 +216,13 @@ O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.ri
 - Perfis sugeridos por capacidade: 960×720 (entrada), 1280×960 (intermediário) e 1440×1080 (alto desempenho).
 - DPI continua adaptado à categoria do hardware.
 - O app informa que a proporção 4:3 pode deformar ou cortar a imagem e não é suportada por todos os aparelhos/jogos. Nenhuma alteração é aplicada automaticamente.
+
+
+## SENSI.AI 2.1.5
+
+- **VersionName:** 2.1.5
+- **VersionCode:** 21
+- Seletor com nove opções de resolução esticada 4:3: 800×600, 960×720, 1024×768, 1152×864, 1280×960, 1360×1020, 1440×1080, 1600×1200 e 1920×1440.
+- A recomendação automática escolhe um ponto de partida conforme a categoria do hardware, mas o usuário pode selecionar outra opção e copiar a resolução escolhida.
+- O DPI sugerido permanece separado da seleção de resolução.
+- Resoluções maiores podem exigir mais recursos; compatibilidade e proporção visual variam por aparelho e jogo. O app não aplica alterações automaticamente.
