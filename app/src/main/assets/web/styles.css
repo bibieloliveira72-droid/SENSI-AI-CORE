@@ -870,3 +870,19 @@ body{background-image:radial-gradient(ellipse at 12% 0%,rgba(85,246,210,.09),tra
 .scope-range{display:block;width:100%;height:22px;margin:10px 0 2px;accent-color:#55f6d2;cursor:pointer}
 .sensi-item .sensi-value-row{margin-bottom:4px}
 .sensi-item .scope-range:focus-visible{outline:2px solid #55f6d2;outline-offset:3px;border-radius:8px}
+
+/* SENSI.AI 2.0 Boost Center */
+.tab-bar{grid-template-columns:repeat(4,minmax(0,1fr))}.tab-btn{padding-left:5px;padding-right:5px;font-size:.78rem}
+.boost-hero{margin-bottom:16px}.boost-card{margin-bottom:14px}
+.boost-device{padding:12px 14px;border:1px solid rgba(85,246,210,.22);border-radius:12px;background:rgba(85,246,210,.045);color:#d9fff6;font-size:.82rem;font-weight:800}
+.boost-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0}
+.boost-stat{min-width:0;padding:13px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-input);display:flex;flex-direction:column;gap:5px}
+.boost-stat span{font-size:.7rem;color:var(--text-secondary);font-weight:700}.boost-stat strong{font-size:1.25rem;font-family:var(--font-mono);color:#8fffe5;overflow-wrap:anywhere}.boost-stat small{font-size:.66rem;color:var(--text-muted)}
+.boost-advice{padding:12px;border-radius:12px;background:rgba(140,123,255,.07);border:1px solid rgba(140,123,255,.2);color:#d9d2ff;font-size:.78rem;line-height:1.55;margin:10px 0}
+.shizuku-status{display:flex;align-items:center;gap:11px;padding:13px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-input);margin-bottom:12px}
+.shizuku-status .status-dot{flex:0 0 9px;background:#f59e0b;box-shadow:none}.shizuku-status.ready .status-dot{background:#22c55e}.shizuku-status.denied .status-dot{background:#ef4444}
+.shizuku-status div{display:flex;flex-direction:column;gap:4px}.shizuku-status strong{font-size:.82rem}.shizuku-status small{font-size:.7rem;color:var(--text-secondary)}
+.shizuku-actions{display:flex;flex-wrap:wrap;gap:8px}.shizuku-actions button{flex:1;min-width:130px}.shizuku-actions button:disabled{opacity:.45;cursor:not-allowed}
+.boost-checklist{display:grid;gap:10px}.boost-checklist article{padding:12px;border:1px solid var(--border-subtle);border-radius:12px;background:rgba(255,255,255,.025)}
+.boost-checklist strong{font-size:.82rem;color:#8fffe5}.boost-checklist p{margin:5px 0 0;color:var(--text-secondary);font-size:.76rem;line-height:1.55}
+@media(max-width:360px){.tab-btn{font-size:.68rem}.tab-icon{display:none}.boost-stat strong{font-size:1.05rem}}
