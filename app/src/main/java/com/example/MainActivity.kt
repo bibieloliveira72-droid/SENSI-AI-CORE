@@ -124,17 +124,18 @@ private class AndroidClipboardBridge(private val context: Context) {
     if (!granted) return JSONObject().put("ok", false).put("message", "Autorização Shizuku ainda não concedida.").toString()
 
     return try {
+      // Transaction 5 performs a harmless identity read inside the actual Shizuku UserService.
+      val remote = JSONObject(callSafeTweakService(5, null))
+      if (!remote.optBoolean("ok")) return remote.toString()
       val metrics = context.resources.displayMetrics
-      JSONObject().apply {
-        put("ok", true)
-        put("identity", "Aplicativo autorizado pelo Shizuku")
-        put("androidRelease", Build.VERSION.RELEASE)
-        put("screenSize", "${metrics.widthPixels}x${metrics.heightPixels}")
-        put("screenDensity", "${metrics.densityDpi} dpi")
-        put("message", "Conexão Shizuku e autorização confirmadas. Diagnóstico local concluído; nenhuma configuração foi modificada.")
-      }.toString()
+      remote.put("identity", "UserService Shizuku conectado")
+        .put("androidRelease", Build.VERSION.RELEASE)
+        .put("screenSize", "${metrics.widthPixels}x${metrics.heightPixels}")
+        .put("screenDensity", "${metrics.densityDpi} dpi")
+        .put("message", "Comunicação real com o UserService confirmada. Identidade remota consultada sem alterar configurações.")
+      remote.toString()
     } catch (error: Throwable) {
-      JSONObject().put("ok", false).put("message", "Falha no diagnóstico: ${error.message ?: "erro desconhecido"}").toString()
+      JSONObject().put("ok", false).put("message", "Falha ao conectar ao UserService Shizuku: ${error.message ?: "erro desconhecido"}").toString()
     }
   }
 

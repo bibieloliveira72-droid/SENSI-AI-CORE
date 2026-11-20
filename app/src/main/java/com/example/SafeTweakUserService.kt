@@ -11,6 +11,7 @@ class SafeTweakUserService : Binder() {
   private const val RESTORE_ANIMATIONS=2
   private const val APPLY_MASSINHA=3
   private const val RESTORE_MASSINHA=4
+  private const val TEST_ACCESS=5
   private val animKeys=listOf("window_animation_scale","transition_animation_scale","animator_duration_scale")
   private const val SETTINGS="/system/bin/settings"
   private const val GETPROP="/system/bin/getprop"
@@ -22,16 +23,23 @@ class SafeTweakUserService : Binder() {
   private val allowed=setOf("com.dts.freefireth","com.dts.freefiremax")
  }
  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
-  if(code !in APPLY_ANIMATIONS..RESTORE_MASSINHA)return super.onTransact(code,data,reply,flags)
+  if(code !in APPLY_ANIMATIONS..TEST_ACCESS)return super.onTransact(code,data,reply,flags)
   data.enforceInterface(DESCRIPTOR)
   val result=try{when(code){
    APPLY_ANIMATIONS->applyAnimations()
    RESTORE_ANIMATIONS->restoreAnimations(data.readString().orEmpty())
    APPLY_MASSINHA->applyMassinha(data.readString().orEmpty())
    RESTORE_MASSINHA->restoreMassinha(data.readString().orEmpty())
+   TEST_ACCESS->testAccess()
    else->JSONObject().put("ok",false)
   }}catch(e:Throwable){JSONObject().put("ok",false).put("message",e.message?:"Shizuku operation failed")}
   reply?.writeNoException();reply?.writeString(result.toString());return true
+ }
+ private fun testAccess():JSONObject {
+  // Read-only probe. This command runs inside the Shizuku-managed process.
+  val result=run("/system/bin/id")
+  if(result.first!=0) return JSONObject().put("ok",false).put("message","UserService iniciou, mas a consulta de identidade falhou: "+result.second)
+  return JSONObject().put("ok",true).put("remoteIdentity",result.second).put("remoteExitCode",result.first)
  }
  private fun applyAnimations():JSONObject {
   val backup=JSONObject()
