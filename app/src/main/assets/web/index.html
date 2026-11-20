@@ -6,13 +6,15 @@
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
   />
-  <meta name="theme-color" content="#070709" />
+  <meta name="theme-color" content="#090D13" />
   <title>SENSI.AI — Motor de Sensibilidade Free Fire</title>
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
   <div class="bg-grid" aria-hidden="true"></div>
   <div class="bg-glow" aria-hidden="true"></div>
+  <div class="ambient-orb ambient-orb-a" aria-hidden="true"></div>
+  <div class="ambient-orb ambient-orb-b" aria-hidden="true"></div>
 
   <div class="app-shell">
     <header class="topbar">
@@ -26,31 +28,32 @@
         </div>
         <div>
           <h1 class="brand-title">SENSI<span>.AI</span></h1>
-          <p class="brand-sub">Motor Próprio • Free Fire</p>
+          <p class="brand-sub">SENSITIVITY LAB <span>•</span> FREE FIRE</p>
         </div>
       </div>
 
       <div class="offline-pill" aria-label="Modo de execução offline local">
         <span class="status-dot online" aria-hidden="true"></span>
-        <span>100% OFFLINE</span>
+        <span>ENGINE LOCAL</span>
       </div>
     </header>
 
     <nav class="tab-bar" role="tablist" aria-label="Navegação principal">
       <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="generator">
-        Gerador
+        <span class="tab-icon">⌁</span><span>Gerador</span>
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="saved">
-        Perfis &amp; Histórico
+        <span class="tab-icon">▤</span><span>Biblioteca</span>
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="compare">
-        Comparar
+        <span class="tab-icon">⇄</span><span>Comparar</span>
       </button>
     </nav>
 
     <main class="main-content">
       <!-- TAB 1: GERADOR + CALIBRAÇÃO -->
       <section id="tab-generator" class="tab-panel" role="tabpanel">
+        <section class="hero-panel"><div class="hero-copy"><span class="eyebrow"><i></i> PERSONAL SETUP / 01</span><h2>Encontre o seu <em>ritmo.</em></h2><p>Monte seu setup, gere uma base e refine cada mira com seus próprios testes.</p><div class="hero-meta"><span>● MOTOR LOCAL</span><span>6 MIRAS</span><span>4 PERFIS</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">S<span>.</span></div><i class="orbit-dot"></i></div></section>
         <form id="sensiForm" class="card form-card" novalidate>
           <div class="section-head">
             <h2>Hardware &amp; Botão de Tiro</h2>
@@ -316,6 +319,7 @@
             <h2>Perfis Salvos</h2>
             <span class="badge" id="savedCountBadge">0 SALVOS</span>
           </div>
+          <label class="search-wrap"><span>⌕</span><input id="profileSearch" class="input-control" type="search" placeholder="Buscar por aparelho ou perfil..." autocomplete="off" /></label>
           <div id="savedProfilesList" class="list-stack"></div>
         </div>
 
