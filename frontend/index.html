@@ -372,8 +372,9 @@
         <section class="card boost-card">
           <div class="section-head"><div><h2>Shizuku Hub</h2><p class="device-summary">Permissão opcional, solicitada somente por ação sua.</p></div><span class="badge">OPCIONAL</span></div>
           <div class="shizuku-status" id="shizukuStatus"><span class="status-dot"></span><div><strong>Verificando compatibilidade…</strong><small>O estado será consultado no Android.</small></div></div>
-          <div class="shizuku-actions"><button type="button" id="shizukuCheckBtn" class="btn-secondary">VERIFICAR SHIZUKU</button><button type="button" id="shizukuGrantBtn" class="btn-ghost-sm" disabled>SOLICITAR AUTORIZAÇÃO</button></div>
-          <p class="field-help">Nesta versão, a integração verifica o serviço e a autorização. Não executa comandos, não altera propriedades do sistema, não desativa proteções e não modifica o Free Fire. A autorização é opcional.</p>
+          <div class="shizuku-actions"><button type="button" id="shizukuCheckBtn" class="btn-secondary">VERIFICAR SHIZUKU</button><button type="button" id="shizukuGrantBtn" class="btn-ghost-sm" disabled>SOLICITAR AUTORIZAÇÃO</button><button type="button" id="shizukuTestBtn" class="btn-primary">TESTAR ACESSO</button></div>
+          <div id="shizukuDiagnostics" class="boost-apply-status" aria-live="polite">O teste consulta identidade do processo, versão do Android, resolução e densidade. Nenhuma configuração será modificada.</div>
+          <p class="field-help">O Shizuku é usado nesta versão para diagnósticos de leitura. Não executa comandos arbitrários, não altera propriedades globais, não encerra o Free Fire e não desativa proteções. A autorização é opcional.</p>
         </section>
         <section class="card boost-card boost-workspace">
           <div class="section-head"><div><h2>Monte seu Boost</h2><p class="device-summary">Escolha várias otimizações e monte um plano para seu aparelho.</p></div><span class="badge">MULTISELECT</span></div>

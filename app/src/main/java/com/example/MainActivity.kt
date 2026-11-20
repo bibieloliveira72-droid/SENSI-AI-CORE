@@ -14,6 +14,8 @@ import android.os.Build
 import android.os.PowerManager
 import android.content.pm.PackageManager
 import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import rikka.shizuku.Shizuku
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
@@ -105,6 +107,36 @@ private class AndroidClipboardBridge(private val context: Context) {
   fun requestShizukuPermission() {
     if (try { Shizuku.pingBinder() } catch (_: Throwable) { false }) {
       try { Shizuku.requestPermission(2407) } catch (_: Throwable) { }
+    }
+  }
+
+
+  @JavascriptInterface
+  fun runShizukuDiagnostics(): String {
+    val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
+    if (!running) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo. Inicie o serviço e tente novamente.").toString()
+    val granted = try { Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED } catch (_: Throwable) { false }
+    if (!granted) return JSONObject().put("ok", false).put("message", "Autorização Shizuku ainda não concedida.").toString()
+
+    fun readOnly(command: Array<String>): String {
+      val process = Shizuku.newProcess(command, null, null)
+      val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
+      val error = process.errorStream.bufferedReader().use { it.readText() }.trim()
+      val exit = process.waitFor()
+      return if (exit == 0) output.take(500) else (error.ifBlank { "Comando indisponível (código $exit)." }).take(300)
+    }
+
+    return try {
+      val result = JSONObject()
+      result.put("ok", true)
+      result.put("identity", readOnly(arrayOf("/system/bin/id")))
+      result.put("androidRelease", readOnly(arrayOf("/system/bin/getprop", "ro.build.version.release")))
+      result.put("screenSize", readOnly(arrayOf("/system/bin/wm", "size")))
+      result.put("screenDensity", readOnly(arrayOf("/system/bin/wm", "density")))
+      result.put("message", "Acesso Shizuku confirmado. Foram executadas somente consultas de leitura.")
+      result.toString()
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha no teste Shizuku: ${error.message ?: "erro desconhecido"}").toString()
     }
   }
 

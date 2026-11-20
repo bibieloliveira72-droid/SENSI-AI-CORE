@@ -86,6 +86,17 @@ $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
 $("boostNextTweak")?.addEventListener("click",nextTweak);
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
+$("shizukuTestBtn")?.addEventListener("click",()=>{
+ const out=$("shizukuDiagnostics");
+ if(out)out.textContent="Executando consultas de leitura pelo Shizuku…";
+ try{
+  if(!bridge||typeof bridge.runShizukuDiagnostics!=="function"){if(out)out.textContent="Disponível somente no APK Android.";return}
+  const result=parse(bridge.runShizukuDiagnostics());
+  if(!result||!result.ok){if(out)out.textContent=result?.message||"Não foi possível testar o acesso. Verifique o serviço e a autorização.";check();return}
+  if(out)out.textContent="Acesso confirmado. Identidade: "+result.identity+" | Android: "+result.androidRelease+" | Tela: "+result.screenSize+" | Densidade: "+result.screenDensity+". "+result.message;
+  shizuku("ready","Shizuku funcional e autorizado","Consultas de leitura executadas com sucesso.",false);
+ }catch(_){if(out)out.textContent="Falha ao executar o diagnóstico. Confira o Shizuku e tente novamente."}
+});
 $("shizukuGrantBtn")?.addEventListener("click",()=>{try{if(bridge&&typeof bridge.requestShizukuPermission==="function"){bridge.requestShizukuPermission();shizuku("","Solicitação enviada","Conclua ou negue no Shizuku e depois toque em verificar.",false)}}catch(_){shizuku("","Falha ao solicitar","O app continua funcionando sem Shizuku.",false)}});
 $("settingAutoOpenFF")?.addEventListener("change",e=>{appSettings.autoOpenFreeFire=e.target.checked;saveSettings();put("settingsStatus",e.target.checked?"O Free Fire será aberto ao concluir os tweaks.":"A abertura automática foi desativada.")});
 $("settingGameEdition")?.addEventListener("change",e=>{appSettings.gameEdition=e.target.value;saveSettings();put("settingsStatus","Versão preferida salva neste aparelho.")});
