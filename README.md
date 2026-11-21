@@ -6,6 +6,12 @@ O SENSI.AI é um aplicativo desenvolvido para gerar configurações personalizad
 
 Seu objetivo é ajudar cada jogador a encontrar configurações adequadas ao seu estilo de jogo por meio de um algoritmo próprio de geração e calibração.
 
+📢 CANAL OFICIAL NO TELEGRAM
+
+Entre no nosso canal para acompanhar novidades, atualizações e avisos do SENSI.AI:
+
+👉 https://t.me/+ICpY9A07EmxhNWI5
+
 🎯 Funcionalidades
 
 - Geração personalizada de sensibilidade.
@@ -32,9 +38,7 @@ Seu objetivo é ajudar cada jogador a encontrar configurações adequadas ao seu
 
 📱 Compatibilidade
 
-O projeto foi planejado para funcionar em dispositivos Android e permitir empacotamento nos formatos:
-
-- APK
+O projeto foi planejado para funcionar em dispositivos Android e permitir empacotamento nos formatos APK.
 
 A interface utiliza tecnologias web, facilitando sua adaptação para diferentes tamanhos de tela.
 
