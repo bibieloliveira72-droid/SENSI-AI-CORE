@@ -130,6 +130,9 @@ const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. F
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
 function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado","Autorização confirmada. Os tweaks via Shizuku estão liberados para execução.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
 document.addEventListener("DOMContentLoaded",()=>{
+const confirmCancel=$("boostConfirmCancel"),confirmAccept=$("boostConfirmAccept"),confirmModal=$("boostConfirmModal");
+confirmCancel?.addEventListener("click",()=>{closeBoostConfirm();applyStatus("Aplicação cancelada. Nenhuma alteração foi feita.");});
+confirmAccept?.addEventListener("click",()=>{const payload=parse(confirmModal?.dataset.pending||"");closeBoostConfirm();if(payload)executeConfirmedTweaks(payload);else applyStatus("Confirmação expirada. Nenhuma alteração foi feita.");});
 document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
 const massinhaPackage=$("massinhaTargetPackage");
 function massinhaCommands(){
