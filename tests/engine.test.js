@@ -142,6 +142,18 @@ test("Ajuste de 1 em 1 ponto e calibração adaptativa respeitam os limites vál
   assert.ok(stuck.values["Red Dot"] > overshoot.values["Red Dot"]);
 });
 
+test("Calibração iterativa trabalha a partir dos valores informados pelo jogador", () => {
+  const engine = loadEngine();
+  const mine = { General: 150, "Red Dot": 145, "2x": 130, "4x": 120, AWM: 80, Olhadinha: 135 };
+  const first = engine.applyAdaptiveCalibration(mine, "overshoot_head", { dpi: 600, fireButtonSize: 52, calibrationSteps: 0, learningState: {} });
+  assert.ok(first.values.General < mine.General);
+  assert.ok(first.values["Red Dot"] < mine["Red Dot"]);
+  assert.equal(first.values.AWM, mine.AWM);
+  const second = engine.applyAdaptiveCalibration(first.values, "stuck_chest", { dpi: 600, fireButtonSize: 52, calibrationSteps: 1, learningState: first.learningState });
+  assert.ok(second.values.General > first.values.General);
+  for (const scope of engine.SCOPE_KEYS) assert.ok(second.values[scope] >= 0 && second.values[scope] <= 200);
+});
+
 test("Comparação calcula diferenças exatas por mira", () => {
   const engine = loadEngine();
   const a = engine.generateSensitivity({

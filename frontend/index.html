@@ -13,6 +13,23 @@
   <link rel="stylesheet" href="./resolution-lab.css" />
   <link rel="stylesheet" href="./masterstrap-inspired.css" />
   <link rel="stylesheet" href="./masterstrap-mobile.css" />
+  <style>
+.calibration-import{margin:12px 0;padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:rgba(255,255,255,.025)}
+.calibration-import-head,.calibration-session{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.calibration-import-head strong{font-size:.88rem}
+.calibration-import-head span,.calibration-helper,.calibration-session span{color:var(--text-secondary);font-size:.76rem}
+.calibration-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.calibration-input-grid label{display:flex;flex-direction:column;gap:5px;color:var(--text-secondary);font-size:.76rem;font-weight:700}
+.calibration-input-grid .input-control{min-height:43px;padding:8px 10px}
+.calibration-start-btn{margin-top:12px;min-height:48px}
+.calibration-helper{margin:8px 0 0;line-height:1.45}
+.calibration-session{margin:12px 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg-input)}
+.calibration-session>div{display:flex;flex-direction:column;gap:3px}
+.calibration-session strong{font-size:.82rem}
+.calibration-finish-btn{min-height:42px;padding:0 12px;font-size:.72rem}
+.cal-btn:disabled,.calibration-finish-btn:disabled{opacity:.42;cursor:not-allowed}
+@media(max-width:360px){.calibration-session{align-items:stretch;flex-direction:column}.calibration-finish-btn{width:100%}}
+</style>
 </head>
 <body>
 
@@ -28,7 +45,7 @@
         </div>
         <div>
           <h1 class="brand-title">SENSI<span>.AI</span></h1>
-          <p class="brand-sub">SENSITIVITY LAB <span>•</span> FREE FIRE <span class="app-version">v3.1.4</span></p>
+          <p class="brand-sub">SENSITIVITY LAB <span>•</span> FREE FIRE <span class="app-version">v3.1.9</span></p>
         </div>
       </div>
 
@@ -260,37 +277,37 @@
 
 
 
-          <!-- Calibração Interativa -->
+          <!-- Calibração Inteligente v3.1.9 -->
           <div class="calibration-panel">
             <div class="calibration-head">
-              <div>
-                <h3>Calibração Interativa (Teste no Treinamento)</h3>
-                <p>Informe como a mira se comportou para o algoritmo adaptativo refinar os valores:</p>
+              <div><h3>Calibração Inteligente</h3><p>Digite sua sensibilidade atual. O motor ajusta os valores em etapas conforme o resultado dos seus testes.</p></div>
+              <button type="button" id="resetBaseBtn" class="btn-ghost-sm">Voltar ao início</button>
+            </div>
+            <div class="calibration-import">
+              <div class="calibration-import-head"><strong>Minha sensibilidade atual</strong><span>Valores de 0 a 200</span></div>
+              <div class="calibration-input-grid">
+                <label>Geral<input class="input-control mono-input" id="calInputGeneral" type="number" min="0" max="200" inputmode="numeric" placeholder="Geral" /></label>
+                <label>Red Dot<input class="input-control mono-input" id="calInputRedDot" type="number" min="0" max="200" inputmode="numeric" placeholder="Red Dot" /></label>
+                <label>Mira 2x<input class="input-control mono-input" id="calInput2x" type="number" min="0" max="200" inputmode="numeric" placeholder="2x" /></label>
+                <label>Mira 4x<input class="input-control mono-input" id="calInput4x" type="number" min="0" max="200" inputmode="numeric" placeholder="4x" /></label>
+                <label>AWM<input class="input-control mono-input" id="calInputAWM" type="number" min="0" max="200" inputmode="numeric" placeholder="AWM" /></label>
+                <label>Olhadinha<input class="input-control mono-input" id="calInputOlhadinha" type="number" min="0" max="200" inputmode="numeric" placeholder="Olhadinha" /></label>
               </div>
-              <button type="button" id="resetBaseBtn" class="btn-ghost-sm">Resetar Base</button>
+              <button type="button" class="btn-primary calibration-start-btn" id="startCalibrationBtn">USAR MINHA SENSI E CALIBRAR</button>
+              <p class="calibration-helper">Preencha os seis campos. Teste no modo treinamento e selecione o comportamento observado para o motor ajustar sua configuração.</p>
             </div>
-
-            <div class="calibration-actions" id="calibrationButtons">
-              <button type="button" class="cal-btn" data-feedback="overshoot_head">
-                Passando da cabeça
-              </button>
-              <button type="button" class="cal-btn" data-feedback="stuck_chest">
-                Travando no peito
-              </button>
-              <button type="button" class="cal-btn" data-feedback="scope_shake">
-                2x / 4x tremendo
-              </button>
-              <button type="button" class="cal-btn" data-feedback="slow_turn">
-                Giro / gelo lento
-              </button>
-              <button type="button" class="cal-btn" data-feedback="awm_slow">
-                AWM lenta
-              </button>
-              <button type="button" class="cal-btn" data-feedback="awm_fast">
-                AWM rápida
-              </button>
+            <div class="calibration-session" aria-live="polite">
+              <div><strong id="calibrationStatus">Aguardando sua sensibilidade</strong><span id="calibrationStepCount">Nenhum ajuste realizado</span></div>
+              <button type="button" class="btn-secondary calibration-finish-btn" id="finishCalibrationBtn" disabled>ESTOU SATISFEITO</button>
             </div>
-
+            <div class="calibration-actions" id="calibrationButtons" aria-label="Como a mira se comportou">
+              <button type="button" class="cal-btn" data-feedback="overshoot_head" disabled>Passando da cabeça</button>
+              <button type="button" class="cal-btn" data-feedback="stuck_chest" disabled>Travando no peito</button>
+              <button type="button" class="cal-btn" data-feedback="scope_shake" disabled>2x / 4x tremendo</button>
+              <button type="button" class="cal-btn" data-feedback="slow_turn" disabled>Giro / gelo lento</button>
+              <button type="button" class="cal-btn" data-feedback="awm_slow" disabled>AWM lenta</button>
+              <button type="button" class="cal-btn" data-feedback="awm_fast" disabled>AWM rápida</button>
+            </div>
             <div id="calibrationFeedbackBox" class="cal-feedback hidden"></div>
           </div>
 

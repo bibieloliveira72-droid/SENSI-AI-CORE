@@ -730,6 +730,18 @@
     calibrationButtons: document.getElementById("calibrationButtons"),
     calibrationFeedbackBox: document.getElementById("calibrationFeedbackBox"),
     resetBaseBtn: document.getElementById("resetBaseBtn"),
+    calibrationInputs: {
+      General: document.getElementById("calInputGeneral"),
+      "Red Dot": document.getElementById("calInputRedDot"),
+      "2x": document.getElementById("calInput2x"),
+      "4x": document.getElementById("calInput4x"),
+      AWM: document.getElementById("calInputAWM"),
+      Olhadinha: document.getElementById("calInputOlhadinha"),
+    },
+    startCalibrationBtn: document.getElementById("startCalibrationBtn"),
+    finishCalibrationBtn: document.getElementById("finishCalibrationBtn"),
+    calibrationStatus: document.getElementById("calibrationStatus"),
+    calibrationStepCount: document.getElementById("calibrationStepCount"),
 
     saveProfileNameInput: document.getElementById("saveProfileNameInput"),
     saveProfileBtn: document.getElementById("saveProfileBtn"),
@@ -1257,14 +1269,72 @@
       disclaimer: generated.disclaimer,
       calibrationSteps: 0,
       learningState: readCalibrationLearning(generated.config, generated.profileLabel),
+      calibrationFinished: false,
     };
 
+    els.calibrationButtons.querySelectorAll("button[data-feedback]").forEach((button) => { button.disabled = false; });
+    els.finishCalibrationBtn.disabled = false;
+    els.calibrationStatus.textContent = "Sensibilidade gerada. Teste e refine quando quiser.";
+    els.calibrationStepCount.textContent = "Nenhum ajuste realizado";
     els.calibrationFeedbackBox.classList.add("hidden");
     els.calibrationFeedbackBox.textContent = "";
 
     recordHistoryEntry(activeState);
     renderActiveResults();
     els.resultsSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function handleStartCalibration() {
+    clearError();
+    const raw = collectFormInput();
+    if (!raw.marca || raw.marca.length < 2 || !raw.modelo) {
+      showError("Selecione a marca e o modelo do aparelho antes de iniciar a calibração.");
+      return;
+    }
+    if (!Number.isInteger(raw.dpi) || raw.dpi < 200 || raw.dpi > 1600) {
+      showError("A DPI deve estar entre 200 e 1600.");
+      return;
+    }
+    const values = {};
+    for (const [scope, input] of Object.entries(els.calibrationInputs)) {
+      const value = input.value.trim();
+      if (value === "" || !Number.isInteger(Number(value)) || Number(value) < 0 || Number(value) > 200) {
+        showError("Preencha os seis valores com números inteiros entre 0 e 200.");
+        input.focus();
+        return;
+      }
+      values[scope] = Number(value);
+    }
+    const generated = window.SensiEngine.generateSensitivity(raw);
+    const config = { ...generated.config, recommendedSetup: generated.recommendations };
+    activeState = {
+      config, profileLabel: generated.profileLabel,
+      engineMode: generated.engineMode || raw.engineMode || "balanceado",
+      values: { ...values }, baseValues: { ...values },
+      notes: generated.notes, disclaimer: generated.disclaimer,
+      calibrationSteps: 0, learningState: {}, calibrationFinished: false,
+    };
+    saveCalibrationLearning(config, generated.profileLabel, {});
+    els.calibrationButtons.querySelectorAll("button[data-feedback]").forEach((button) => { button.disabled = false; });
+    els.finishCalibrationBtn.disabled = false;
+    els.calibrationStatus.textContent = "Sua sensibilidade foi carregada. Faça um teste no treinamento.";
+    els.calibrationStepCount.textContent = "0 ajustes realizados";
+    els.calibrationFeedbackBox.classList.add("hidden");
+    recordHistoryEntry(activeState);
+    renderActiveResults();
+    els.resultsSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    showToast("Sua sensibilidade está pronta para calibrar.");
+  }
+
+  function handleFinishCalibration() {
+    if (!activeState) return;
+    activeState.calibrationFinished = true;
+    els.calibrationButtons.querySelectorAll("button[data-feedback]").forEach((button) => { button.disabled = true; });
+    els.finishCalibrationBtn.disabled = true;
+    els.calibrationStatus.textContent = "Calibração finalizada. Sensibilidade marcada como satisfatória.";
+    els.calibrationStepCount.textContent = activeState.calibrationSteps + " ajustes realizados";
+    recordHistoryEntry(activeState);
+    showToast("Calibração finalizada. Você pode salvar seu perfil.");
   }
 
   function handleSingleAdjust(scopeKey, delta) {
@@ -1278,7 +1348,7 @@
   }
 
   function handleCalibrationClick(feedbackType) {
-    if (!activeState) return;
+    if (!activeState || activeState.calibrationFinished) return;
     const prevValues = { ...activeState.values };
     const result = window.SensiEngine.applyAdaptiveCalibration(
       activeState.values,
@@ -1294,6 +1364,8 @@
     activeState.values = result.values;
     activeState.learningState = result.learningState;
     activeState.calibrationSteps += 1;
+    els.calibrationStatus.textContent = "Ajuste aplicado. Teste novamente e escolha outro feedback se precisar.";
+    els.calibrationStepCount.textContent = activeState.calibrationSteps + (activeState.calibrationSteps === 1 ? " ajuste realizado" : " ajustes realizados");
     saveCalibrationLearning(activeState.config, activeState.profileLabel, activeState.learningState);
 
     const changedParts = Object.entries(result.deltas)
@@ -1330,6 +1402,11 @@
     activeState.values = { ...activeState.baseValues };
     activeState.calibrationSteps = 0;
     activeState.learningState = {};
+    activeState.calibrationFinished = false;
+    els.calibrationButtons.querySelectorAll("button[data-feedback]").forEach((button) => { button.disabled = false; });
+    els.finishCalibrationBtn.disabled = false;
+    els.calibrationStatus.textContent = "Valores iniciais restaurados. Faça um novo teste.";
+    els.calibrationStepCount.textContent = "0 ajustes realizados";
     saveCalibrationLearning(activeState.config, activeState.profileLabel, {});
     els.calibrationFeedbackBox.classList.add("hidden");
     renderActiveResults();
@@ -1680,6 +1757,9 @@
     });
 
     els.form.addEventListener("submit", handleGenerateSubmit);
+
+    els.startCalibrationBtn.addEventListener("click", handleStartCalibration);
+    els.finishCalibrationBtn.addEventListener("click", handleFinishCalibration);
 
     els.calibrationButtons.addEventListener("click", (event) => {
       const btn = event.target.closest("button[data-feedback]");
