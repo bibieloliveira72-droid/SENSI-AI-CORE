@@ -103,3 +103,5 @@
 .boost-confirm-panel p{margin:0;color:#b7c2ce;font-size:12px;line-height:1.65;white-space:pre-line}
 .boost-confirm-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
 .boost-confirm-actions button{flex:1 1 140px;min-height:42px}
+
+.boost-profile-apply{display:grid;gap:8px;margin:12px 0 2px}.boost-profile-apply button{width:100%;min-height:46px}.boost-profile-apply small{font-size:10px;line-height:1.5;color:var(--muted,#98a5b5);text-align:center}

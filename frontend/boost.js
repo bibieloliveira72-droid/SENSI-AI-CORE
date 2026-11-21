@@ -41,7 +41,8 @@ notifications:["Notificações","Configure Não Perturbe manualmente e permita c
 updates:["Atualizações","Agende downloads e atualizações para um horário conveniente. Não desative atualizações de segurança."],
 accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os que você usa. Não desative serviços essenciais para tentar ganhar desempenho."]
 };
-const recommended={stable:["game","memory","thermal","display","background","refresh"],cool:["thermal","display","battery","game"],battery:["battery","display","background","updates"],network:["network","updates","notifications"],balanced:["game","memory","thermal","network","display","refresh"]};
+const recommended={stable:["animations","game","memory","thermal","display","background","refresh"],cool:["animations","thermal","display","battery","game"],battery:["animations","battery","display","background","updates"],network:["animations","network","updates","notifications"],balanced:["animations","game","memory","thermal","network","display","refresh"]};
+let activeBoostProfile="stable";
 function selected(){return [...document.querySelectorAll("#tab-boost input[type=checkbox]:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
 function setSelected(keys){document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
@@ -151,13 +152,26 @@ async function copyMassinha(version){
  }catch(_){put("massinhaCopyStatus","Não foi possível copiar automaticamente. Selecione e copie o comando exibido.");}
 }
 $("boostSelectRecommended")?.addEventListener("click",()=>setSelected(recommended[$("boostUseCase")?.value||"stable"]||recommended.stable));
-document.querySelectorAll("[data-boost-profile]").forEach(button=>button.addEventListener("click",()=>{
- const profile=button.getAttribute("data-boost-profile")||"stable",target=({stable:"stable",cool:"cool",battery:"battery",balanced:"balanced"})[profile]||"stable";
+function selectBoostProfile(profile){
+ const target=Object.prototype.hasOwnProperty.call(recommended,profile)?profile:"stable";
+ activeBoostProfile=target;
  if($("boostUseCase"))$("boostUseCase").value=target;
- setSelected(recommended[target]||recommended.stable);
- document.querySelectorAll("[data-boost-profile]").forEach(x=>x.classList.toggle("active",x===button));
- put("boostApplyStatus","Perfil "+(button.querySelector("strong")?.textContent||target)+" selecionado. Revise a lista e aplique apenas os ajustes executáveis que desejar.");
+ setSelected(recommended[target]);
+ document.querySelectorAll("[data-boost-profile]").forEach(x=>x.classList.toggle("active",x.getAttribute("data-boost-profile")===target));
+ put("boostApplyStatus","Perfil "+target+" selecionado. O plano inclui Animações Leves, que exige Shizuku e pode ser restaurado, além das etapas manuais.");
+}
+function applySelectedBoostProfile(){
+ const profile=$("boostUseCase")?.value||activeBoostProfile||"stable";
+ selectBoostProfile(profile);
+ buildPlan();
+ try{refresh()}catch(_){put("boostAdvice","Diagnóstico indisponível nesta execução. O plano ainda pode ser consultado.");}
+ startApplyTweaks();
+}
+document.querySelectorAll("[data-boost-profile]").forEach(button=>button.addEventListener("click",()=>{
+ selectBoostProfile(button.getAttribute("data-boost-profile")||"stable");
 }));
+$("boostUseCase")?.addEventListener("change",e=>selectBoostProfile(e.target.value));
+$("boostApplyProfileBtn")?.addEventListener("click",applySelectedBoostProfile);
 $("boostLaunchGame")?.addEventListener("click",()=>openFreeFire(true));
 $("boostOpenDisplaySettings")?.addEventListener("click",()=>{const ok=bridge&&typeof bridge.openTweakSettings==="function"&&bridge.openTweakSettings("display");put("boostApplyStatus",ok?"Configurações de tela abertas. As alterações são feitas por você no Android.":"Esse painel está disponível somente no APK Android.")});
 $("boostOpenBatterySettings")?.addEventListener("click",()=>{const ok=bridge&&typeof bridge.openTweakSettings==="function"&&bridge.openTweakSettings("battery");put("boostApplyStatus",ok?"Configurações de bateria abertas.":"Esse painel está disponível somente no APK Android.")});

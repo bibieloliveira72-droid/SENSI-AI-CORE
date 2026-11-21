@@ -30,7 +30,7 @@ jobs:
           package-manager-cache: false
 
       - name: Run SENSI.AI offline engine tests
-        run: node --test tests/engine.test.js tests/resolution-lab.test.js
+        run: node --test tests/engine.test.js tests/resolution-lab.test.js tests/boost-profiles.test.js
 
       - name: Verify frontend and Android assets are synchronized
         run: |
