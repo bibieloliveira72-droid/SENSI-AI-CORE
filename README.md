@@ -92,7 +92,7 @@ Plataforma: Android
 
 - Nome do aplicativo: SENSI.AI
 - Versão: 1.0.0
-- Application ID Android: `com.sensiai.freefire`
+- Application ID Android: `com.aistudio.mockcraft.kvwqnz`
 - Motor: algoritmo local determinístico em JavaScript
 - Conexão com serviços externos: não necessária para gerar e calibrar configurações
 
