@@ -9,14 +9,14 @@ plugins {
 
 android {
   namespace = "com.example"
-  compileSdk { version = release(36) { minorApiLevel = 1 } }
+  compileSdk = 37
 
   defaultConfig {
     applicationId = "com.aistudio.mockcraft.kvwqnz"
     minSdk = 24
-    targetSdk = 36
-    versionCode = 26
-    versionName = "3.0.0"
+    targetSdk = 37
+    versionCode = 27
+    versionName = "3.1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
