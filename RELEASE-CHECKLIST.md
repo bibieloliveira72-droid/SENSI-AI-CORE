@@ -26,3 +26,11 @@ O workflow em `.github/workflows/build-apk.yml` executa os testes JavaScript e g
 
 ## Limites conhecidos
 O algoritmo produz sugestões iniciais com base nos dados informados. Não mede diretamente o toque, não lê dados internos do Free Fire e não garante headshots ou desempenho competitivo. Os resultados precisam ser ajustados pelo jogador.
+
+## Android 17 (API 37)
+- [ ] Build with `compileSdk = 37` and `targetSdk = 37`.
+- [ ] Confirm the CI runner installs `platforms;android-37` from the preview channel (`--channel=3`).
+- [ ] Run the full Boost flow on an Android 17 device or emulator.
+- [ ] Verify Shizuku authorization, allowed tweaks, and backup restoration.
+- [ ] Confirm diagnostic readings are labeled accurately and unavailable metrics are never fabricated.
+- [ ] Recheck frontend/Android asset synchronization before release.

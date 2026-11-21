@@ -1,0 +1,215 @@
+(() => {
+"use strict";
+const $=id=>document.getElementById(id), bridge=window.AndroidBridge||null;
+const parse=v=>{try{return JSON.parse(v)}catch(_){return null}};
+const put=(id,v)=>{const e=$(id);if(e)e.textContent=v};
+const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
+
+const SETTINGS_KEY="sensi_ai_app_settings_v1";
+const defaultSettings={autoOpenFreeFire:true,gameEdition:"freefire"};
+function readSettings(){try{return {...defaultSettings,...JSON.parse(localStorage.getItem(SETTINGS_KEY)||"{}")}}catch(_){return {...defaultSettings}}}
+let appSettings=readSettings();
+function saveSettings(){try{localStorage.setItem(SETTINGS_KEY,JSON.stringify(appSettings))}catch(_){}}
+function syncSettingsUI(){
+const auto=$("settingAutoOpenFF"),edition=$("settingGameEdition");
+if(auto)auto.checked=!!appSettings.autoOpenFreeFire;
+if(edition)edition.value=appSettings.gameEdition;
+}
+function openFreeFire(manual){
+if(!bridge||typeof bridge.openFreeFire!=="function"){put("settingsStatus","A abertura automática está disponível apenas no APK Android.");if(manual)applyStatus("Instale e abra o SENSI.AI pelo APK para iniciar o Free Fire.");return false}
+let opened=false;try{opened=bridge.openFreeFire(appSettings.gameEdition)==="opened"}catch(_){}
+const message=opened?"Free Fire iniciado. Boa partida!": "Não encontrei essa versão do Free Fire instalada. Confira a versão escolhida nas Configurações.";
+put("settingsStatus",message);if(!manual)applyStatus(message);return opened
+}
+const guides={
+game:["Preparar jogo","Escolha gráficos que o aparelho mantenha estáveis, teste uma partida curta e desligue apenas sobreposições que você não usa."],
+massinha:["Gráficos Massinha","Perfil ANGLE V1 ou V2 para Free Fire. O jogo selecionado será encerrado para recarregar; faça backup e use apenas se aceitar essa alteração."],
+memory:["Revisar memória","Atualize o diagnóstico. Feche manualmente apenas apps que você abriu e não está usando. Mantenha música e comunicação se precisar delas."],
+thermal:["Controle térmico","Observe temperatura e alertas. Se aquecer, pause e deixe esfriar naturalmente. Evite jogar carregando ou sob sol direto."],
+battery:["Cuidar da bateria","Use brilho confortável, confira consumo por app e escolha economia de bateria apenas quando aceitar possíveis limites de desempenho."],
+network:["Rede e conexão","Prefira conexão estável, pause downloads iniciados por você e evite alternar de rede durante a partida."],
+touch:["Controles e toque","Ajuste HUD dentro do jogo, teste uma mudança por vez e mantenha acessibilidade e opções de toque nos padrões se não souber a função."],
+display:["Tela e fluidez","Use apenas taxas de atualização oferecidas pelo fabricante. Se houver aquecimento ou instabilidade, volte para uma opção mais equilibrada."],
+animations:["Animações Leves","Reduz as três escalas de animação da interface Android para 0,5x. Isso pode deixar menus e transições mais rápidos visualmente, mas não aumenta o FPS do jogo."],
+storage:["Armazenamento","Revise arquivos que reconhece e não precisa. Não apague pastas Android/data ou dados de jogos para liberar espaço."],
+background:["Apps em segundo plano","Revise apps recentes e encerre manualmente somente os que não precisa. Não restrinja serviços importantes, música ou acessibilidade."],
+sound:["Áudio","Confira volume, saída de som e Bluetooth. Evite alterações extremas de volume."],
+privacy:["Privacidade","Revise permissões e acessos especiais. Mantenha as proteções e atualizações de segurança ativas."],
+report:["Relatório do sistema","Confira memória disponível, bateria, temperatura e estabilidade em uma sessão curta. Compare os resultados depois."],
+refresh:["Diagnóstico atualizado","Toque em Atualizar diagnóstico acima para ler os dados que o Android disponibiliza. Leituras não equivalem a benchmark."],
+notifications:["Notificações","Configure Não Perturbe manualmente e permita chamadas ou alertas importantes. Reverta quando terminar de jogar."],
+updates:["Atualizações","Agende downloads e atualizações para um horário conveniente. Não desative atualizações de segurança."],
+accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os que você usa. Não desative serviços essenciais para tentar ganhar desempenho."]
+};
+const recommended={stable:["animations","game","memory","thermal","display","background","refresh"],cool:["animations","thermal","display","battery","game"],battery:["animations","battery","display","background","updates"],network:["animations","network","updates","notifications"],balanced:["animations","game","memory","thermal","network","display","refresh"]};
+let activeBoostProfile="stable";
+function selected(){return [...document.querySelectorAll("#tab-boost input[type=checkbox]:checked")].map(x=>x.value)}
+function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
+function setSelected(keys){document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
+function buildPlan(){
+ const keys=selected(),box=$("boostPlanResult");
+ if(!box)return;
+ box.replaceChildren();
+ if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
+ const h=document.createElement("strong");h.textContent="Seu plano de otimização • "+keys.length+" etapa(s)";box.append(h);
+ const p=document.createElement("p");p.textContent="Confira cada etapa manualmente. O plano não executa ações escondidas.";box.append(p);
+ const ol=document.createElement("ol");
+ keys.forEach(key=>{const li=document.createElement("li"),b=document.createElement("b"),span=document.createElement("span");b.textContent=guides[key][0]+": ";span.textContent=guides[key][1];li.append(b,span);ol.append(li)});
+ box.append(ol);
+}
+function startApplyTweaks(){
+ const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha");
+ if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
+ if(!doAnimations&&!doMassinha){applyStatus("Sua seleção contém orientações e checklists. Nenhum ajuste executável foi marcado.");return}
+ if(!bridge||typeof bridge.getShizukuStatus!=="function"){applyStatus("A execução de ajustes exige o APK Android com Shizuku.");return}
+ const auth=parse(bridge.getShizukuStatus());
+ if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
+ const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
+ const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"", "Os outros itens selecionados são apenas orientações. Confirmar?"].filter(Boolean).join("\n\n");
+ const confirmBox=$("boostConfirmModal"),confirmText=$("boostConfirmMessage");
+ if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
+ confirmText.textContent=warning;
+ confirmBox.classList.remove("hidden");
+ confirmBox.setAttribute("aria-hidden","false");
+ confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,pkg,version});
+ return;
+}
+function executeConfirmedTweaks(payload){
+ const {keys,doAnimations,doMassinha,pkg,version}=payload;
+ const messages=[];
+ try{
+  if(doAnimations){if(typeof bridge.applySafeTweak!=="function")messages.push("Animações Leves: função indisponível nesta versão.");else{const r=parse(bridge.applySafeTweak("animations"));messages.push(r?.message||(r?.ok?"Animações Leves aplicadas.":"Falha ao aplicar Animações Leves."));}}
+  if(doMassinha){if(typeof bridge.applyMassinhaTweak!=="function")messages.push("Gráficos Massinha: função indisponível nesta versão.");else{const r=parse(bridge.applyMassinhaTweak(version,pkg));messages.push(r?.message||(r?.ok?"Gráficos Massinha aplicados.":"Falha ao aplicar Gráficos Massinha."));}}
+  const guidance=keys.filter(k=>k!=="animations"&&k!=="massinha");if(guidance.length)messages.push(guidance.length+" item(ns) permanecem como checklist/orientação, sem alteração automática.");
+  applyStatus(messages.join(" "));
+ }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
+}
+function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
+function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
+
+let lastDeviceSnapshot=null;
+function updateHeatShield(d){
+ const state=$("heatShieldState"),meter=$("heatShieldMeter");
+ if(!state||!meter)return;
+ if(!d){
+  state.className="heat-shield-state level-unknown";
+  put("heatShieldStatus","SEM LEITURA");
+  put("heatShieldThermal","Abra o APK e atualize o diagnóstico");
+  put("heatShieldTemp","N/D");
+  put("heatShieldAndroidStatus","N/D");
+  put("heatShieldMemory","N/D");
+  put("heatShieldAdvice","A leitura térmica nativa não está disponível neste modo. Nenhuma configuração foi alterada.");
+  meter.style.width="0%";
+  meter.parentElement?.setAttribute("aria-valuenow","0");
+  return;
+ }
+ const temp=Number(d.batteryTempC),thermalStatus=Number(d.thermalStatus),memory=Number(d.availableMemoryMb);
+ const hasTemp=Number.isFinite(temp)&&temp>=0,hasThermal=Number.isFinite(thermalStatus)&&thermalStatus>=0;
+ const tempScore=hasTemp?Math.max(0,Math.min(100,((temp-30)/18)*100)):0;
+ const thermalScore=hasThermal?(thermalStatus/6)*100:0;
+ const score=Math.round(Math.max(tempScore,thermalScore));
+ let level="normal",label="NORMAL",advice="Sem alerta térmico relevante nos dados atuais. Faça uma partida curta e compare a estabilidade antes de mudar outras configurações.";
+ if(!hasTemp&&!hasThermal){level="unknown";label="SEM LEITURA";advice="O Android não disponibilizou dados térmicos nesta consulta. Tente atualizar novamente.";}
+ else if((hasThermal&&thermalStatus>=4)||(hasTemp&&temp>=45)){level="high";label="ALTO";advice="O aparelho pode estar sob carga térmica elevada. Faça uma pausa e deixe esfriar naturalmente. Evite insistir em FPS ou Hz máximos.";}
+ else if((hasThermal&&thermalStatus>=3)||(hasTemp&&temp>=42)){level="attention";label="ATENÇÃO";advice="Acompanhe a temperatura. Se houver quedas de quadros, reduza um nível os gráficos ou o FPS dentro do jogo e confira novamente.";}
+ else if((hasThermal&&thermalStatus>=2)||(hasTemp&&temp>=40)){level="observe";label="OBSERVAR";advice="Há um sinal leve de aquecimento. Mantenha uma configuração estável e observe a tendência durante a partida.";}
+ state.className="heat-shield-state level-"+level;
+ put("heatShieldStatus",label);
+ put("heatShieldThermal",hasThermal?"Android: "+thermal(thermalStatus):"Estado térmico Android indisponível");
+ put("heatShieldTemp",hasTemp?temp.toFixed(1)+" °C":"N/D");
+ put("heatShieldAndroidStatus",hasThermal?thermal(thermalStatus):"N/D");
+ put("heatShieldMemory",Number.isFinite(memory)&&memory>=0?Math.round(memory)+" MB":"N/D");
+ meter.style.width=score+"%";
+ meter.parentElement?.setAttribute("aria-valuenow",String(score));
+ put("heatShieldAdvice",advice);
+}
+
+function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
+if(!d){lastDeviceSnapshot=null;updateHeatShield(null);put("boostDevice","Modo navegador: diagnóstico Android nativo indisponível.");put("boostMemory","N/D");put("boostMemoryHint","Disponível no APK");put("boostBattery","N/D");put("boostBatteryHint","Disponível no APK");put("boostTemp","N/D");put("boostTempHint","Disponível no APK");put("boostAndroid",/Android/i.test(navigator.userAgent)?"Android":"Web");put("boostAndroidHint","Sem leitura nativa");put("boostResolution","N/D");put("boostResolutionHint","Disponível no APK");put("boostRefreshRate","N/D");put("boostRefreshRateHint","Disponível no APK");put("boostAdvice","Abra a versão APK para consultar os dados do Android.");return}
+lastDeviceSnapshot=d;updateHeatShield(d);put("boostLastCheck","Última leitura: "+new Date().toLocaleTimeString());try{localStorage.setItem("sensi_boost_last_check",String(Date.now()))}catch(_){}put("boostDevice",(d.manufacturer+" "+d.model).trim());put("boostMemory",d.availableMemoryMb>=0?Math.round(d.availableMemoryMb)+" MB":"N/D");put("boostMemoryHint",d.totalMemoryMb>0?"de "+Math.round(d.totalMemoryMb)+" MB totais":"Leitura indisponível");put("boostBattery",d.batteryPercent>=0?d.batteryPercent+"%":"N/D");put("boostBatteryHint","Nível informado pelo Android");put("boostTemp",d.batteryTempC>=0?Number(d.batteryTempC).toFixed(1)+" °C":"N/D");put("boostTempHint",thermal(d.thermalStatus));put("boostAndroid",d.android||"N/D");put("boostAndroidHint","API "+(d.sdk||"N/D"));put("boostResolution",d.screenWidth>0&&d.screenHeight>0?d.screenWidth+" × "+d.screenHeight:"N/D");put("boostResolutionHint",d.densityDpi>0?d.densityDpi+" DPI":"Densidade indisponível");put("boostRefreshRate",d.refreshRateHz>0?Number(d.refreshRateHz).toFixed(1)+" Hz":"N/D");put("boostRefreshRateHint","Taxa informada pelo display");
+const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. Faça uma pausa e deixe esfriar naturalmente.");else if(d.batteryTempC>=0)tips.push("Temperatura da bateria sem alerta imediato.");if(d.availableMemoryMb>=0&&d.totalMemoryMb>0&&d.availableMemoryMb/d.totalMemoryMb<.12)tips.push("Pouca memória disponível. Feche manualmente apps que não está usando.");if(d.lowMemory)tips.push("O Android sinalizou pouca memória.");if(d.thermalStatus>=3)tips.push("Estado térmico elevado. Reduza a carga gráfica e aguarde.");if(!tips.length)tips.push("Sem alertas claros nos dados disponíveis. Isso não substitui um teste de estabilidade.");put("boostAdvice",tips.join(" "))}
+function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
+function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado","Autorização confirmada. Os tweaks via Shizuku estão liberados para execução.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
+document.addEventListener("DOMContentLoaded",()=>{
+const confirmCancel=$("boostConfirmCancel"),confirmAccept=$("boostConfirmAccept"),confirmModal=$("boostConfirmModal");
+confirmCancel?.addEventListener("click",()=>{closeBoostConfirm();applyStatus("Aplicação cancelada. Nenhuma alteração foi feita.");});
+confirmAccept?.addEventListener("click",()=>{const payload=parse(confirmModal?.dataset.pending||"");closeBoostConfirm();if(payload)executeConfirmedTweaks(payload);else applyStatus("Confirmação expirada. Nenhuma alteração foi feita.");});
+document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
+const massinhaPackage=$("massinhaTargetPackage");
+function massinhaCommands(){
+ const pkg=massinhaPackage?.value||"com.dts.freefireth";
+ const v1="settings put global angle_gl_driver_selection_pkgs "+pkg+" && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop "+pkg;
+ const v2="settings put global angle_gl_driver_selection_pkgs "+pkg+" && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled forceNearestFiltering:disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop "+pkg;
+ put("massinhaCommandV1",v1);put("massinhaCommandV2",v2);
+ return {v1,v2};
+}
+async function copyMassinha(version){
+ const commands=massinhaCommands(),value=version==="v2"?commands.v2:commands.v1;
+ try{
+  if(navigator.clipboard&&navigator.clipboard.writeText)await navigator.clipboard.writeText(value);
+  else {const field=document.createElement("textarea");field.value=value;field.setAttribute("readonly","");field.style.position="fixed";field.style.opacity="0";document.body.append(field);field.select();const ok=document.execCommand("copy");field.remove();if(!ok)throw new Error("Cópia indisponível neste aparelho.");}
+  put("massinhaCopyStatus","Comando "+version.toUpperCase()+" copiado. Cole no terminal do Brevent.");
+ }catch(_){put("massinhaCopyStatus","Não foi possível copiar automaticamente. Selecione e copie o comando exibido.");}
+}
+$("boostSelectRecommended")?.addEventListener("click",()=>setSelected(recommended[$("boostUseCase")?.value||"stable"]||recommended.stable));
+function selectBoostProfile(profile){
+ const target=Object.prototype.hasOwnProperty.call(recommended,profile)?profile:"stable";
+ activeBoostProfile=target;
+ if($("boostUseCase"))$("boostUseCase").value=target;
+ setSelected(recommended[target]);
+ document.querySelectorAll("[data-boost-profile]").forEach(x=>x.classList.toggle("active",x.getAttribute("data-boost-profile")===target));
+ put("boostApplyStatus","Perfil "+target+" selecionado. O plano inclui Animações Leves, que exige Shizuku e pode ser restaurado, além das etapas manuais.");
+}
+function applySelectedBoostProfile(){
+ const profile=$("boostUseCase")?.value||activeBoostProfile||"stable";
+ selectBoostProfile(profile);
+ buildPlan();
+ try{refresh()}catch(_){put("boostAdvice","Diagnóstico indisponível nesta execução. O plano ainda pode ser consultado.");}
+ startApplyTweaks();
+}
+document.querySelectorAll("[data-boost-profile]").forEach(button=>button.addEventListener("click",()=>{
+ selectBoostProfile(button.getAttribute("data-boost-profile")||"stable");
+}));
+$("boostUseCase")?.addEventListener("change",e=>selectBoostProfile(e.target.value));
+$("boostApplyProfileBtn")?.addEventListener("click",applySelectedBoostProfile);
+$("boostLaunchGame")?.addEventListener("click",()=>openFreeFire(true));
+$("boostOpenDisplaySettings")?.addEventListener("click",()=>{const ok=bridge&&typeof bridge.openTweakSettings==="function"&&bridge.openTweakSettings("display");put("boostApplyStatus",ok?"Configurações de tela abertas. As alterações são feitas por você no Android.":"Esse painel está disponível somente no APK Android.")});
+$("boostOpenBatterySettings")?.addEventListener("click",()=>{const ok=bridge&&typeof bridge.openTweakSettings==="function"&&bridge.openTweakSettings("battery");put("boostApplyStatus",ok?"Configurações de bateria abertas.":"Esse painel está disponível somente no APK Android.")});
+$("boostCopyReport")?.addEventListener("click",async()=>{
+ const d=lastDeviceSnapshot,report=d?["SENSI.AI BOOST REPORT","Dispositivo: "+d.manufacturer+" "+d.model,"Android: "+d.android+" (API "+d.sdk+")","RAM disponível: "+d.availableMemoryMb+" MB / "+d.totalMemoryMb+" MB","Bateria: "+d.batteryPercent+"%","Temperatura da bateria: "+d.batteryTempC+" °C","Estado térmico: "+thermal(d.thermalStatus),"Resolução: "+(d.screenWidth>0?d.screenWidth+" x "+d.screenHeight:"N/D"),"Taxa de atualização: "+(d.refreshRateHz>0?d.refreshRateHz+" Hz":"N/D"),"Densidade: "+(d.densityDpi>0?d.densityDpi+" DPI":"N/D"),"Gerado em: "+new Date().toLocaleString()].join("\n"):"Diagnóstico indisponível. Abra o APK e atualize a leitura.";
+ try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(report);else if(bridge?.copyText)bridge.copyText(report);else throw new Error("Cópia indisponível");put("boostApplyStatus","Relatório copiado.");}catch(_){put("boostApplyStatus","Não foi possível copiar o relatório neste ambiente.");}
+});
+$("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides)));
+$("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
+$("massinhaTargetPackage")?.addEventListener("change",massinhaCommands);
+$("massinhaCopyV1")?.addEventListener("click",()=>copyMassinha("v1"));
+$("massinhaCopyV2")?.addEventListener("click",()=>copyMassinha("v2"));
+massinhaCommands();
+$("boostBuildPlan")?.addEventListener("click",buildPlan);
+$("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
+
+$("boostRestoreTweaks")?.addEventListener("click",()=>{
+ if(!bridge||typeof bridge.restoreSafeTweak!=="function"||typeof bridge.restoreMassinhaTweak!=="function"){applyStatus("A restauração exige o APK Android com Shizuku atualizado.");return}
+ try{
+  const a=parse(bridge.restoreSafeTweak("animations"));
+  const m=parse(bridge.restoreMassinhaTweak());
+  const messages=[];
+  if(a?.ok)messages.push("Animações: "+(a.message||"backup restaurado."));
+  else messages.push("Animações: "+(a?.message||"não foi possível restaurar."));
+  if(m?.ok)messages.push("Gráficos Massinha: "+(m.message||"backup restaurado."));
+  else messages.push("Gráficos Massinha: "+(m?.message||"não foi possível restaurar."));
+  applyStatus(messages.join(" "));
+ }catch(error){applyStatus("Falha ao restaurar: "+String(error?.message||"verifique Shizuku."))}
+});
+$("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
+$("heatShieldRefresh")?.addEventListener("click",()=>{try{refresh()}catch(_){updateHeatShield(lastDeviceSnapshot);put("heatShieldAdvice","Não foi possível atualizar a leitura. Tente novamente.")}});
+$("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
+$("shizukuGrantBtn")?.addEventListener("click",()=>{try{if(bridge&&typeof bridge.requestShizukuPermission==="function"){const message=bridge.requestShizukuPermission();shizuku("","Solicitação de autorização",message||"Confira a confirmação no Shizuku e depois toque em verificar.",false)}}catch(error){shizuku("","Falha ao solicitar",String(error?.message||"Não foi possível abrir o pedido de autorização."),false)}});
+$("settingAutoOpenFF")?.addEventListener("change",e=>{appSettings.autoOpenFreeFire=e.target.checked;saveSettings();put("settingsStatus",e.target.checked?"O Free Fire será aberto ao concluir os tweaks.":"A abertura automática foi desativada.")});
+$("settingGameEdition")?.addEventListener("change",e=>{appSettings.gameEdition=e.target.value;saveSettings();put("settingsStatus","Versão preferida salva neste aparelho.")});
+$("settingsOpenFF")?.addEventListener("click",()=>openFreeFire(true));
+$("settingsReset")?.addEventListener("click",()=>{appSettings={...defaultSettings};saveSettings();syncSettingsUI();put("settingsStatus","Preferências restauradas para os padrões.")});
+syncSettingsUI();
+put("boostDevice","Diagnóstico pronto. Atualize quando quiser.");put("boostAdvice","Toque em Atualizar diagnóstico para consultar o Android.");updateHeatShield(null);shizuku("","Consulta sob demanda","Toque em verificar Shizuku quando quiser.",false);syncCount();
+});
+})();

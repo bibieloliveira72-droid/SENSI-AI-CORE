@@ -196,6 +196,7 @@
     const hz = sanitizeNumber(input.hz, 120, 60, 165);
     const fireButtonSize = sanitizeNumber(input.fireButtonSize, 52, 25, 90);
     const profileKey = PROFILES[input.profile] ? input.profile : "capa";
+    const engineMode = ["controle", "balanceado", "agil"].includes(input.engineMode) ? input.engineMode : "balanceado";
 
     return {
       marca,
@@ -207,116 +208,98 @@
       hz,
       fireButtonSize,
       profile: profileKey,
+      engineMode,
+    };
+  }
+
+  function recommendDisplaySetup(cfg) {
+    const tier = cfg.processador || "intermediario";
+    const ram = sanitizeNumber(cfg.ram, 8, 1, 32);
+    // 12 dimensões são referências encontradas em listas/conteúdos da comunidade.
+    // As demais são variações matemáticas 4:3 para ampliar a faixa de testes, não presets
+    // comprovadamente populares nem garantia de compatibilidade com cada aparelho/jogo.
+    const communityReferences = new Set([
+      "400x300", "512x384", "640x480", "800x600", "832x624", "960x720",
+      "1024x768", "1152x864", "1280x960", "1400x1050", "1440x1080", "1600x1200",
+    ]);
+    const widths = Array.from({ length: 100 }, (_, index) => 400 + index * 16)
+      .map((width) => width === 1392 ? 1400 : width)
+      .sort((a, b) => a - b);
+    const options = widths.map((width) => {
+      const height = width * 3 / 4;
+      const id = width + "x" + height;
+      const tier = width <= 640 ? "ultraleve"
+        : width <= 960 ? "leve"
+        : width <= 1280 ? "equilibrada"
+        : width <= 1600 ? "alta"
+        : "muito alta";
+      const source = communityReferences.has(id) ? "community" : "calculated";
+      const originLabel = source === "community" ? "referência comunitária" : "variação calculada";
+      return {
+        id,
+        resolution: width + " × " + height,
+        label: "4:3 · " + tier + " · " + originLabel,
+        source,
+      };
+    });
+    let selectedOptionId = "960x720";
+    let dpi = 420;
+    let reason = "Perfil 4:3 de menor carga, indicado como ponto de partida para aparelhos de entrada.";
+    if (tier === "flagship" && ram >= 8) {
+      selectedOptionId = "1440x1080"; dpi = 560;
+      reason = "Perfil 4:3 de maior definição para aparelhos de alto desempenho.";
+    } else if ((tier === "intermediario_plus" && ram >= 6) || (tier === "flagship" && ram < 8)) {
+      selectedOptionId = "1280x960"; dpi = 500;
+      reason = "Perfil 4:3 intermediário, buscando equilibrar definição e fluidez.";
+    } else if (tier === "intermediario" && ram >= 6) {
+      selectedOptionId = "1280x960"; dpi = 480;
+      reason = "Perfil 4:3 intermediário; reduza a carga gráfica se houver perda de fluidez.";
+    }
+    const selected = options.find((item) => item.id === selectedOptionId) || options[1];
+    return {
+      resolution: selected.resolution, resolutionLabel: "Pixels · " + selected.label,
+      selectedOptionId: selected.id, options, dpi, reason,
+      note: "Todas as opções priorizam proporção 4:3 esticada. Resoluções maiores podem exigir mais processamento e memória; a imagem pode deformar ou ser cortada. Nem todo aparelho/jogo aceita esses valores. A recomendação não altera o Android automaticamente."
     };
   }
 
   function generateSensitivity(rawInput) {
     const cfg = normalizeInput(rawInput);
     const profile = PROFILES[cfg.profile];
-    const brandCurve = resolveBrandCurve(cfg.marca, cfg.modelo);
-    const procTier = resolveProcessorTier(cfg.processador, cfg.processadorDetalhe);
-    const modelOffset = resolveModelSignatureOffset(cfg.modelo);
 
-    // Compensação não linear de DPI em relação à base Android padrão (450 DPI)
-    // DPI maior reduz necessidade de sensibilidade alta no jogo; curva suave evita saturação extrema.
+    // Hardware descreve desempenho e fluidez, não mede diretamente a resposta do toque.
+    // Por isso, apenas DPI e tamanho do botão entram na sugestão inicial de sensibilidade.
     const dpiDelta = 450 - cfg.dpi;
     const smoothDpiDelta = Math.tanh(dpiDelta / 380) * 380;
-
-    // Taxa de atualização: telas 90–165 Hz entregam leitura mais limpa e exigem leve redução no overshoot
-    const hzFactor = ((120 - cfg.hz) / 30) * 2.2;
-
-    // RAM: aparelhos com menos RAM ganham leve estabilidade extra nas miras longas e compensação leve na puxada
-    const ramClamp = Math.min(12, Math.max(2, cfg.ram));
-    const ramStability = (ramClamp - 6) * 0.7;
-
-    // Tamanho do botão de tiro (%):
-    // Botão menor (30–45%) oferece mais curso vertical de tela -> puxada mais limpa (leve redução de excesso).
-    // Botão maior (60–85%) encurta o espaço livre de arraste -> compensação vertical positiva em General/Red Dot.
     const buttonDelta = (cfg.fireButtonSize - 52) * 0.36;
-
     const values = {};
+    const modeWeights = { controle: { General: -3, "Red Dot": -2, "2x": -3, "4x": -4, AWM: -3, Olhadinha: -2 }, balanceado: { General: 0, "Red Dot": 0, "2x": 0, "4x": 0, AWM: 0, Olhadinha: 0 }, agil: { General: 3, "Red Dot": 2, "2x": 2, "4x": 1, AWM: 1, Olhadinha: 4 } }[cfg.engineMode];
 
-    // Cálculo independente por mira respeitando os limites válidos do jogo (0 a 200)
-    values.General = clamp(
-      profile.bases.General +
-        smoothDpiDelta * profile.dpiWeights.General +
-        brandCurve.touchGain +
-        procTier.responsiveness +
-        hzFactor * 1.1 +
-        buttonDelta * 0.95 +
-        modelOffset,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values["Red Dot"] = clamp(
-      profile.bases["Red Dot"] +
-        smoothDpiDelta * profile.dpiWeights["Red Dot"] +
-        brandCurve.touchGain * 0.85 +
-        procTier.responsiveness * 0.8 +
-        hzFactor * 0.9 +
-        buttonDelta * 1.05 +
-        ramStability * 0.4 +
-        modelOffset * 0.5,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values["2x"] = clamp(
-      profile.bases["2x"] +
-        smoothDpiDelta * profile.dpiWeights["2x"] +
-        brandCurve.scopeControl +
-        procTier.stability * 0.8 +
-        hzFactor * 0.6 +
-        buttonDelta * 0.55 +
-        ramStability * 0.7,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values["4x"] = clamp(
-      profile.bases["4x"] +
-        smoothDpiDelta * profile.dpiWeights["4x"] +
-        brandCurve.scopeControl * 1.2 +
-        procTier.stability * 1.1 +
-        hzFactor * 0.35 +
-        buttonDelta * 0.3 +
-        ramStability * 0.9,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values.AWM = clamp(
-      profile.bases.AWM +
-        smoothDpiDelta * profile.dpiWeights.AWM +
-        brandCurve.scopeControl * 0.8 +
-        procTier.stability * 0.6 +
-        hzFactor * 0.25 +
-        ramStability * 0.5,
-      MIN_SENSI,
-      MAX_SENSI
-    );
-
-    values.Olhadinha = clamp(
-      profile.bases.Olhadinha +
-        smoothDpiDelta * profile.dpiWeights.Olhadinha +
-        brandCurve.touchGain * 0.9 +
-        procTier.responsiveness * 0.7 +
-        hzFactor * 0.95 +
-        modelOffset,
-      MIN_SENSI,
-      MAX_SENSI
-    );
+    for (const scope of SCOPE_KEYS) {
+      const dpiAdjustment = smoothDpiDelta * profile.dpiWeights[scope];
+      const buttonWeight = scope === "General" ? 0.95
+        : scope === "Red Dot" ? 1.05
+        : scope === "2x" ? 0.55
+        : scope === "4x" ? 0.30
+        : scope === "AWM" ? 0.12
+        : 0.95;
+      values[scope] = clamp(
+        profile.bases[scope] + dpiAdjustment + buttonDelta * buttonWeight + modeWeights[scope],
+        MIN_SENSI,
+        MAX_SENSI
+      );
+    }
 
     const insights = buildTechnicalNotes(cfg, values);
-
     return {
       config: cfg,
+      recommendations: recommendDisplaySetup(cfg),
       profileLabel: profile.label,
+      engineMode: cfg.engineMode,
       values,
-      notes: insights,
+      notes: insights.concat(["Modo híbrido 2.0: " + cfg.engineMode + " combinado ao perfil " + profile.label + "."]),
       disclaimer:
-        "Sugestão inicial gerada localmente para testes no modo treinamento. O SENSI.AI não promete mira automática ou capa garantida — use a calibração interativa e ajustes de 1 em 1 ponto conforme sua pegada.",
+        "Sugestão inicial local para testes no modo treinamento. Hardware não determina a sensibilidade do toque; ajuste os valores conforme sua resposta real. O SENSI.AI não promete mira automática ou capa garantida.",
     };
   }
 
@@ -324,35 +307,20 @@
     const tips = [];
 
     if (cfg.dpi >= 800) {
-      tips.push(
-        `DPI alta (${cfg.dpi}) detectada: o algoritmo reduziu proporcionalmente a sensibilidade base para evitar que a mira passe da cabeça.`
-      );
+      tips.push(`DPI alta (${cfg.dpi}) detectada: a sugestão inicial foi ajustada pela curva de DPI. Valide o resultado no treinamento.`);
     } else if (cfg.dpi <= 420) {
-      tips.push(
-        `DPI baixa/padrão (${cfg.dpi}): o algoritmo elevou a resposta inicial de General (${values.General}) e Red Dot (${values["Red Dot"]}) para facilitar a puxada.`
-      );
+      tips.push(`DPI baixa/padrão (${cfg.dpi}): a curva de DPI ajustou a sugestão inicial. Valide o resultado no treinamento.`);
     } else {
-      tips.push(
-        `DPI intermediária (${cfg.dpi}) combinada com tela de ${cfg.hz} Hz para equilíbrio entre trocação rápida e estabilidade.`
-      );
+      tips.push(`DPI intermediária (${cfg.dpi}) aplicada à sugestão inicial.`);
     }
 
     if (cfg.fireButtonSize >= 65) {
-      tips.push(
-        `Botão de tiro grande (${cfg.fireButtonSize}%): compensação aplicada na subida vertical. Se sentir pouco espaço de arraste, teste reduzir o botão entre 45% e 55%.`
-      );
+      tips.push(`Botão de tiro grande (${cfg.fireButtonSize}%): o tamanho foi considerado como preferência de configuração. Teste pequenas alterações para encontrar seu conforto.`);
     } else if (cfg.fireButtonSize <= 42) {
-      tips.push(
-        `Botão de tiro compacto (${cfg.fireButtonSize}%): ótimo curso livre de tela para puxada contínua.`
-      );
+      tips.push(`Botão de tiro compacto (${cfg.fireButtonSize}%): o tamanho foi considerado como preferência de configuração.`);
     }
 
-    if (cfg.ram <= 4) {
-      tips.push(
-        `Com ${cfg.ram} GB de RAM, a 2x (${values["2x"]}) e a 4x (${values["4x"]}) foram calibradas com margem extra contra oscilações de FPS.`
-      );
-    }
-
+    tips.push("Chipset, RAM e Hz são informações de desempenho do aparelho; não são usados como medida direta da sensibilidade do toque.");
     return tips;
   }
 
@@ -381,6 +349,8 @@
     const damping = Math.max(0.5, 1 - iteration * 0.1);
     const dpiGain = dpi >= 750 ? 0.85 : dpi <= 420 ? 1.15 : 1.0;
 
+    const memoryInput = context.learningState && typeof context.learningState === "object"
+      ? context.learningState : {};
     const rawDeltas = {
       General: 0,
       "Red Dot": 0,
@@ -449,17 +419,39 @@
 
     const nextValues = {};
     const appliedDeltas = {};
+    const learningState = {};
+
     for (const key of SCOPE_KEYS) {
-      nextValues[key] = clamp(prev[key] + rawDeltas[key], MIN_SENSI, MAX_SENSI);
+      const previous = memoryInput[key] && typeof memoryInput[key] === "object"
+        ? memoryInput[key] : {};
+      const direction = Math.sign(rawDeltas[key]);
+      const sameDirectionCount = direction !== 0 && Number(previous.lastDirection) === direction
+        ? Math.min(5, Math.max(0, Number(previous.sameDirectionCount) || 0)) : 0;
+      const learningFactor = sameDirectionCount === 0 ? 1 : Math.max(0.45, 1 - sameDirectionCount * 0.15);
+      const learnedDelta = rawDeltas[key] === 0 ? 0 : Math.sign(rawDeltas[key]) *
+        Math.max(1, Math.round(Math.abs(rawDeltas[key]) * learningFactor));
+
+      nextValues[key] = clamp(prev[key] + learnedDelta, MIN_SENSI, MAX_SENSI);
       appliedDeltas[key] = nextValues[key] - prev[key];
+      learningState[key] = direction === 0
+        ? { lastDirection: Number(previous.lastDirection) || 0, sameDirectionCount }
+        : {
+            lastDirection: direction,
+            sameDirectionCount: sameDirectionCount + 1,
+          };
     }
 
     return {
       values: nextValues,
       deltas: appliedDeltas,
+      learningState,
       reason,
-      tip,
+      tip: sameDirectionCountForTip(learningState) ? tip + " O motor reduziu gradualmente o passo nas miras que receberam correções repetidas na mesma direção." : tip,
     };
+  }
+
+  function sameDirectionCountForTip(state) {
+    return SCOPE_KEYS.some((key) => state[key].sameDirectionCount > 1);
   }
 
   function compareConfigurations(entryA, entryB) {
@@ -494,7 +486,9 @@
     PROCESSOR_TIERS,
     normalizeInput,
     generateSensitivity,
+    recommendDisplaySetup,
     adjustSingleScope,
+    setScopeValue(currentValues, scopeKey, value) { if (!SCOPE_KEYS.includes(scopeKey)) throw new Error("Mira inválida: " + scopeKey); return { ...currentValues, [scopeKey]: sanitizeNumber(value, currentValues[scopeKey], MIN_SENSI, MAX_SENSI) }; },
     applyAdaptiveCalibration,
     compareConfigurations,
   };
