@@ -57,9 +57,6 @@ jobs:
         with:
           packages: 'platform-tools'
 
-      - name: Install Android 17 preview platform
-        run: yes | sdkmanager --channel=3 "platforms;android-37"
-
       - name: Setup Gradle 9.3.1
         uses: gradle/actions/setup-gradle@v6
         with:
