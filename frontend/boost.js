@@ -65,7 +65,16 @@ function startApplyTweaks(){
  if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
  const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
  const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"", "Os outros itens selecionados são apenas orientações. Confirmar?"].filter(Boolean).join("\n\n");
- if(!window.confirm(warning)){applyStatus("Aplicação cancelada.");return}
+ const confirmBox=$("boostConfirmModal"),confirmText=$("boostConfirmMessage");
+ if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
+ confirmText.textContent=warning;
+ confirmBox.classList.remove("hidden");
+ confirmBox.setAttribute("aria-hidden","false");
+ confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,pkg,version});
+ return;
+}
+function executeConfirmedTweaks(payload){
+ const {keys,doAnimations,doMassinha,pkg,version}=payload;
  const messages=[];
  try{
   if(doAnimations){if(typeof bridge.applySafeTweak!=="function")messages.push("Animações Leves: função indisponível nesta versão.");else{const r=parse(bridge.applySafeTweak("animations"));messages.push(r?.message||(r?.ok?"Animações Leves aplicadas.":"Falha ao aplicar Animações Leves."));}}
@@ -74,6 +83,7 @@ function startApplyTweaks(){
   applyStatus(messages.join(" "));
  }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
 }
+function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 
 let lastDeviceSnapshot=null;
