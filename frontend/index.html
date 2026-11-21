@@ -15,11 +15,6 @@
   <link rel="stylesheet" href="./masterstrap-mobile.css" />
 </head>
 <body>
-  <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-glow" aria-hidden="true"></div>
-  <div class="ambient-orb ambient-orb-a" aria-hidden="true"></div>
-  <div class="ambient-orb ambient-orb-b" aria-hidden="true"></div>
-  <canvas id="touchTrailCanvas" class="touch-trail-canvas" aria-hidden="true"></canvas>
 
   <div class="app-shell">
     <header class="topbar">
@@ -33,7 +28,7 @@
         </div>
         <div>
           <h1 class="brand-title">SENSI<span>.AI</span></h1>
-          <p class="brand-sub">SENSITIVITY LAB <span>•</span> FREE FIRE</p>
+          <p class="brand-sub">SENSITIVITY LAB <span>•</span> FREE FIRE <span class="app-version">v3.1.4</span></p>
         </div>
       </div>
 
@@ -64,6 +59,10 @@
       <!-- TAB 1: GERADOR + CALIBRAÇÃO -->
       <section id="tab-generator" class="tab-panel" role="tabpanel">
         <section class="hero-panel"><div class="hero-copy"><span class="eyebrow"><i></i> PERSONAL SETUP / 01</span><h2>Encontre o seu <em>ritmo.</em></h2><p>Monte seu setup, gere uma base e refine cada mira com seus próprios testes.</p><div class="hero-meta"><span>● MOTOR LOCAL</span><span>6 MIRAS</span><span>4 PERFIS</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">S<span>.</span></div><i class="orbit-dot"></i></div></section>
+        <section class="card boost-card telegram-community-card">
+          <div class="section-head"><div><h2>Comunidade SENSI.AI</h2><p class="device-summary">Novidades, atualizações e avisos oficiais.</p></div><span class="badge">TELEGRAM</span></div>
+          <a class="btn-primary telegram-join-btn" href="https://t.me/+ICpY9A07EmxhNWI5" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal oficial do SENSI.AI no Telegram">ENTRAR NO CANAL ↗</a>
+        </section>
         <form id="sensiForm" class="card form-card" novalidate>
           <div class="section-head">
             <h2>Hardware &amp; Botão de Tiro</h2>
@@ -452,10 +451,6 @@
           </details>
           <p class="support-footnote">O suporte legado não promete compatibilidade universal. Alguns fabricantes limitam recursos do Android e podem exigir etapas adicionais no próprio sistema.</p>
         </section>
-        <section class="card boost-card telegram-community-card">
-          <div class="section-head"><div><h2>Comunidade SENSI.AI</h2><p class="device-summary">Acompanhe novidades, atualizações e avisos do projeto.</p></div><span class="badge">TELEGRAM</span></div>
-          <a class="btn-primary" href="https://t.me/+ICpY9A07EmxhNWI5" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal oficial do SENSI.AI no Telegram">ENTRAR NO TELEGRAM ↗</a>
-        </section>
       </section>
     </main>
   </div>
@@ -478,6 +473,5 @@
   <script src="./app.js" defer></script>
   <script src="./boost.js" defer></script>
   <script src="./resolution-lab.js" defer></script>
-  <script src="./touch-effects.js" defer></script>
 </body>
 </html>
