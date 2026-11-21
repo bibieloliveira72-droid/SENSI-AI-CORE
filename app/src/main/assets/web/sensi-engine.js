@@ -257,7 +257,7 @@
     }
     const selected = options.find((item) => item.id === selectedOptionId) || options[1];
     return {
-      resolution: selected.resolution, resolutionLabel: selected.label,
+      resolution: selected.resolution, resolutionLabel: "Pixels · " + selected.label,
       selectedOptionId: selected.id, options, dpi, reason,
       note: "Todas as opções priorizam proporção 4:3 esticada. Resoluções maiores podem exigir mais processamento e memória; a imagem pode deformar ou ser cortada. Nem todo aparelho/jogo aceita esses valores. A recomendação não altera o Android automaticamente."
     };

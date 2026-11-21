@@ -846,7 +846,7 @@
     return [
       `SENSI.AI — ${cfg.marca} ${cfg.modelo} (${entry.profileLabel})`,
       `Hardware: ${cfg.ram}GB RAM | ${cfg.hz}Hz | ${cfg.dpi} DPI atual | Botão de tiro: ${cfg.fireButtonSize}%`,
-      `Resolução de referência: ${setup.resolution} (${setup.resolutionLabel})`,
+      `Resolução (Pixels): ${setup.resolution} (${setup.resolutionLabel})`,
       `DPI sugerido: ${setup.dpi}`,
       `Geral (General): ${v.General}`,
       `Red Dot: ${v["Red Dot"]}`,
@@ -1706,7 +1706,7 @@
     els.copyResolutionBtn.addEventListener("click", () => {
       if (!activeState) return;
       const setup = activeState.config.recommendedSetup || window.SensiEngine.recommendDisplaySetup(activeState.config);
-      copyToClipboard(setup.resolution, "Resolução copiada!");
+      copyToClipboard(setup.resolution, "Resolução (Pixels) copiada!");
     });
 
     els.copyRecommendedDpiBtn.addEventListener("click", () => {
