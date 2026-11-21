@@ -30,7 +30,14 @@ test("Frontend e assets APK são 100% offline, sem fetch, sem XHR, sem URLs exte
       assert.equal(/\bfetch\s*\(/.test(content), false, `fetch() proibido encontrado em ${file}`);
       assert.equal(/XMLHttpRequest/.test(content), false, `XMLHttpRequest proibido em ${file}`);
       assert.equal(/Math\.random/.test(content), false, `Math.random proibido em ${file}`);
-      assert.equal(/https?:\/\//i.test(content), false, `URL externa encontrada em ${file}`);
+      const contentWithoutOfficialTelegram = file === "index.html"
+        ? content.replaceAll("https://t.me/+ICpY9A07EmxhNWI5", "")
+        : content;
+      assert.equal(/https?:\/\//i.test(contentWithoutOfficialTelegram), false, `URL externa encontrada em ${file}`);
+      if (file === "index.html") {
+        assert.equal((content.match(/https:\/\/t\.me\/\+ICpY9A07EmxhNWI5/g) || []).length, 1,
+          "O convite oficial do Telegram deve aparecer exatamente uma vez");
+      }
       assert.equal(/GEMINI_API_KEY/i.test(content), false, `Referência a API key em ${file}`);
     }
   }
