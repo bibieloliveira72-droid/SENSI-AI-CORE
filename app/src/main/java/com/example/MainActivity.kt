@@ -26,6 +26,8 @@ import rikka.shizuku.Shizuku
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.util.DisplayMetrics
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -97,6 +99,15 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
     val level = battery?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
     val scale = battery?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
     val percent = if (level >= 0 && scale > 0) (level * 100) / scale else -1
+    val displayInfo = try {
+      val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+      val metrics = DisplayMetrics()
+      @Suppress("DEPRECATION")
+      windowManager.defaultDisplay.getRealMetrics(metrics)
+      @Suppress("DEPRECATION")
+      val refreshRate = windowManager.defaultDisplay.refreshRate.toDouble()
+      Triple(metrics.widthPixels, metrics.heightPixels, Pair(metrics.densityDpi, refreshRate))
+    } catch (_: Throwable) { Triple(-1, -1, Pair(-1, -1.0)) }
     val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       (context.getSystemService(Context.POWER_SERVICE) as PowerManager).currentThermalStatus
     } else -1
@@ -111,6 +122,10 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
       put("batteryPercent", percent)
       put("batteryTempC", if (temp >= 0) temp / 10.0 else -1)
       put("thermalStatus", thermal)
+      put("screenWidth", displayInfo.first)
+      put("screenHeight", displayInfo.second)
+      put("densityDpi", displayInfo.third.first)
+      put("refreshRateHz", displayInfo.third.second)
     }.toString()
   }
 
