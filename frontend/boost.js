@@ -42,9 +42,9 @@ updates:["Atualizações","Agende downloads e atualizações para um horário co
 accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os que você usa. Não desative serviços essenciais para tentar ganhar desempenho."]
 };
 const recommended={stable:["game","memory","thermal","display","background","refresh"],cool:["thermal","display","battery","game"],battery:["battery","display","background","updates"],network:["network","updates","notifications"],balanced:["game","memory","thermal","network","display","refresh"]};
-function selected(){return [...document.querySelectorAll("#boostMultiGrid input:checked")].map(x=>x.value)}
+function selected(){return [...document.querySelectorAll("#tab-boost input[type=checkbox]:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
-function setSelected(keys){document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
+function setSelected(keys){document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
 function buildPlan(){
  const keys=selected(),box=$("boostPlanResult");
  if(!box)return;
@@ -120,7 +120,7 @@ const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. F
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
 function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado","Autorização confirmada. Os tweaks via Shizuku estão liberados para execução.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
 document.addEventListener("DOMContentLoaded",()=>{
-document.querySelectorAll("#boostMultiGrid input").forEach(x=>x.addEventListener("change",syncCount));
+document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
 const massinhaPackage=$("massinhaTargetPackage");
 function massinhaCommands(){
  const pkg=massinhaPackage?.value||"com.dts.freefireth";
