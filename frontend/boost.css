@@ -69,3 +69,26 @@
 .massinha-command-card button{width:100%}
 .massinha-copy-status{margin:8px 0;padding:11px 12px;border-radius:10px;background:rgba(25,217,183,.08);border:1px solid rgba(25,217,183,.2);font-size:11px;line-height:1.5;color:var(--text,#f5f5f7)}
 .massinha-copy-warning{font-size:10px;line-height:1.6;color:#e9c77b;margin:10px 0}
+
+
+/* VOID-inspired Heat Shield Insight: advisory only, no automatic system writes */
+.heat-shield-card{overflow:hidden}
+.heat-shield-card .section-head h2 em{color:#63f4e2;font-style:normal}
+.heat-shield-state{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:12px 13px;border:1px solid rgba(125,155,180,.2);border-radius:13px;background:rgba(7,15,25,.66)}
+.heat-shield-state-dot{width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:#8b98a8;box-shadow:0 0 10px currentColor}
+.heat-shield-state strong{font-size:11px;letter-spacing:.09em;color:var(--text,#f5f5f7)}
+.heat-shield-state small{margin-left:auto;font-size:10px;color:var(--muted,#98a5b5)}
+.heat-shield-state.level-normal .heat-shield-state-dot{background:#63e6bd;color:#63e6bd}
+.heat-shield-state.level-observe .heat-shield-state-dot{background:#e7cf73;color:#e7cf73}
+.heat-shield-state.level-attention .heat-shield-state-dot{background:#ffad62;color:#ffad62}
+.heat-shield-state.level-high .heat-shield-state-dot{background:#ff6b75;color:#ff6b75}
+.heat-shield-meter{height:7px;margin:12px 1px 14px;overflow:hidden;border-radius:99px;background:rgba(145,165,185,.14)}
+.heat-shield-meter>span{display:block;width:0;height:100%;border-radius:inherit;background:linear-gradient(90deg,#63e6bd 0%,#e7cf73 55%,#ff6b75 100%);transition:width .35s ease}
+.heat-shield-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.heat-shield-metrics>div{display:grid;gap:6px;min-width:0;padding:11px 9px;border:1px solid rgba(125,155,180,.14);border-radius:12px;background:rgba(18,25,36,.58)}
+.heat-shield-metrics small{font-size:9px;line-height:1.35;color:var(--muted,#98a5b5)}
+.heat-shield-metrics strong{font-size:13px;line-height:1.2;color:var(--text,#f5f5f7);overflow-wrap:anywhere}
+.heat-shield-advice{margin:12px 0;padding:12px 13px;border-radius:12px;background:rgba(99,244,226,.055);border:1px solid rgba(99,244,226,.16);font-size:11px;line-height:1.6;color:var(--text,#dcebf2)}
+.heat-shield-card>button{width:100%}
+@media(max-width:380px){.heat-shield-state{align-items:flex-start}.heat-shield-state small{width:100%;margin-left:18px}.heat-shield-metrics{grid-template-columns:1fr 1fr}.heat-shield-metrics>div:last-child{grid-column:1/-1}}
+@media(prefers-reduced-motion:reduce){.heat-shield-meter>span{transition:none}}

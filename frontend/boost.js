@@ -67,9 +67,47 @@ function startApplyTweaks(){
  }catch(_){applyStatus("Falha ao aplicar Animações Leves. Verifique o Shizuku.")}
 }
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
+
+let lastDeviceSnapshot=null;
+function updateHeatShield(d){
+ const state=$("heatShieldState"),meter=$("heatShieldMeter");
+ if(!state||!meter)return;
+ if(!d){
+  state.className="heat-shield-state level-unknown";
+  put("heatShieldStatus","SEM LEITURA");
+  put("heatShieldThermal","Abra o APK e atualize o diagnóstico");
+  put("heatShieldTemp","N/D");
+  put("heatShieldAndroidStatus","N/D");
+  put("heatShieldMemory","N/D");
+  put("heatShieldAdvice","A leitura térmica nativa não está disponível neste modo. Nenhuma configuração foi alterada.");
+  meter.style.width="0%";
+  meter.parentElement?.setAttribute("aria-valuenow","0");
+  return;
+ }
+ const temp=Number(d.batteryTempC),thermalStatus=Number(d.thermalStatus),memory=Number(d.availableMemoryMb);
+ const hasTemp=Number.isFinite(temp)&&temp>=0,hasThermal=Number.isFinite(thermalStatus)&&thermalStatus>=0;
+ const tempScore=hasTemp?Math.max(0,Math.min(100,((temp-30)/18)*100)):0;
+ const thermalScore=hasThermal?(thermalStatus/6)*100:0;
+ const score=Math.round(Math.max(tempScore,thermalScore));
+ let level="normal",label="NORMAL",advice="Sem alerta térmico relevante nos dados atuais. Faça uma partida curta e compare a estabilidade antes de mudar outras configurações.";
+ if(!hasTemp&&!hasThermal){level="unknown";label="SEM LEITURA";advice="O Android não disponibilizou dados térmicos nesta consulta. Tente atualizar novamente.";}
+ else if((hasThermal&&thermalStatus>=4)||(hasTemp&&temp>=45)){level="high";label="ALTO";advice="O aparelho pode estar sob carga térmica elevada. Faça uma pausa e deixe esfriar naturalmente. Evite insistir em FPS ou Hz máximos.";}
+ else if((hasThermal&&thermalStatus>=3)||(hasTemp&&temp>=42)){level="attention";label="ATENÇÃO";advice="Acompanhe a temperatura. Se houver quedas de quadros, reduza um nível os gráficos ou o FPS dentro do jogo e confira novamente.";}
+ else if((hasThermal&&thermalStatus>=2)||(hasTemp&&temp>=40)){level="observe";label="OBSERVAR";advice="Há um sinal leve de aquecimento. Mantenha uma configuração estável e observe a tendência durante a partida.";}
+ state.className="heat-shield-state level-"+level;
+ put("heatShieldStatus",label);
+ put("heatShieldThermal",hasThermal?"Android: "+thermal(thermalStatus):"Estado térmico Android indisponível");
+ put("heatShieldTemp",hasTemp?temp.toFixed(1)+" °C":"N/D");
+ put("heatShieldAndroidStatus",hasThermal?thermal(thermalStatus):"N/D");
+ put("heatShieldMemory",Number.isFinite(memory)&&memory>=0?Math.round(memory)+" MB":"N/D");
+ meter.style.width=score+"%";
+ meter.parentElement?.setAttribute("aria-valuenow",String(score));
+ put("heatShieldAdvice",advice);
+}
+
 function refresh(){let d=null;if(bridge&&typeof bridge.getDeviceSnapshot==="function")d=parse(bridge.getDeviceSnapshot());
-if(!d){put("boostDevice","Modo navegador: diagnóstico Android nativo indisponível.");put("boostMemory","N/D");put("boostMemoryHint","Disponível no APK");put("boostBattery","N/D");put("boostBatteryHint","Disponível no APK");put("boostTemp","N/D");put("boostTempHint","Disponível no APK");put("boostAndroid",/Android/i.test(navigator.userAgent)?"Android":"Web");put("boostAndroidHint","Sem leitura nativa");put("boostAdvice","Abra a versão APK para consultar os dados do Android.");return}
-put("boostDevice",(d.manufacturer+" "+d.model).trim());put("boostMemory",d.availableMemoryMb>=0?Math.round(d.availableMemoryMb)+" MB":"N/D");put("boostMemoryHint",d.totalMemoryMb>0?"de "+Math.round(d.totalMemoryMb)+" MB totais":"Leitura indisponível");put("boostBattery",d.batteryPercent>=0?d.batteryPercent+"%":"N/D");put("boostBatteryHint","Nível informado pelo Android");put("boostTemp",d.batteryTempC>=0?Number(d.batteryTempC).toFixed(1)+" °C":"N/D");put("boostTempHint",thermal(d.thermalStatus));put("boostAndroid",d.android||"N/D");put("boostAndroidHint","API "+(d.sdk||"N/D"));
+if(!d){lastDeviceSnapshot=null;updateHeatShield(null);put("boostDevice","Modo navegador: diagnóstico Android nativo indisponível.");put("boostMemory","N/D");put("boostMemoryHint","Disponível no APK");put("boostBattery","N/D");put("boostBatteryHint","Disponível no APK");put("boostTemp","N/D");put("boostTempHint","Disponível no APK");put("boostAndroid",/Android/i.test(navigator.userAgent)?"Android":"Web");put("boostAndroidHint","Sem leitura nativa");put("boostAdvice","Abra a versão APK para consultar os dados do Android.");return}
+lastDeviceSnapshot=d;updateHeatShield(d);put("boostDevice",(d.manufacturer+" "+d.model).trim());put("boostMemory",d.availableMemoryMb>=0?Math.round(d.availableMemoryMb)+" MB":"N/D");put("boostMemoryHint",d.totalMemoryMb>0?"de "+Math.round(d.totalMemoryMb)+" MB totais":"Leitura indisponível");put("boostBattery",d.batteryPercent>=0?d.batteryPercent+"%":"N/D");put("boostBatteryHint","Nível informado pelo Android");put("boostTemp",d.batteryTempC>=0?Number(d.batteryTempC).toFixed(1)+" °C":"N/D");put("boostTempHint",thermal(d.thermalStatus));put("boostAndroid",d.android||"N/D");put("boostAndroidHint","API "+(d.sdk||"N/D"));
 const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. Faça uma pausa e deixe esfriar naturalmente.");else if(d.batteryTempC>=0)tips.push("Temperatura da bateria sem alerta imediato.");if(d.availableMemoryMb>=0&&d.totalMemoryMb>0&&d.availableMemoryMb/d.totalMemoryMb<.12)tips.push("Pouca memória disponível. Feche manualmente apps que não está usando.");if(d.lowMemory)tips.push("O Android sinalizou pouca memória.");if(d.thermalStatus>=3)tips.push("Estado térmico elevado. Reduza a carga gráfica e aguarde.");if(!tips.length)tips.push("Sem alertas claros nos dados disponíveis. Isso não substitui um teste de estabilidade.");put("boostAdvice",tips.join(" "))}
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
 function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado","Autorização confirmada. Os tweaks via Shizuku estão liberados para execução.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
@@ -107,6 +145,7 @@ $("boostRestoreTweaks")?.addEventListener("click",()=>{
  catch(_){applyStatus("Falha ao restaurar. Verifique Shizuku.")}
 });
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
+$("heatShieldRefresh")?.addEventListener("click",()=>{try{refresh()}catch(_){updateHeatShield(lastDeviceSnapshot);put("heatShieldAdvice","Não foi possível atualizar a leitura. Tente novamente.")}});
 $("shizukuCheckBtn")?.addEventListener("click",()=>{try{check()}catch(_){shizuku("","Falha na consulta","Verifique se o serviço está ativo.",false)}});
 $("shizukuGrantBtn")?.addEventListener("click",()=>{try{if(bridge&&typeof bridge.requestShizukuPermission==="function"){const message=bridge.requestShizukuPermission();shizuku("","Solicitação de autorização",message||"Confira a confirmação no Shizuku e depois toque em verificar.",false)}}catch(error){shizuku("","Falha ao solicitar",String(error?.message||"Não foi possível abrir o pedido de autorização."),false)}});
 $("settingAutoOpenFF")?.addEventListener("change",e=>{appSettings.autoOpenFreeFire=e.target.checked;saveSettings();put("settingsStatus",e.target.checked?"O Free Fire será aberto ao concluir os tweaks.":"A abertura automática foi desativada.")});
@@ -114,6 +153,6 @@ $("settingGameEdition")?.addEventListener("change",e=>{appSettings.gameEdition=e
 $("settingsOpenFF")?.addEventListener("click",()=>openFreeFire(true));
 $("settingsReset")?.addEventListener("click",()=>{appSettings={...defaultSettings};saveSettings();syncSettingsUI();put("settingsStatus","Preferências restauradas para os padrões.")});
 syncSettingsUI();
-put("boostDevice","Diagnóstico pronto. Atualize quando quiser.");put("boostAdvice","Toque em Atualizar diagnóstico para consultar o Android.");shizuku("","Consulta sob demanda","Toque em verificar Shizuku quando quiser.",false);syncCount();
+put("boostDevice","Diagnóstico pronto. Atualize quando quiser.");put("boostAdvice","Toque em Atualizar diagnóstico para consultar o Android.");updateHeatShield(null);shizuku("","Consulta sob demanda","Toque em verificar Shizuku quando quiser.",false);syncCount();
 });
 })();

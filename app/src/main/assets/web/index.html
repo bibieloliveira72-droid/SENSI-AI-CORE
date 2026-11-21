@@ -408,6 +408,25 @@
           <div id="boostAdvice" class="boost-advice" aria-live="polite">Toque em atualizar para analisar os dados disponíveis.</div>
           <button type="button" id="boostRefreshBtn" class="btn-primary">ATUALIZAR DIAGNÓSTICO</button>
         </section>
+        <section class="card boost-card heat-shield-card">
+          <div class="section-head"><div><h2>Heat Shield <em>Insight.</em></h2><p class="device-summary">Leitura térmica e orientação de sessão, inspiradas na lógica adaptativa do VOID.</p></div><span class="badge">THERMAL GUARD</span></div>
+          <div id="heatShieldState" class="heat-shield-state level-unknown" aria-live="polite">
+            <span class="heat-shield-state-dot" aria-hidden="true"></span>
+            <strong id="heatShieldStatus">AGUARDANDO LEITURA</strong>
+            <small id="heatShieldThermal">Diagnóstico ainda não atualizado</small>
+          </div>
+          <div class="heat-shield-meter" role="progressbar" aria-label="Indicador de atenção térmica" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <span id="heatShieldMeter"></span>
+          </div>
+          <div class="heat-shield-metrics">
+            <div><small>Temperatura da bateria</small><strong id="heatShieldTemp">--</strong></div>
+            <div><small>Estado térmico Android</small><strong id="heatShieldAndroidStatus">--</strong></div>
+            <div><small>Memória disponível</small><strong id="heatShieldMemory">--</strong></div>
+          </div>
+          <p id="heatShieldAdvice" class="heat-shield-advice">Atualize o diagnóstico para receber uma orientação baseada nos dados disponíveis.</p>
+          <button type="button" id="heatShieldRefresh" class="btn-secondary">ATUALIZAR LEITURA TÉRMICA</button>
+          <p class="boost-safety-note">Importante: o Android informa a temperatura da bateria e um estado térmico geral. Isso não é uma medição direta da GPU, da CPU ou do FPS. O Heat Shield Insight orienta, mas não altera configurações automaticamente.</p>
+        </section>
         <section class="card boost-card">
           <div class="section-head"><div><h2>Shizuku Hub</h2><p class="device-summary">Verificação simples do serviço e da autorização do SENSI.AI.</p></div><span class="badge">REQUERIDO PARA TWEAKS</span></div>
           <div class="shizuku-status" id="shizukuStatus"><span class="status-dot"></span><div><strong>Estado não verificado</strong><small>Consulte se o Shizuku está ativo e autorizado.</small></div></div>
