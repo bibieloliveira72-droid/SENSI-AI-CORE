@@ -90,7 +90,15 @@ test("Motor usa DPI e botão como parâmetros de ajuste, sem inventar relação 
   assert.ok(capa.values["Red Dot"] > precisao.values["Red Dot"]);
 });
 
-test("Recomendação de resolução identifica Pixels sem alterar as dimensões calculadas", () => {\n  const engine = loadEngine();\n  const setup = engine.recommendDisplaySetup({ processador: "intermediario", ram: 8 });\n  assert.match(setup.resolutionLabel, /^Pixels · /);\n  assert.match(setup.resolution, /^\\d+ × \\d+$/);\n  assert.equal(setup.selectedOptionId, "1280x960");\n});\n\ntest("Ajuste de 1 em 1 ponto e calibração adaptativa respeitam os limites válidos (0..200)", () => {
+test("Recomendação de resolução identifica Pixels sem alterar as dimensões calculadas", () => {
+  const engine = loadEngine();
+  const setup = engine.recommendDisplaySetup({ processador: "intermediario", ram: 8 });
+  assert.match(setup.resolutionLabel, /^Pixels · /);
+  assert.ok(setup.resolution.includes(" × "));
+  assert.equal(setup.selectedOptionId, "1280x960");
+});
+
+test("Ajuste de 1 em 1 ponto e calibração adaptativa respeitam os limites válidos (0..200)", () => {
   const engine = loadEngine();
   let vals = {
     General: 199,
