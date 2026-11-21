@@ -65,7 +65,16 @@ function startApplyTweaks(){
  if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
  const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
  const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"", "Os outros itens selecionados são apenas orientações. Confirmar?"].filter(Boolean).join("\n\n");
- if(!window.confirm(warning)){applyStatus("Aplicação cancelada.");return}
+ const confirmBox=$("boostConfirmModal"),confirmText=$("boostConfirmMessage");
+ if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
+ confirmText.textContent=warning;
+ confirmBox.classList.remove("hidden");
+ confirmBox.setAttribute("aria-hidden","false");
+ confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,pkg,version});
+ return;
+}
+function executeConfirmedTweaks(payload){
+ const {keys,doAnimations,doMassinha,pkg,version}=payload;
  const messages=[];
  try{
   if(doAnimations){if(typeof bridge.applySafeTweak!=="function")messages.push("Animações Leves: função indisponível nesta versão.");else{const r=parse(bridge.applySafeTweak("animations"));messages.push(r?.message||(r?.ok?"Animações Leves aplicadas.":"Falha ao aplicar Animações Leves."));}}
@@ -74,6 +83,7 @@ function startApplyTweaks(){
   applyStatus(messages.join(" "));
  }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
 }
+function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
 
 let lastDeviceSnapshot=null;
@@ -120,6 +130,9 @@ const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. F
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
 function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado","Autorização confirmada. Os tweaks via Shizuku estão liberados para execução.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
 document.addEventListener("DOMContentLoaded",()=>{
+const confirmCancel=$("boostConfirmCancel"),confirmAccept=$("boostConfirmAccept"),confirmModal=$("boostConfirmModal");
+confirmCancel?.addEventListener("click",()=>{closeBoostConfirm();applyStatus("Aplicação cancelada. Nenhuma alteração foi feita.");});
+confirmAccept?.addEventListener("click",()=>{const payload=parse(confirmModal?.dataset.pending||"");closeBoostConfirm();if(payload)executeConfirmedTweaks(payload);else applyStatus("Confirmação expirada. Nenhuma alteração foi feita.");});
 document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
 const massinhaPackage=$("massinhaTargetPackage");
 function massinhaCommands(){
