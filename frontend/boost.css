@@ -92,3 +92,14 @@
 .heat-shield-card>button{width:100%}
 @media(max-width:380px){.heat-shield-state{align-items:flex-start}.heat-shield-state small{width:100%;margin-left:18px}.heat-shield-metrics{grid-template-columns:1fr 1fr}.heat-shield-metrics>div:last-child{grid-column:1/-1}}
 @media(prefers-reduced-motion:reduce){.heat-shield-meter>span{transition:none}}
+
+/* In-app confirmation dialog: replaces WebView native file:// confirm prompt */
+.boost-confirm-modal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px}
+.boost-confirm-modal.hidden{display:none}
+.boost-confirm-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.76);backdrop-filter:blur(7px)}
+.boost-confirm-panel{position:relative;width:min(100%,430px);padding:22px;border:1px solid rgba(99,244,226,.28);border-radius:20px;background:#101720;box-shadow:0 24px 80px rgba(0,0,0,.55)}
+.boost-confirm-kicker{font-size:9px;font-weight:800;letter-spacing:.14em;color:#63e6d3}
+.boost-confirm-panel h2{margin:9px 0;font-size:20px;color:#f5f7fa}
+.boost-confirm-panel p{margin:0;color:#b7c2ce;font-size:12px;line-height:1.65;white-space:pre-line}
+.boost-confirm-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:20px}
+.boost-confirm-actions button{flex:1 1 140px;min-height:42px}
