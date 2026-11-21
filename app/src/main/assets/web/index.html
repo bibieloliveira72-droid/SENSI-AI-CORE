@@ -455,6 +455,18 @@
     </main>
   </div>
 
+  <div id="boostConfirmModal" class="boost-confirm-modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="boostConfirmTitle">
+    <div class="boost-confirm-backdrop"></div>
+    <section class="boost-confirm-panel">
+      <span class="boost-confirm-kicker">CONFIRMAÇÃO DE SEGURANÇA</span>
+      <h2 id="boostConfirmTitle">Aplicar ajustes?</h2>
+      <p id="boostConfirmMessage"></p>
+      <div class="boost-confirm-actions">
+        <button type="button" id="boostConfirmCancel" class="btn-secondary">CANCELAR</button>
+        <button type="button" id="boostConfirmAccept" class="btn-primary">CONFIRMAR APLICAÇÃO</button>
+      </div>
+    </section>
+  </div>
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="./sensi-engine.js" defer></script>
