@@ -189,9 +189,17 @@ $("boostBuildPlan")?.addEventListener("click",buildPlan);
 $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
 
 $("boostRestoreTweaks")?.addEventListener("click",()=>{
- if(!bridge||typeof bridge.restoreSafeTweak!=="function"){applyStatus("A restauração exige o APK Android com Shizuku.");return}
- try{const messages=[];const a=parse(bridge.restoreSafeTweak("animations"));if(a?.ok)messages.push(a.message);if(typeof bridge.restoreMassinhaTweak==="function"){const m=parse(bridge.restoreMassinhaTweak());if(m?.ok)messages.push(m.message);}applyStatus(messages.length?messages.join(" "):(a?.message||"Nenhum backup disponível."));}
- catch(_){applyStatus("Falha ao restaurar. Verifique Shizuku.")}
+ if(!bridge||typeof bridge.restoreSafeTweak!=="function"||typeof bridge.restoreMassinhaTweak!=="function"){applyStatus("A restauração exige o APK Android com Shizuku atualizado.");return}
+ try{
+  const a=parse(bridge.restoreSafeTweak("animations"));
+  const m=parse(bridge.restoreMassinhaTweak());
+  const messages=[];
+  if(a?.ok)messages.push("Animações: "+(a.message||"backup restaurado."));
+  else messages.push("Animações: "+(a?.message||"não foi possível restaurar."));
+  if(m?.ok)messages.push("Gráficos Massinha: "+(m.message||"backup restaurado."));
+  else messages.push("Gráficos Massinha: "+(m?.message||"não foi possível restaurar."));
+  applyStatus(messages.join(" "));
+ }catch(error){applyStatus("Falha ao restaurar: "+String(error?.message||"verifique Shizuku."))}
 });
 $("boostRefreshBtn")?.addEventListener("click",()=>{try{refresh()}catch(_){put("boostAdvice","Não foi possível ler os dados do Android. Tente novamente.")}});
 $("heatShieldRefresh")?.addEventListener("click",()=>{try{refresh()}catch(_){updateHeatShield(lastDeviceSnapshot);put("heatShieldAdvice","Não foi possível atualizar a leitura. Tente novamente.")}});
