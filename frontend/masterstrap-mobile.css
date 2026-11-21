@@ -50,3 +50,28 @@ html,body{background:var(--ms-mobile-bg)!important;color:var(--ms-mobile-text)}b
   .tab-bar{height:66px!important;min-height:66px!important;max-height:66px!important;grid-template-rows:54px!important;grid-auto-rows:54px!important}
   .tab-bar>.tab-btn{height:54px!important;min-height:54px!important;max-height:54px!important}
 }
+
+/* v3.0.0 build 26: compact, categorized Boost tools and experimental graphics */
+.boost-function-groups{display:grid;gap:8px;margin:8px 0 12px}
+.boost-function-group{overflow:hidden;border:1px solid rgba(255,255,255,.085);border-radius:13px;background:rgba(255,255,255,.018)}
+.boost-function-group>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:45px;padding:11px 12px;list-style:none;color:#e8ebf2;font-size:.66rem;font-weight:850;letter-spacing:.045em;cursor:pointer}
+.boost-function-group>summary::-webkit-details-marker{display:none}
+.boost-function-group>summary:after{content:"＋";color:#83aaff;font-size:1rem}
+.boost-function-group[open]>summary:after{content:"−"}
+.boost-function-group>summary small{margin-left:auto;color:#858b99;font-size:.56rem;font-weight:650;letter-spacing:0}
+.boost-function-group .boost-multi-grid{padding:0 8px 9px;margin:0;grid-template-columns:1fr}
+.boost-experimental-card{border-color:rgba(132,157,255,.22);background:linear-gradient(145deg,rgba(30,34,48,.98),rgba(18,19,26,.98))}
+.boost-experimental-card .boost-card-heading h3 em{color:#9db8ff;font-style:normal}
+.boost-experimental-card .boost-massinha-inline{margin:10px 0 8px}
+.boost-experimental-actions .boost-option{border-color:rgba(139,164,255,.24);background:rgba(83,111,190,.09)}
+.boost-brevent-head{display:flex;align-items:center;justify-content:space-between;margin:14px 0 8px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+.boost-brevent-head>div{display:grid;gap:4px}
+.boost-brevent-head strong{color:#eef1f8;font-size:.8rem}
+.boost-brevent-head small{color:#999eaa;font-size:.61rem}
+.boost-command-grid{display:grid;grid-template-columns:1fr;gap:8px}
+.boost-command-grid .massinha-command-card{min-width:0;margin:0;padding:10px}
+.boost-command-grid .massinha-command-card pre{max-height:92px;overflow:auto}
+.boost-command-grid .massinha-command-card button{width:100%;min-height:37px}
+.massinha-copy-warning{margin:10px 0 6px;padding:10px 11px;border:1px solid rgba(255,183,91,.25);border-radius:10px;background:rgba(180,112,32,.09);color:#f0c78e;font-size:.62rem;line-height:1.5}
+.massinha-copy-warning strong{color:#ffd99e}
+@media(min-width:560px){.boost-command-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.boost-function-group .boost-multi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
