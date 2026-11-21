@@ -75,3 +75,51 @@ html,body{background:var(--ms-mobile-bg)!important;color:var(--ms-mobile-text)}b
 .massinha-copy-warning{margin:10px 0 6px;padding:10px 11px;border:1px solid rgba(255,183,91,.25);border-radius:10px;background:rgba(180,112,32,.09);color:#f0c78e;font-size:.62rem;line-height:1.5}
 .massinha-copy-warning strong{color:#ffd99e}
 @media(min-width:560px){.boost-command-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.boost-function-group .boost-multi-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* SENSI.AI 3.1.4: interface minimalista e leve */
+:root {
+  --bg-void: #0b0d11;
+  --bg-card: #13161c;
+  --bg-elevated: #191d25;
+  --bg-input: #0e1116;
+  --border-subtle: rgba(255,255,255,.08);
+  --border-red: rgba(239,68,68,.35);
+  --red-core: #dc343c;
+  --red-bright: #ef4444;
+  --red-dark: #b91c1c;
+  --text-primary: #f4f5f7;
+  --text-secondary: #a4aab5;
+  --text-muted: #747c89;
+}
+html, body { background:var(--bg-void)!important; }
+.bg-grid, .bg-glow, .ambient-orb, .hero-orbit, .touch-trail-canvas { display:none!important; }
+.app-shell { max-width:680px; }
+.brand-mark { background:#171a21!important; border:1px solid var(--border-subtle)!important; box-shadow:none!important; }
+.brand-sub { display:flex; flex-wrap:wrap; align-items:center; gap:5px; }
+.app-version { display:inline-flex; align-items:center; margin-left:5px; padding:2px 6px; border:1px solid var(--border-subtle); border-radius:6px; color:#c2c7d0; font:700 .62rem var(--font-mono); letter-spacing:.02em; }
+.offline-pill { min-height:32px; padding:5px 9px; background:#13161c; border-color:var(--border-subtle); color:#c8cdd5; }
+.status-dot { box-shadow:none!important; }
+.tab-bar { gap:4px!important; padding:4px!important; background:#11141a!important; border-color:var(--border-subtle)!important; border-radius:12px!important; }
+.tab-btn { border-radius:8px!important; color:#a6acb7!important; }
+.tab-btn.active { background:#282d36!important; color:#fff!important; border:1px solid #3b424e!important; box-shadow:none!important; }
+.card, .boost-card, .form-card, .hero-panel, .rl-card, .telegram-community-card { background:#13161c!important; border:1px solid var(--border-subtle)!important; border-radius:13px!important; box-shadow:none!important; }
+.hero-panel { padding:17px!important; margin-bottom:12px!important; }
+.hero-panel h2 { font-size:1.35rem!important; }
+.hero-panel p { color:var(--text-secondary)!important; }
+.card { padding:15px!important; }
+.btn-primary { background:#d93640!important; border:0!important; border-radius:10px!important; box-shadow:none!important; }
+.btn-secondary { box-shadow:none!important; }
+.input-control, .chip, .chip-mini, .profile-card { box-shadow:none!important; }
+.telegram-community-card { margin:0 0 14px!important; padding:13px!important; }
+.telegram-community-card .section-head { margin-bottom:9px!important; }
+.telegram-join-btn { min-height:43px!important; margin:0!important; font-size:.82rem!important; letter-spacing:.02em!important; }
+* { scroll-behavior:auto!important; animation:none!important; transition:none!important; text-shadow:none!important; filter:none!important; backdrop-filter:none!important; -webkit-backdrop-filter:none!important; box-shadow:none!important; }
+*:focus-visible { outline:2px solid #ef4444!important; outline-offset:2px; }
+@media(max-width:380px) {
+  .app-shell { padding-left:10px!important; padding-right:10px!important; }
+  .brand { gap:8px!important; }
+  .brand-title { font-size:1.18rem!important; }
+  .offline-pill { font-size:.58rem!important; }
+  .tab-btn { font-size:.58rem!important; }
+}
