@@ -29,7 +29,7 @@ O algoritmo produz sugestões iniciais com base nos dados informados. Não mede 
 
 ## Android 17 (API 37)
 - [ ] Build with `compileSdk = 37` and `targetSdk = 37`.
-- [ ] Confirm the CI runner installs `platforms;android-37`.
+- [ ] Confirm the CI runner installs `platforms;android-37` from the preview channel (`--channel=3`).
 - [ ] Run the full Boost flow on an Android 17 device or emulator.
 - [ ] Verify Shizuku authorization, allowed tweaks, and backup restoration.
 - [ ] Confirm diagnostic readings are labeled accurately and unavailable metrics are never fabricated.
