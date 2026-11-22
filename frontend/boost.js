@@ -75,7 +75,7 @@ function runGuideAction(key){
 function buildPlan(){
  const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();
  if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
- const executable=keys.filter(k=>k==="animations"||k==="massinha"),manual=keys.filter(k=>!executable.includes(k));
+ const executable=keys.filter(k=>["animations","massinha","game"].includes(k)),manual=keys.filter(k=>!executable.includes(k));
  const h=document.createElement("strong");h.textContent="Plano SENSI.AI · "+keys.length+" etapa(s)";box.append(h);
  const p=document.createElement("p");p.textContent=executable.length?executable.length+" ajuste(s) protegido(s) usam Shizuku, confirmação e backup. "+manual.length+" atalho(s) abrem painéis oficiais, atualizam diagnósticos ou copiam o relatório.":"Todas as etapas selecionadas agora possuem uma ação: abrir um painel do Android, atualizar uma leitura, iniciar o jogo ou copiar o relatório.";box.append(p);
  const group=(title,items)=>{if(!items.length)return;const heading=document.createElement("h4");heading.textContent=title;box.append(heading);const ol=document.createElement("ol");items.forEach(k=>{const li=document.createElement("li"),strong=document.createElement("b"),span=document.createElement("span"),button=document.createElement("button");strong.textContent=guides[k][0]+": ";span.textContent=guides[k][1];button.type="button";button.className="btn-ghost-sm boost-plan-action";button.textContent=guideActionLabels[k]||"EXECUTAR ETAPA";button.addEventListener("click",()=>runGuideAction(k));li.append(strong,span,button);ol.append(li)});box.append(ol)};
