@@ -896,3 +896,7 @@ body{background-image:radial-gradient(ellipse at 12% 0%,rgba(85,246,210,.09),tra
 
 /* Seletor de resoluções esticadas 4:3 */
 .resolution-picker-label{margin-top:3px;color:#91a5b3;font:800 .58rem var(--font-mono);letter-spacing:.05em}.resolution-picker{width:100%;min-height:39px;padding:8px;border:1px solid rgba(85,246,210,.25);border-radius:9px;background:#101d28;color:#eafffa;font-size:.72rem;font-weight:700;}
+
+
+/* SENSI.AI 3.2.0 violet identity */
+:root{--border-red:rgba(167,139,250,.42);--red-core:#8b5cf6;--red-bright:#b794f6;--red-dark:#6d28d9}.bg-glow{background:radial-gradient(circle,rgba(139,92,246,.22) 0%,rgba(139,92,246,0) 72%)}.brand-mark{border-color:rgba(167,139,250,.48);box-shadow:0 0 22px rgba(139,92,246,.2)}.brand-title span{color:#b794f6}.tab-btn.active{background:linear-gradient(135deg,#9b72f2 0%,#7043cf 100%);box-shadow:0 6px 18px rgba(139,92,246,.25)}.btn-primary{background:linear-gradient(135deg,#a783f5 0%,#7043cf 100%);box-shadow:0 7px 20px rgba(139,92,246,.2)}.badge{color:#e4d8ff;background:rgba(139,92,246,.14);border-color:rgba(167,139,250,.38)}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #c4b5fd;outline-offset:3px}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
