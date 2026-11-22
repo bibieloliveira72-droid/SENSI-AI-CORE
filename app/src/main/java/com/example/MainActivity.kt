@@ -190,9 +190,36 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
 
   @JavascriptInterface
   fun compileGameProfile(packageName: String): String {
-    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
-    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
-    return try { callSafeTweakService(6, packageName) } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha na compilação: " + (error.message ?: "erro desconhecido")).toString() }
+    // Mesma rota de execução do Benimaru: Shizuku.newProcess(sh -c ...).
+    // O pacote é validado por allowlist antes de entrar no comando.
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") {
+      return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    }
+    if (!isShizukuAuthorized()) {
+      return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    }
+    return try {
+      val command = "cmd package compile -m speed -f $packageName 2>&1"
+      val process = Shizuku.newProcess(arrayOf("sh", "-c", command), null, null)
+      val output = process.inputStream.bufferedReader().use { it.readText() }.trim()
+      val exitCode = process.waitFor()
+      if (exitCode == 0) {
+        JSONObject()
+          .put("ok", true)
+          .put("exitCode", exitCode)
+          .put("message", "Compilação ART no modo speed concluída para $packageName.")
+          .put("output", output.take(500))
+          .toString()
+      } else {
+        JSONObject()
+          .put("ok", false)
+          .put("exitCode", exitCode)
+          .put("message", "O Android recusou a compilação ART: " + output.take(300))
+          .toString()
+      }
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao executar pelo Shizuku: " + (error.message ?: "erro desconhecido")).toString()
+    }
   }
 
   @JavascriptInterface
