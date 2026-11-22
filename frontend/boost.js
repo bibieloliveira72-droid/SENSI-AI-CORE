@@ -109,6 +109,8 @@ function executeConfirmedTweaks(payload){
   if(doGameMode){if(typeof bridge.applyGameMode!=="function"){allApplied=false;messages.push("Modo de jogo: função indisponível nesta versão.");}else{const r=parse(bridge.applyGameMode(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Modo performance ativado.");}else{allApplied=false;messages.push(r?.message||"Falha no modo performance.");}}}
   if(doGame){if(typeof bridge.compileGameProfile!=="function"){allApplied=false;messages.push("Compilação: função indisponível nesta versão.");}else{const r=parse(bridge.compileGameProfile(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Compilação concluída.");}else{allApplied=false;messages.push(r?.message||"Falha na compilação.");}}}
   const manual=keys.filter(k=>!["animations","massinha","game","gameMode"].includes(k));if(manual.length)messages.push(manual.length+" função(ões) ainda não possuem executor automático.");
+  if(gm?.ok)messages.push("Modo de jogo: "+(gm.message||"restaurado."));
+  else if(gm?.message&& !gm.message.includes("Nenhum modo performance"))messages.push("Modo de jogo: "+gm.message);
   applyStatus(messages.join(" "));
   if(allApplied&&appliedCount>0&&appSettings.autoOpenFreeFire){put("boostApplyStatus",messages.join(" ")+" Abrindo o jogo conforme sua preferência…");openFreeFire(false);}
  }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
@@ -219,6 +221,8 @@ $("boostRestoreTweaks")?.addEventListener("click",()=>{
  try{
   const a=parse(bridge.restoreSafeTweak("animations"));
   const m=parse(bridge.restoreMassinhaTweak());
+  const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth";
+  const gm=typeof bridge.restoreGameMode==="function"?parse(bridge.restoreGameMode(pkg)):null;
   const messages=[];
   if(a?.ok)messages.push("Animações: "+(a.message||"backup restaurado."));
   else messages.push("Animações: "+(a?.message||"não foi possível restaurar."));
