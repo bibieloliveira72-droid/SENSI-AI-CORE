@@ -56,3 +56,7 @@ test("atalhos nativos usam telas oficiais do Android e não encerram apps", () =
   assert.match(android, /ACTION_MANAGE_APPLICATIONS_SETTINGS/);
   assert.doesNotMatch(js, /am force-stop.*(spotify|com\.spotify)/i);
 });
+
+test("o plano é montado antes de verificar Shizuku para não bloquear os atalhos", () => {
+  assert.match(js, /function startApplyTweaks\(\)[\s\S]*?buildPlan\(\);[\s\S]*?getShizukuStatus/);
+});

@@ -85,6 +85,7 @@ function buildPlan(){
 function startApplyTweaks(){
  const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha");
  if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
+ buildPlan();
  if(!doAnimations&&!doMassinha){buildPlan();applyStatus("Plano montado. Agora cada etapa tem seu próprio botão para abrir o painel correto, atualizar o diagnóstico ou copiar o relatório. Nenhuma alteração foi feita sem sua escolha.");return}
  if(!bridge||typeof bridge.getShizukuStatus!=="function"){applyStatus("A execução de ajustes exige o APK Android com Shizuku.");return}
  const auth=parse(bridge.getShizukuStatus());
