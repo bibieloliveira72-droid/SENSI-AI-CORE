@@ -17,6 +17,8 @@ class SafeTweakUserService : Binder() {
   private const val RESTORE_GAME_MODE=8
   private const val APPLY_SHADER_DRIVER=9
   private const val RESTORE_SHADER_DRIVER=10
+  private const val APPLY_REFRESH_RATE=11
+  private const val RESTORE_REFRESH_RATE=12
   private val animKeys=listOf("window_animation_scale","transition_animation_scale","animator_duration_scale")
   private const val SETTINGS="/system/bin/settings"
   private const val GETPROP="/system/bin/getprop"
@@ -28,7 +30,7 @@ class SafeTweakUserService : Binder() {
   private val allowed=setOf("com.dts.freefireth","com.dts.freefiremax")
  }
  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
-  if(code !in APPLY_ANIMATIONS..RESTORE_SHADER_DRIVER)return super.onTransact(code,data,reply,flags)
+  if(code !in APPLY_ANIMATIONS..RESTORE_REFRESH_RATE)return super.onTransact(code,data,reply,flags)
   data.enforceInterface(DESCRIPTOR)
   val result=try{when(code){
    APPLY_ANIMATIONS->applyAnimations()
@@ -41,6 +43,8 @@ class SafeTweakUserService : Binder() {
    RESTORE_GAME_MODE->gameMode(data.readString().orEmpty(), false)
    APPLY_SHADER_DRIVER->applyShaderDriver(data.readString().orEmpty())
    RESTORE_SHADER_DRIVER->restoreShaderDriver(data.readString().orEmpty())
+   APPLY_REFRESH_RATE->applyRefreshRate(data.readString().orEmpty())
+   RESTORE_REFRESH_RATE->restoreRefreshRate(data.readString().orEmpty())
    else->JSONObject().put("ok",false)
   }}catch(e:Throwable){JSONObject().put("ok",false).put("message",e.message?:"Shizuku operation failed")}
   reply?.writeNoException();reply?.writeString(result.toString());return true
@@ -59,6 +63,35 @@ class SafeTweakUserService : Binder() {
   val result=run("/system/bin/cmd","package","compile","-m","speed","-f",pkg)
   if(result.first!=0) return JSONObject().put("ok",false).put("exitCode",result.first).put("message","Compilação do jogo falhou: "+result.second)
   return JSONObject().put("ok",true).put("exitCode",result.first).put("message","Compilação ART speed -f concluída para "+pkg+".")
+ }
+ private fun applyRefreshRate(raw:String):JSONObject {
+  val q=JSONObject(raw)
+  val hz=q.getInt("hz")
+  require(hz in 30..240) { "Taxa de atualização fora do intervalo permitido." }
+  val oldMin=run(SETTINGS,"get","system","min_refresh_rate")
+  val oldMax=run(SETTINGS,"get","system","peak_refresh_rate")
+  if(oldMin.first!=0||oldMax.first!=0) error("Não foi possível ler os valores atuais de Hz.")
+  val backup=JSONObject().put("min",oldMin.second.trim().ifBlank{"null"}).put("max",oldMax.second.trim().ifBlank{"null"})
+  try {
+   val a=run(SETTINGS,"put","system","min_refresh_rate",hz.toString())
+   if(a.first!=0) error("Falha ao definir Hz mínimo: "+a.second)
+   val b=run(SETTINGS,"put","system","peak_refresh_rate",hz.toString())
+   if(b.first!=0) error("Falha ao definir Hz máximo: "+b.second)
+  } catch(e:Throwable) {
+   restoreRefreshRate(backup.toString())
+   throw e
+  }
+  return JSONObject().put("ok",true).put("backup",backup).put("message","Taxa de atualização solicitada em $hz Hz. O painel pode limitar valores não suportados.")
+ }
+ private fun restoreRefreshRate(raw:String):JSONObject {
+  val b=JSONObject(raw)
+  writeSystemSetting("min_refresh_rate",b.getString("min"))
+  writeSystemSetting("peak_refresh_rate",b.getString("max"))
+  return JSONObject().put("ok",true).put("message","Taxa de atualização anterior restaurada.")
+ }
+ private fun writeSystemSetting(key:String,value:String) {
+  val r=if(value=="null") run(SETTINGS,"delete","system",key) else run(SETTINGS,"put","system",key,value)
+  if(r.first!=0) error("Falha ao restaurar $key: "+r.second)
  }
  private fun readSetting(key:String):String {
   val r=run(SETTINGS,"get","global",key)
