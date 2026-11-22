@@ -45,7 +45,7 @@ accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os qu
 const guideActionLabels={
 game:"COMPILAR PERFIL",gameMode:"ATIVAR MODO PERFORMANCE",massinha:"APLICAR COM SHIZUKU",memory:"DIAGNÓSTICO + APPS",thermal:"ATUALIZAR TEMPERATURA",battery:"ABRIR BATERIA",network:"ABRIR WI-FI",touch:"ABRIR TELA / TOQUE",display:"ABRIR TELA",animations:"APLICAR 0,5x",storage:"ABRIR ARMAZENAMENTO",background:"ABRIR APPS",sound:"ABRIR ÁUDIO",privacy:"ABRIR PRIVACIDADE",report:"COPIAR RELATÓRIO",refresh:"ATUALIZAR DIAGNÓSTICO",notifications:"ABRIR NOTIFICAÇÕES",updates:"ABRIR CONFIGURAÇÕES",accessibility:"ABRIR ACESSIBILIDADE"
 };
-const recommended={stable:["animations","game","memory","thermal","display","background","refresh"],cool:["animations","thermal","display","battery","game"],battery:["animations","battery","display","background","updates"],network:["animations","network","updates","notifications"],balanced:["animations","game","memory","thermal","network","display","refresh"]};
+const recommended={stable:["animations","game","gameMode"],cool:["animations","game","gameMode"],battery:["animations"],network:["animations"],balanced:["animations","game","gameMode"]};
 let activeBoostProfile="stable";
 function selected(){return [...document.querySelectorAll("#tab-boost input[type=checkbox]:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
@@ -84,7 +84,7 @@ function buildPlan(){
  const note=document.createElement("small");note.textContent="Os atalhos não encerram aplicativos nem alteram opções silenciosamente. Spotify, Shizuku e serviços importantes são preservados.";box.append(note);
 }
 function startApplyTweaks(){
- const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha"),doGame=keys.includes("game");
+ const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha"),doGame=keys.includes("game"),doGameMode=keys.includes("gameMode");
  if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
  buildPlan();
  if(!doAnimations&&!doMassinha&&!doGame&&!doGameMode){buildPlan();applyStatus("Nenhuma ação executável foi selecionada. Escolha uma função compatível com Shizuku.");return}
@@ -108,11 +108,9 @@ function executeConfirmedTweaks(payload){
   if(doMassinha){if(typeof bridge.applyMassinhaTweak!=="function"){allApplied=false;messages.push("Gráficos Massinha: função indisponível nesta versão.");}else{const r=parse(bridge.applyMassinhaTweak(version,pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Gráficos Massinha aplicados.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Gráficos Massinha.");}}}
   if(doGameMode){if(typeof bridge.applyGameMode!=="function"){allApplied=false;messages.push("Modo de jogo: função indisponível nesta versão.");}else{const r=parse(bridge.applyGameMode(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Modo performance ativado.");}else{allApplied=false;messages.push(r?.message||"Falha no modo performance.");}}}
   if(doGame){if(typeof bridge.compileGameProfile!=="function"){allApplied=false;messages.push("Compilação: função indisponível nesta versão.");}else{const r=parse(bridge.compileGameProfile(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Compilação concluída.");}else{allApplied=false;messages.push(r?.message||"Falha na compilação.");}}}
-  const manual=keys.filter(k=>!["animations","massinha","game","gameMode"].includes(k));if(manual.length)messages.push(manual.length+" função(ões) ainda não possuem executor automático.");
-  if(gm?.ok)messages.push("Modo de jogo: "+(gm.message||"restaurado."));
-  else if(gm?.message&& !gm.message.includes("Nenhum modo performance"))messages.push("Modo de jogo: "+gm.message);
-  applyStatus(messages.join(" "));
-  if(allApplied&&appliedCount>0&&appSettings.autoOpenFreeFire){put("boostApplyStatus",messages.join(" ")+" Abrindo o jogo conforme sua preferência…");openFreeFire(false);}
+  const manual=keys.filter(k=>!["animations","massinha","game","gameMode"].includes(k));if(manual.length){allApplied=false;messages.push(manual.length+" opção(ões) ainda não têm módulo portado e foram ignoradas.");}
+  if(allApplied&&appliedCount>0){put("boostApplyStatus",messages.join(" ")+" Otimizações concluídas. Abrindo o jogo…");openFreeFire(false);}
+  else { applyStatus(messages.join(" ")+" O jogo não será aberto porque nem todas as operações foram concluídas."); }
  }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
 }
 function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
@@ -224,6 +222,8 @@ $("boostRestoreTweaks")?.addEventListener("click",()=>{
   const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth";
   const gm=typeof bridge.restoreGameMode==="function"?parse(bridge.restoreGameMode(pkg)):null;
   const messages=[];
+  if(gm?.ok)messages.push("Modo de jogo: "+(gm.message||"restaurado."));
+  else if(gm?.message&&!gm.message.includes("Nenhum modo performance"))messages.push("Modo de jogo: "+gm.message);
   if(a?.ok)messages.push("Animações: "+(a.message||"backup restaurado."));
   else messages.push("Animações: "+(a?.message||"não foi possível restaurar."));
   if(m?.ok)messages.push("Gráficos Massinha: "+(m.message||"backup restaurado."));
