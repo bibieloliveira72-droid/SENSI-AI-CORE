@@ -22,7 +22,7 @@ const message=opened?"Free Fire iniciado. Boa partida!": "Não encontrei essa ve
 put("settingsStatus",message);if(!manual)applyStatus(message);return opened
 }
 const guides={
-game:["Compilar perfil do jogo","Solicita ao Android a compilação ART speed-profile do Free Fire selecionado. Pode levar algum tempo; o Android pode ignorar ou não oferecer ganho perceptível."],
+game:["Compilar perfil do jogo","Solicita ao Android a compilação ART speed do Free Fire selecionado. Pode levar algum tempo; o Android pode ignorar ou não oferecer ganho perceptível."],
 massinha:["Gráficos Massinha","Perfil ANGLE V1 ou V2 para Free Fire. O jogo selecionado será encerrado para recarregar; faça backup e use apenas se aceitar essa alteração."],
 memory:["Revisar memória","Atualize o diagnóstico. Feche manualmente apenas apps que você abriu e não está usando. Mantenha música e comunicação se precisar delas."],
 thermal:["Controle térmico","Observe temperatura e alertas. Se aquecer, pause e deixe esfriar naturalmente. Evite jogar carregando ou sob sol direto."],
@@ -91,7 +91,7 @@ function startApplyTweaks(){
  const auth=parse(bridge.getShizukuStatus());
  if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
  const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
- const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"",doGame?"Executar compilação ART speed-profile para "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". Isso reorganiza a compilação do app; não garante aumento de FPS.":"", "As ferramentas de apoio não serão alteradas automaticamente. Confirmar?"].filter(Boolean).join("\n\n");
+ const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"",doGame?"Executar compilação ART speed para "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". Isso reorganiza a compilação do app; não garante aumento de FPS.":"", "As ferramentas de apoio não serão alteradas automaticamente. Confirmar?"].filter(Boolean).join("\n\n");
  const confirmBox=$("boostConfirmModal"),confirmText=$("boostConfirmMessage");
  if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
  confirmText.textContent=warning;
