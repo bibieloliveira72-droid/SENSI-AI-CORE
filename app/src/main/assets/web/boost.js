@@ -229,8 +229,10 @@ $("boostRestoreTweaks")?.addEventListener("click",()=>{
   const gm=typeof bridge.restoreGameMode==="function"?parse(bridge.restoreGameMode(pkg)):null;
   const messages=[];
   if(hz?.ok)messages.push("Taxa de atualização: "+(hz.message||"restaurada."));
-  else if(hz?.message&&!hz.message.includes("Nenhum backup"))messages.push("Taxa de atualização: "+hz.message);\n  if(sh?.ok)messages.push("Driver gráfico: "+(sh.message||"restaurado."));
-  else if(sh?.message&&!sh.message.includes("Nenhum backup"))messages.push("Driver gráfico: "+sh.message);\n  if(gm?.ok)messages.push("Modo de jogo: "+(gm.message||"restaurado."));
+  else if(hz?.message&&!hz.message.includes("Nenhum backup"))messages.push("Taxa de atualização: "+hz.message);
+  if(sh?.ok)messages.push("Driver gráfico: "+(sh.message||"restaurado."));
+  else if(sh?.message&&!sh.message.includes("Nenhum backup"))messages.push("Driver gráfico: "+sh.message);
+  if(gm?.ok)messages.push("Modo de jogo: "+(gm.message||"restaurado."));
   else if(gm?.message&&!gm.message.includes("Nenhum modo performance"))messages.push("Modo de jogo: "+gm.message);
   if(a?.ok)messages.push("Animações: "+(a.message||"backup restaurado."));
   else messages.push("Animações: "+(a?.message||"não foi possível restaurar."));
