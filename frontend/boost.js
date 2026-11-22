@@ -22,7 +22,9 @@ const message=opened?"Free Fire iniciado. Boa partida!": "Não encontrei essa ve
 put("settingsStatus",message);if(!manual)applyStatus(message);return opened
 }
 const guides={
-game:["Compilar perfil do jogo","Compila o jogo com o modo ART speed -f do Benimaru."],\nshader:["Driver gráfico Benimaru","Seleciona ANGLE, nativo ou padrão para o Free Fire com backup restaurável."],\nrefreshRate:["Taxa de atualização","Aplica um limite de Hz escolhido e guarda os valores anteriores."],
+game:["Compilar perfil do jogo","Compila o jogo com o modo ART speed -f do Benimaru."],
+shader:["Driver gráfico Benimaru","Seleciona ANGLE, nativo ou padrão para o Free Fire com backup restaurável."],
+refreshRate:["Taxa de atualização","Aplica um limite de Hz escolhido e guarda os valores anteriores."],
 gameMode:["Modo de desempenho do jogo","Ativa o modo performance nativo do Android para o Free Fire. Pode não existir em todos os aparelhos; restauração para modo padrão."],
 massinha:["Gráficos Massinha","Perfil ANGLE V1 ou V2 para Free Fire. O jogo selecionado será encerrado para recarregar; faça backup e use apenas se aceitar essa alteração."],
 memory:["Revisar memória","Atualize o diagnóstico. Feche manualmente apenas apps que você abriu e não está usando. Mantenha música e comunicação se precisar delas."],
@@ -105,7 +107,9 @@ function executeConfirmedTweaks(payload){
  const {keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver,hz}=payload,messages=[];let allApplied=true,appliedCount=0;
  try{
   if(doAnimations){if(typeof bridge.applySafeTweak!=="function"){allApplied=false;messages.push("Animações Leves: função indisponível nesta versão.");}else{const r=parse(bridge.applySafeTweak("animations"));if(r?.ok){appliedCount++;messages.push(r.message||"Animações Leves aplicadas.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Animações Leves.");}}}
-  if(doRefreshRate){if(typeof bridge.applyBenimaruRefreshRate!=="function"){allApplied=false;messages.push("Taxa de atualização: função indisponível nesta versão.");}else{const r=parse(bridge.applyBenimaruRefreshRate(Number(hz||90)));if(r?.ok){appliedCount++;messages.push(r.message||"Taxa de atualização aplicada.");}else{allApplied=false;messages.push(r?.message||"Falha ao ajustar Hz.");}}}\n  if(doShader){if(typeof bridge.applyBenimaruShaderDriver!=="function"){allApplied=false;messages.push("Driver gráfico: função indisponível nesta versão.");}else{const r=parse(bridge.applyBenimaruShaderDriver(pkg,driver||"angle"));if(r?.ok){appliedCount++;messages.push(r.message||"Driver gráfico aplicado.");}else{allApplied=false;messages.push(r?.message||"Falha no driver gráfico.");}}}\n  if(doMassinha){if(typeof bridge.applyMassinhaTweak!=="function"){allApplied=false;messages.push("Gráficos Massinha: função indisponível nesta versão.");}else{const r=parse(bridge.applyMassinhaTweak(version,pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Gráficos Massinha aplicados.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Gráficos Massinha.");}}}
+  if(doRefreshRate){if(typeof bridge.applyBenimaruRefreshRate!=="function"){allApplied=false;messages.push("Taxa de atualização: função indisponível nesta versão.");}else{const r=parse(bridge.applyBenimaruRefreshRate(Number(hz||90)));if(r?.ok){appliedCount++;messages.push(r.message||"Taxa de atualização aplicada.");}else{allApplied=false;messages.push(r?.message||"Falha ao ajustar Hz.");}}}
+  if(doShader){if(typeof bridge.applyBenimaruShaderDriver!=="function"){allApplied=false;messages.push("Driver gráfico: função indisponível nesta versão.");}else{const r=parse(bridge.applyBenimaruShaderDriver(pkg,driver||"angle"));if(r?.ok){appliedCount++;messages.push(r.message||"Driver gráfico aplicado.");}else{allApplied=false;messages.push(r?.message||"Falha no driver gráfico.");}}}
+  if(doMassinha){if(typeof bridge.applyMassinhaTweak!=="function"){allApplied=false;messages.push("Gráficos Massinha: função indisponível nesta versão.");}else{const r=parse(bridge.applyMassinhaTweak(version,pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Gráficos Massinha aplicados.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Gráficos Massinha.");}}}
   if(doGameMode){if(typeof bridge.applyGameMode!=="function"){allApplied=false;messages.push("Modo de jogo: função indisponível nesta versão.");}else{const r=parse(bridge.applyGameMode(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Modo performance ativado.");}else{allApplied=false;messages.push(r?.message||"Falha no modo performance.");}}}
   if(doGame){if(typeof bridge.compileGameProfile!=="function"){allApplied=false;messages.push("Compilação: função indisponível nesta versão.");}else{const r=parse(bridge.compileGameProfile(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Compilação concluída.");}else{allApplied=false;messages.push(r?.message||"Falha na compilação.");}}}
   const manual=keys.filter(k=>!["animations","massinha","game","gameMode","shader","refreshRate"].includes(k));if(manual.length){allApplied=false;messages.push(manual.length+" opção(ões) ainda não têm módulo portado e foram ignoradas.");}
@@ -220,9 +224,13 @@ $("boostRestoreTweaks")?.addEventListener("click",()=>{
   const a=parse(bridge.restoreSafeTweak("animations"));
   const m=parse(bridge.restoreMassinhaTweak());
   const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth";
-  const hz=typeof bridge.restoreBenimaruRefreshRate==="function"?parse(bridge.restoreBenimaruRefreshRate()):null;\n  const sh=typeof bridge.restoreBenimaruShaderDriver==="function"?parse(bridge.restoreBenimaruShaderDriver(pkg)):null;\n  const gm=typeof bridge.restoreGameMode==="function"?parse(bridge.restoreGameMode(pkg)):null;
+  const hz=typeof bridge.restoreBenimaruRefreshRate==="function"?parse(bridge.restoreBenimaruRefreshRate()):null;
+  const sh=typeof bridge.restoreBenimaruShaderDriver==="function"?parse(bridge.restoreBenimaruShaderDriver(pkg)):null;
+  const gm=typeof bridge.restoreGameMode==="function"?parse(bridge.restoreGameMode(pkg)):null;
   const messages=[];
-  if(hz?.ok)messages.push("Taxa de atualização: "+(hz.message||"restaurada."));\n  else if(hz?.message&&!hz.message.includes("Nenhum backup"))messages.push("Taxa de atualização: "+hz.message);\n  if(sh?.ok)messages.push("Driver gráfico: "+(sh.message||"restaurado."));\n  else if(sh?.message&&!sh.message.includes("Nenhum backup"))messages.push("Driver gráfico: "+sh.message);\n  if(gm?.ok)messages.push("Modo de jogo: "+(gm.message||"restaurado."));
+  if(hz?.ok)messages.push("Taxa de atualização: "+(hz.message||"restaurada."));
+  else if(hz?.message&&!hz.message.includes("Nenhum backup"))messages.push("Taxa de atualização: "+hz.message);\n  if(sh?.ok)messages.push("Driver gráfico: "+(sh.message||"restaurado."));
+  else if(sh?.message&&!sh.message.includes("Nenhum backup"))messages.push("Driver gráfico: "+sh.message);\n  if(gm?.ok)messages.push("Modo de jogo: "+(gm.message||"restaurado."));
   else if(gm?.message&&!gm.message.includes("Nenhum modo performance"))messages.push("Modo de jogo: "+gm.message);
   if(a?.ok)messages.push("Animações: "+(a.message||"backup restaurado."));
   else messages.push("Animações: "+(a?.message||"não foi possível restaurar."));
