@@ -269,7 +269,7 @@
 
     // Motor 3.2: curva não linear de DPI + resposta do botão + estabilidade por mira.
     // RAM, chipset e Hz não são tratados como sensores de toque: não alteram a mira sem medição real.
-    const dpiPosition = clamp((cfg.dpi - 200) / 1400, 0, 1) / 1;
+    const dpiPosition = Math.max(0, Math.min(1, (cfg.dpi - 200) / 1400));
     const dpiCurve = Math.tanh((0.48 - dpiPosition) * 2.15) * 86;
     const buttonPosition = (cfg.fireButtonSize - 52) / 38;
     const buttonCurve = Math.sign(buttonPosition) * Math.pow(Math.abs(buttonPosition), 0.82) * 10.5;

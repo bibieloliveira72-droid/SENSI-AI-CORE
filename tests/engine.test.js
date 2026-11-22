@@ -105,6 +105,8 @@ test("Motor 3.2 usa curva não linear por mira e identifica sua versão", () => 
   };
   const base = engine.generateSensitivity(input);
   const highDpi = engine.generateSensitivity({ ...input, dpi: 1100 });
+  const midDpi = engine.generateSensitivity({ ...input, dpi: 600 });
+  assert.notDeepEqual(base.values, midDpi.values, "A curva deve responder também às faixas intermediárias de DPI");
   const largeButton = engine.generateSensitivity({ ...input, fireButtonSize: 80 });
   assert.equal(base.engineVersion, "3.2");
   assert.notDeepEqual(base.values, highDpi.values);
