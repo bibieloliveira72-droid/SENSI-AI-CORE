@@ -8,7 +8,7 @@ const android = readFileSync(new URL("../app/src/main/java/com/example/MainActiv
 const profileLiteral = js.match(/const recommended=(\{[\s\S]*?\});\nlet activeBoostProfile/);
 assert.ok(profileLiteral, "Mapa de perfis precisa existir");
 const profiles = Function("return (" + profileLiteral[1] + ")")();
-const validActions = new Set(["animations","game","gameMode","shader","memory","thermal","battery","network","touch","display","storage","background","sound","privacy","report","refresh","notifications","updates","accessibility","massinha"]);
+const validActions = new Set(["animations","game","gameMode","shader","refreshRate","memory","thermal","battery","network","touch","display","storage","background","sound","privacy","report","refresh","notifications","updates","accessibility","massinha"]);
 
 test("os cinco perfis possuem uma lista válida e a ação executável reversível", () => {
   for (const name of ["stable","cool","battery","network","balanced"]) {
