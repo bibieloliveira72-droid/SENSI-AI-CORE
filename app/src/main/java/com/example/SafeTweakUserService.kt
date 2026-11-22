@@ -52,9 +52,9 @@ class SafeTweakUserService : Binder() {
  }
  private fun compileGame(pkg:String):JSONObject {
   require(pkg in allowed) { "Pacote de jogo não permitido." }
-  val result=run("/system/bin/cmd","package","compile","-m","speed-profile",pkg)
+  val result=run("/system/bin/cmd","package","compile","-m","speed","-f",pkg)
   if(result.first!=0) return JSONObject().put("ok",false).put("exitCode",result.first).put("message","Compilação do jogo falhou: "+result.second)
-  return JSONObject().put("ok",true).put("exitCode",result.first).put("message","Compilação speed-profile concluída para "+pkg+".")
+  return JSONObject().put("ok",true).put("exitCode",result.first).put("message","Compilação ART speed -f concluída para "+pkg+".")
  }
  private fun testAccess():JSONObject {
   // Read-only probe. This command runs inside the Shizuku-managed process.
