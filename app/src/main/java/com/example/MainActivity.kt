@@ -265,6 +265,41 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
   }
 
   @JavascriptInterface
+  fun applyBenimaruShaderDriver(packageName: String, driver: String): String {
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (driver !in setOf("angle", "native", "default")) return JSONObject().put("ok", false).put("message", "Driver inválido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "shader_backup_" + packageName
+    if (prefs.contains(key)) return JSONObject().put("ok", false).put("message", "Já existe um backup de driver para este jogo. Restaure antes de aplicar outra opção.").toString()
+    return try {
+      val payload = JSONObject().put("package", packageName).put("driver", driver).toString()
+      val result = callSafeTweakService(9, payload)
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) json.optJSONObject("backup")?.let { prefs.edit().putString(key, it.toString()).apply() }
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha no driver gráfico: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun restoreBenimaruShaderDriver(packageName: String): String {
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "shader_backup_" + packageName
+    val backup = prefs.getString(key, null) ?: return JSONObject().put("ok", false).put("message", "Nenhum backup de driver encontrado para este jogo.").toString()
+    return try {
+      val result = callSafeTweakService(10, backup)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove(key).apply()
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao restaurar driver: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
   fun restoreGameMode(packageName: String): String {
     if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
