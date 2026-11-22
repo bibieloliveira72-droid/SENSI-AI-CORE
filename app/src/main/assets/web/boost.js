@@ -45,7 +45,7 @@ accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os qu
 const guideActionLabels={
 game:"COMPILAR PERFIL",gameMode:"ATIVAR MODO PERFORMANCE",massinha:"APLICAR COM SHIZUKU",memory:"DIAGNÓSTICO + APPS",thermal:"ATUALIZAR TEMPERATURA",battery:"ABRIR BATERIA",network:"ABRIR WI-FI",touch:"ABRIR TELA / TOQUE",display:"ABRIR TELA",animations:"APLICAR 0,5x",storage:"ABRIR ARMAZENAMENTO",background:"ABRIR APPS",sound:"ABRIR ÁUDIO",privacy:"ABRIR PRIVACIDADE",report:"COPIAR RELATÓRIO",refresh:"ATUALIZAR DIAGNÓSTICO",notifications:"ABRIR NOTIFICAÇÕES",updates:"ABRIR CONFIGURAÇÕES",accessibility:"ABRIR ACESSIBILIDADE"
 };
-const recommended={stable:["animations","game","gameMode"],cool:["animations","game","gameMode"],battery:["animations"],network:["animations"],balanced:["animations","game","gameMode"]};
+const recommended={stable:["animations","game"],cool:["animations","game"],battery:["animations"],network:["animations"],balanced:["animations","game"]};
 let activeBoostProfile="stable";
 function selected(){return [...document.querySelectorAll("#tab-boost input[type=checkbox]:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
