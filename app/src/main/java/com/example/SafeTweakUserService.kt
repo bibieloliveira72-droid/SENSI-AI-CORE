@@ -15,6 +15,8 @@ class SafeTweakUserService : Binder() {
   private const val COMPILE_GAME=6
   private const val APPLY_GAME_MODE=7
   private const val RESTORE_GAME_MODE=8
+  private const val APPLY_SHADER_DRIVER=9
+  private const val RESTORE_SHADER_DRIVER=10
   private val animKeys=listOf("window_animation_scale","transition_animation_scale","animator_duration_scale")
   private const val SETTINGS="/system/bin/settings"
   private const val GETPROP="/system/bin/getprop"
@@ -26,7 +28,7 @@ class SafeTweakUserService : Binder() {
   private val allowed=setOf("com.dts.freefireth","com.dts.freefiremax")
  }
  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
-  if(code !in APPLY_ANIMATIONS..RESTORE_GAME_MODE)return super.onTransact(code,data,reply,flags)
+  if(code !in APPLY_ANIMATIONS..RESTORE_SHADER_DRIVER)return super.onTransact(code,data,reply,flags)
   data.enforceInterface(DESCRIPTOR)
   val result=try{when(code){
    APPLY_ANIMATIONS->applyAnimations()
@@ -37,6 +39,8 @@ class SafeTweakUserService : Binder() {
    COMPILE_GAME->compileGame(data.readString().orEmpty())
    APPLY_GAME_MODE->gameMode(data.readString().orEmpty(), true)
    RESTORE_GAME_MODE->gameMode(data.readString().orEmpty(), false)
+   APPLY_SHADER_DRIVER->applyShaderDriver(data.readString().orEmpty())
+   RESTORE_SHADER_DRIVER->restoreShaderDriver(data.readString().orEmpty())
    else->JSONObject().put("ok",false)
   }}catch(e:Throwable){JSONObject().put("ok",false).put("message",e.message?:"Shizuku operation failed")}
   reply?.writeNoException();reply?.writeString(result.toString());return true
@@ -55,6 +59,46 @@ class SafeTweakUserService : Binder() {
   val result=run("/system/bin/cmd","package","compile","-m","speed","-f",pkg)
   if(result.first!=0) return JSONObject().put("ok",false).put("exitCode",result.first).put("message","Compilação do jogo falhou: "+result.second)
   return JSONObject().put("ok",true).put("exitCode",result.first).put("message","Compilação ART speed -f concluída para "+pkg+".")
+ }
+ private fun readSetting(key:String):String {
+  val r=run(SETTINGS,"get","global",key)
+  if(r.first!=0) error("Falha ao ler $key: "+r.second)
+  return r.second.trim().ifBlank{"null"}
+ }
+ private fun writeSetting(key:String,value:String) {
+  val r=if(value=="null") run(SETTINGS,"delete","global",key) else run(SETTINGS,"put","global",key,value)
+  if(r.first!=0) error("Falha ao gravar $key: "+r.second)
+ }
+ private fun applyShaderDriver(raw:String):JSONObject {
+  val q=JSONObject(raw)
+  val pkg=q.getString("package")
+  val driver=q.getString("driver")
+  require(pkg in allowed) { "Pacote não permitido." }
+  require(driver in setOf("angle","native","default")) { "Driver inválido." }
+  val oldPkgs=readSetting(PKGS)
+  val oldValues=readSetting(VALUES)
+  val packages=if(oldPkgs=="null") mutableListOf() else oldPkgs.split(",").map{it.trim()}.filter{it.isNotEmpty()}.toMutableList()
+  val values=if(oldValues=="null") mutableListOf() else oldValues.split(",").map{it.trim()}.toMutableList()
+  if(packages.size!=values.size) error("Mapa ANGLE inconsistente. Nenhuma alteração foi aplicada.")
+  val backup=JSONObject().put("package",pkg).put("packages",oldPkgs).put("values",oldValues)
+  val index=packages.indexOf(pkg)
+  if(driver=="default") { if(index>=0){packages.removeAt(index);values.removeAt(index)} }
+  else if(index>=0) values[index]=driver else {packages.add(pkg);values.add(driver)}
+  try {
+   writeSetting(PKGS,if(packages.isEmpty()) "null" else packages.joinToString(","))
+   writeSetting(VALUES,if(values.isEmpty()) "null" else values.joinToString(","))
+  } catch(e:Throwable) {
+   writeSetting(PKGS,oldPkgs);writeSetting(VALUES,oldValues);throw e
+  }
+  return JSONObject().put("ok",true).put("backup",backup).put("message","Driver gráfico $driver configurado para $pkg. Reinicie o jogo para testar.")
+ }
+ private fun restoreShaderDriver(raw:String):JSONObject {
+  val b=JSONObject(raw)
+  val pkg=b.getString("package")
+  require(pkg in allowed) { "Pacote não permitido." }
+  writeSetting(PKGS,b.getString("packages"))
+  writeSetting(VALUES,b.getString("values"))
+  return JSONObject().put("ok",true).put("message","Configuração de driver gráfico original restaurada para $pkg.")
  }
  private fun testAccess():JSONObject {
   // Read-only probe. This command runs inside the Shizuku-managed process.
