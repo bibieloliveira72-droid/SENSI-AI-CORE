@@ -22,7 +22,8 @@ const message=opened?"Free Fire iniciado. Boa partida!": "Não encontrei essa ve
 put("settingsStatus",message);if(!manual)applyStatus(message);return opened
 }
 const guides={
-game:["Compilar perfil do jogo","Solicita ao Android a compilação ART speed do Free Fire selecionado. Pode levar algum tempo; o Android pode ignorar ou não oferecer ganho perceptível."],
+game:["Compilar perfil do jogo","Solicita ao Android a compilação ART speed-profile do Free Fire selecionado."],
+gameMode:["Modo de desempenho do jogo","Ativa o modo performance nativo do Android para o Free Fire. Pode não existir em todos os aparelhos; restauração para modo padrão."],
 massinha:["Gráficos Massinha","Perfil ANGLE V1 ou V2 para Free Fire. O jogo selecionado será encerrado para recarregar; faça backup e use apenas se aceitar essa alteração."],
 memory:["Revisar memória","Atualize o diagnóstico. Feche manualmente apenas apps que você abriu e não está usando. Mantenha música e comunicação se precisar delas."],
 thermal:["Controle térmico","Observe temperatura e alertas. Se aquecer, pause e deixe esfriar naturalmente. Evite jogar carregando ou sob sol direto."],
@@ -42,7 +43,7 @@ updates:["Atualizações","Agende downloads e atualizações para um horário co
 accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os que você usa. Não desative serviços essenciais para tentar ganhar desempenho."]
 };
 const guideActionLabels={
-game:"COMPILAR PERFIL",massinha:"APLICAR COM SHIZUKU",memory:"DIAGNÓSTICO + APPS",thermal:"ATUALIZAR TEMPERATURA",battery:"ABRIR BATERIA",network:"ABRIR WI-FI",touch:"ABRIR TELA / TOQUE",display:"ABRIR TELA",animations:"APLICAR 0,5x",storage:"ABRIR ARMAZENAMENTO",background:"ABRIR APPS",sound:"ABRIR ÁUDIO",privacy:"ABRIR PRIVACIDADE",report:"COPIAR RELATÓRIO",refresh:"ATUALIZAR DIAGNÓSTICO",notifications:"ABRIR NOTIFICAÇÕES",updates:"ABRIR CONFIGURAÇÕES",accessibility:"ABRIR ACESSIBILIDADE"
+game:"COMPILAR PERFIL",gameMode:"ATIVAR MODO PERFORMANCE",massinha:"APLICAR COM SHIZUKU",memory:"DIAGNÓSTICO + APPS",thermal:"ATUALIZAR TEMPERATURA",battery:"ABRIR BATERIA",network:"ABRIR WI-FI",touch:"ABRIR TELA / TOQUE",display:"ABRIR TELA",animations:"APLICAR 0,5x",storage:"ABRIR ARMAZENAMENTO",background:"ABRIR APPS",sound:"ABRIR ÁUDIO",privacy:"ABRIR PRIVACIDADE",report:"COPIAR RELATÓRIO",refresh:"ATUALIZAR DIAGNÓSTICO",notifications:"ABRIR NOTIFICAÇÕES",updates:"ABRIR CONFIGURAÇÕES",accessibility:"ABRIR ACESSIBILIDADE"
 };
 const recommended={stable:["animations","game","memory","thermal","display","background","refresh"],cool:["animations","thermal","display","battery","game"],battery:["animations","battery","display","background","updates"],network:["animations","network","updates","notifications"],balanced:["animations","game","memory","thermal","network","display","refresh"]};
 let activeBoostProfile="stable";
@@ -75,7 +76,7 @@ function runGuideAction(key){
 function buildPlan(){
  const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();
  if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
- const executable=keys.filter(k=>["animations","massinha","game"].includes(k)),manual=keys.filter(k=>!executable.includes(k));
+ const executable=keys.filter(k=>["animations","massinha","game","gameMode"].includes(k)),manual=keys.filter(k=>!executable.includes(k));
  const h=document.createElement("strong");h.textContent="Plano SENSI.AI · "+keys.length+" etapa(s)";box.append(h);
  const p=document.createElement("p");p.textContent=executable.length?executable.length+" ajuste(s) protegido(s) usam Shizuku, confirmação e backup. "+manual.length+" atalho(s) abrem painéis oficiais, atualizam diagnósticos ou copiam o relatório.":"Todas as etapas selecionadas agora possuem uma ação: abrir um painel do Android, atualizar uma leitura, iniciar o jogo ou copiar o relatório.";box.append(p);
  const group=(title,items)=>{if(!items.length)return;const heading=document.createElement("h4");heading.textContent=title;box.append(heading);const ol=document.createElement("ol");items.forEach(k=>{const li=document.createElement("li"),strong=document.createElement("b"),span=document.createElement("span"),button=document.createElement("button");strong.textContent=guides[k][0]+": ";span.textContent=guides[k][1];button.type="button";button.className="btn-ghost-sm boost-plan-action";button.textContent=guideActionLabels[k]||"EXECUTAR ETAPA";button.addEventListener("click",()=>runGuideAction(k));li.append(strong,span,button);ol.append(li)});box.append(ol)};
@@ -86,27 +87,28 @@ function startApplyTweaks(){
  const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha"),doGame=keys.includes("game");
  if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
  buildPlan();
- if(!doAnimations&&!doMassinha&&!doGame){buildPlan();applyStatus("Nenhuma ação executável foi selecionada. Escolha uma função compatível com Shizuku.");return}
+ if(!doAnimations&&!doMassinha&&!doGame&&!doGameMode){buildPlan();applyStatus("Nenhuma ação executável foi selecionada. Escolha uma função compatível com Shizuku.");return}
  if(!bridge||typeof bridge.getShizukuStatus!=="function"){applyStatus("A execução de ajustes exige o APK Android com Shizuku.");return}
  const auth=parse(bridge.getShizukuStatus());
  if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
  const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
- const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"",doGame?"Executar compilação ART speed para "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". Isso reorganiza a compilação do app; não garante aumento de FPS.":"", "As ferramentas de apoio não serão alteradas automaticamente. Confirmar?"].filter(Boolean).join("\n\n");
+ const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"",doGame?"Executar compilação ART speed-profile para "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+".":"",doGameMode?"Ativar modo de desempenho nativo do Android para "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". Pode não ser suportado pelo fabricante.":"", "As ferramentas de apoio não serão alteradas automaticamente. Confirmar?"].filter(Boolean).join("\n\n");
  const confirmBox=$("boostConfirmModal"),confirmText=$("boostConfirmMessage");
  if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
  confirmText.textContent=warning;
  confirmBox.classList.remove("hidden");
  confirmBox.setAttribute("aria-hidden","false");
- confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,doGame,pkg,version});
+ confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,doGame,doGameMode,pkg,version});
  return;
 }
 function executeConfirmedTweaks(payload){
- const {keys,doAnimations,doMassinha,doGame,pkg,version}=payload,messages=[];let allApplied=true,appliedCount=0;
+ const {keys,doAnimations,doMassinha,doGame,doGameMode,pkg,version}=payload,messages=[];let allApplied=true,appliedCount=0;
  try{
   if(doAnimations){if(typeof bridge.applySafeTweak!=="function"){allApplied=false;messages.push("Animações Leves: função indisponível nesta versão.");}else{const r=parse(bridge.applySafeTweak("animations"));if(r?.ok){appliedCount++;messages.push(r.message||"Animações Leves aplicadas.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Animações Leves.");}}}
   if(doMassinha){if(typeof bridge.applyMassinhaTweak!=="function"){allApplied=false;messages.push("Gráficos Massinha: função indisponível nesta versão.");}else{const r=parse(bridge.applyMassinhaTweak(version,pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Gráficos Massinha aplicados.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Gráficos Massinha.");}}}
+  if(doGameMode){if(typeof bridge.applyGameMode!=="function"){allApplied=false;messages.push("Modo de jogo: função indisponível nesta versão.");}else{const r=parse(bridge.applyGameMode(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Modo performance ativado.");}else{allApplied=false;messages.push(r?.message||"Falha no modo performance.");}}}
   if(doGame){if(typeof bridge.compileGameProfile!=="function"){allApplied=false;messages.push("Compilação: função indisponível nesta versão.");}else{const r=parse(bridge.compileGameProfile(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Compilação concluída.");}else{allApplied=false;messages.push(r?.message||"Falha na compilação.");}}}
-  const manual=keys.filter(k=>!["animations","massinha","game"].includes(k));if(manual.length)messages.push(manual.length+" função(ões) ainda não possuem executor automático.");
+  const manual=keys.filter(k=>!["animations","massinha","game","gameMode"].includes(k));if(manual.length)messages.push(manual.length+" função(ões) ainda não possuem executor automático.");
   applyStatus(messages.join(" "));
   if(allApplied&&appliedCount>0&&appSettings.autoOpenFreeFire){put("boostApplyStatus",messages.join(" ")+" Abrindo o jogo conforme sua preferência…");openFreeFire(false);}
  }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
