@@ -368,7 +368,7 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
       .daemon(false)
       .processNameSuffix("safe_tweaks")
       .tag("sensi_safe_tweaks")
-      .version(1)
+      .version(2)
     val latch = CountDownLatch(1)
     var remote: IBinder? = null
     val connection = object : ServiceConnection {
