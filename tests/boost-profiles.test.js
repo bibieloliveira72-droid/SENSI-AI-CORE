@@ -18,18 +18,20 @@ test("os cinco perfis possuem uma lista válida e a ação executável reversív
   }
 });
 
-test("os quatro cartões visuais apontam para perfis existentes", () => {
-  const ids = [...html.matchAll(/data-boost-profile="([^"]+)"/g)].map(x => x[1]);
-  assert.deepEqual(ids.sort(), ["balanced","battery","cool","stable"].sort());
-  for (const id of ids) assert.ok(profiles[id]);
+test("aba de otimização apresenta o motor Benimaru e remove atalhos manuais", () => {
+  assert.match(html, /id="tab-boost"/);
+  assert.match(html, /id="boostApplyTweaks"/);
+  assert.match(html, /value="shader"/);
+  assert.match(html, /value="refreshRate"/);
+  assert.match(html, /value="gameMode" checked/);
+  assert.doesNotMatch(html, /massinhaCopyV1|massinhaCopyV2|boostApplyProfileBtn|boostBuildPlan/);
 });
 
-test("botão Aplicar Perfil está presente e ligado ao fluxo de confirmação", () => {
-  assert.match(html, /id="boostApplyProfileBtn"/);
-  assert.match(js, /\$\("boostApplyProfileBtn"\)\?\.addEventListener\("click",applySelectedBoostProfile\)/);
-  assert.match(js, /function applySelectedBoostProfile\([\s\S]*?startApplyTweaks\(\)/);
+test("botão Aplicar otimizações executa os módulos e abre o jogo ao terminar", () => {
+  assert.match(html, /id="boostApplyTweaks"/);
+  assert.match(js, /\$\("boostApplyTweaks"\)\?\.addEventListener\("click",startApplyTweaks\)/);
+  assert.match(js, /function executeConfirmedTweaks\([\s\S]*?applyBenimaruShaderDriver[\s\S]*?applyBenimaruRefreshRate[\s\S]*?openFreeFire\(false\)/);
 });
-
 test("ações nativas continuam protegidas por Shizuku, confirmação e backup", () => {
   assert.match(js, /getShizukuStatus/);
   assert.match(js, /boostConfirmModal/);
