@@ -8,7 +8,6 @@ import org.json.JSONObject
 
 /** Strict Shizuku allowlist. No arbitrary shell input. */
 class SafeTweakUserService : Service() {
- private val commandBinder = object : Binder() {
  companion object {
   const val DESCRIPTOR="com.example.SENSIAI_SAFE_TWEAKS"
   private const val APPLY_ANIMATIONS=1
@@ -33,7 +32,9 @@ class SafeTweakUserService : Service() {
   private const val PROP="debug.angle.feature_overrides_enabled"
   private val allowed=setOf("com.dts.freefireth","com.dts.freefiremax")
  }
- override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
+ private val commandBinder = CommandBinder()
+ private inner class CommandBinder : Binder() {
+  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
   if(code !in APPLY_ANIMATIONS..RESTORE_REFRESH_RATE)return super.onTransact(code,data,reply,flags)
   data.enforceInterface(DESCRIPTOR)
   val result=try{when(code){
