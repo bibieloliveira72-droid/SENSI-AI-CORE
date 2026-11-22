@@ -1,13 +1,10 @@
 package com.example
-import android.app.Service
-import android.content.Intent
-import android.os.IBinder
 import android.os.Binder
 import android.os.Parcel
 import org.json.JSONObject
 
-/** Strict Shizuku allowlist. No arbitrary shell input. */
-class SafeTweakUserService : Service() {
+/** Shizuku UserService: Shizuku instantiates this class as an IBinder. */
+class SafeTweakUserService : Binder() {
  companion object {
   const val DESCRIPTOR="com.example.SENSIAI_SAFE_TWEAKS"
   private const val APPLY_ANIMATIONS=1
@@ -32,9 +29,8 @@ class SafeTweakUserService : Service() {
   private const val PROP="debug.angle.feature_overrides_enabled"
   private val allowed=setOf("com.dts.freefireth","com.dts.freefiremax")
  }
- private val commandBinder = CommandBinder()
- private inner class CommandBinder : Binder() {
-  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
+
+ override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
   if(code !in APPLY_ANIMATIONS..RESTORE_REFRESH_RATE)return super.onTransact(code,data,reply,flags)
   data.enforceInterface(DESCRIPTOR)
   val result=try{when(code){
@@ -54,9 +50,6 @@ class SafeTweakUserService : Service() {
   }}catch(e:Throwable){JSONObject().put("ok",false).put("message",e.message?:"Shizuku operation failed")}
   reply?.writeNoException();reply?.writeString(result.toString());return true
  }
- }
-
- override fun onBind(intent: Intent?): IBinder = commandBinder
 
  private fun gameMode(pkg:String, performance:Boolean):JSONObject {
   require(pkg in allowed) { "Pacote de jogo não permitido." }
