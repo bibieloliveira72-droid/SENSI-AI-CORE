@@ -30,7 +30,7 @@ test("aba de otimização apresenta o motor Benimaru e remove atalhos manuais", 
 test("botão Aplicar otimizações executa os módulos e abre o jogo ao terminar", () => {
   assert.match(html, /id="boostApplyTweaks"/);
   assert.match(js, /\$\("boostApplyTweaks"\)\?\.addEventListener\("click",startApplyTweaks\)/);
-  assert.match(js, /function executeConfirmedTweaks\([\s\S]*?applyBenimaruShaderDriver[\s\S]*?applyBenimaruRefreshRate[\s\S]*?openFreeFire\(false\)/);
+  assert.match(js, /function executeConfirmedTweaks\([\s\S]*?applyBenimaruRefreshRate[\s\S]*?applyBenimaruShaderDriver[\s\S]*?openFreeFire\(false\)/);
 });
 test("ações nativas continuam protegidas por Shizuku, confirmação e backup", () => {
   assert.match(js, /getShizukuStatus/);
