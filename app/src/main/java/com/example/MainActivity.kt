@@ -265,6 +265,36 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
   }
 
   @JavascriptInterface
+  fun applyBenimaruRefreshRate(hz: Int): String {
+    if (hz !in 30..240) return JSONObject().put("ok", false).put("message", "Taxa de atualização inválida.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    if (prefs.contains("refresh_rate_backup")) return JSONObject().put("ok", false).put("message", "Já existe um backup de Hz. Restaure antes de aplicar outro valor.").toString()
+    return try {
+      val result = callSafeTweakService(11, JSONObject().put("hz", hz).toString())
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) json.optJSONObject("backup")?.let { prefs.edit().putString("refresh_rate_backup", it.toString()).apply() }
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao ajustar Hz: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun restoreBenimaruRefreshRate(): String {
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val backup = prefs.getString("refresh_rate_backup", null) ?: return JSONObject().put("ok", false).put("message", "Nenhum backup de Hz encontrado.").toString()
+    return try {
+      val result = callSafeTweakService(12, backup)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove("refresh_rate_backup").apply()
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao restaurar Hz: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
   fun applyBenimaruShaderDriver(packageName: String, driver: String): String {
     if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
     if (driver !in setOf("angle", "native", "default")) return JSONObject().put("ok", false).put("message", "Driver inválido.").toString()
