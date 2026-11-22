@@ -97,6 +97,22 @@ test("Motor usa DPI e botão como parâmetros de ajuste, sem inventar relação 
   assert.ok(capa.values["Red Dot"] > precisao.values["Red Dot"]);
 });
 
+test("Motor 3.2 usa curva não linear por mira e identifica sua versão", () => {
+  const engine = loadEngine();
+  const input = {
+    marca: "Samsung", modelo: "Galaxy A07 4G", processador: "intermediario",
+    ram: 8, dpi: 520, hz: 90, fireButtonSize: 52, profile: "capa", engineMode: "balanceado",
+  };
+  const base = engine.generateSensitivity(input);
+  const highDpi = engine.generateSensitivity({ ...input, dpi: 1100 });
+  const largeButton = engine.generateSensitivity({ ...input, fireButtonSize: 80 });
+  assert.equal(base.engineVersion, "3.2");
+  assert.notDeepEqual(base.values, highDpi.values);
+  assert.notDeepEqual(base.values, largeButton.values);
+  assert.equal(Object.keys(base.values).length, 6);
+  for (const value of Object.values(base.values)) assert.ok(Number.isInteger(value) && value >= 0 && value <= 200);
+});
+
 test("Recomendação de resolução identifica Pixels sem alterar as dimensões calculadas", () => {
   const engine = loadEngine();
   const setup = engine.recommendDisplaySetup({ processador: "intermediario", ram: 8 });

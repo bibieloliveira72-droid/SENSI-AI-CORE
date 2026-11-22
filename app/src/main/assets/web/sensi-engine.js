@@ -267,39 +267,54 @@
     const cfg = normalizeInput(rawInput);
     const profile = PROFILES[cfg.profile];
 
-    // Hardware descreve desempenho e fluidez, não mede diretamente a resposta do toque.
-    // Por isso, apenas DPI e tamanho do botão entram na sugestão inicial de sensibilidade.
-    const dpiDelta = 450 - cfg.dpi;
-    const smoothDpiDelta = Math.tanh(dpiDelta / 380) * 380;
-    const buttonDelta = (cfg.fireButtonSize - 52) * 0.36;
+    // Motor 3.2: curva não linear de DPI + resposta do botão + estabilidade por mira.
+    // RAM, chipset e Hz não são tratados como sensores de toque: não alteram a mira sem medição real.
+    const dpiPosition = clamp((cfg.dpi - 200) / 1400, 0, 1) / 1;
+    const dpiCurve = Math.tanh((0.48 - dpiPosition) * 2.15) * 86;
+    const buttonPosition = (cfg.fireButtonSize - 52) / 38;
+    const buttonCurve = Math.sign(buttonPosition) * Math.pow(Math.abs(buttonPosition), 0.82) * 10.5;
+    const scopeResponse = {
+      General: 1.00, "Red Dot": 0.94, "2x": 0.78,
+      "4x": 0.62, AWM: 0.34, Olhadinha: 0.88,
+    };
+    const buttonResponse = {
+      General: 0.92, "Red Dot": 1.00, "2x": 0.68,
+      "4x": 0.46, AWM: 0.22, Olhadinha: 0.84,
+    };
+    const modeOffsets = {
+      controle: { General: -4, "Red Dot": -3, "2x": -3, "4x": -3, AWM: -2, Olhadinha: -2 },
+      balanceado: { General: 0, "Red Dot": 0, "2x": 0, "4x": 0, AWM: 0, Olhadinha: 0 },
+      agil: { General: 4, "Red Dot": 3, "2x": 2, "4x": 1, AWM: 1, Olhadinha: 4 },
+    };
     const values = {};
-    const modeWeights = { controle: { General: -3, "Red Dot": -2, "2x": -3, "4x": -4, AWM: -3, Olhadinha: -2 }, balanceado: { General: 0, "Red Dot": 0, "2x": 0, "4x": 0, AWM: 0, Olhadinha: 0 }, agil: { General: 3, "Red Dot": 2, "2x": 2, "4x": 1, AWM: 1, Olhadinha: 4 } }[cfg.engineMode];
 
     for (const scope of SCOPE_KEYS) {
-      const dpiAdjustment = smoothDpiDelta * profile.dpiWeights[scope];
-      const buttonWeight = scope === "General" ? 0.95
-        : scope === "Red Dot" ? 1.05
-        : scope === "2x" ? 0.55
-        : scope === "4x" ? 0.30
-        : scope === "AWM" ? 0.12
-        : 0.95;
+      const dpiAdjustment = dpiCurve * profile.dpiWeights[scope] * scopeResponse[scope];
+      const buttonAdjustment = buttonCurve * buttonResponse[scope];
+      const longScopeStability = (scope === "2x" || scope === "4x")
+        ? Math.max(0, dpiPosition - 0.62) * (scope === "4x" ? 7 : 4)
+        : 0;
       values[scope] = clamp(
-        profile.bases[scope] + dpiAdjustment + buttonDelta * buttonWeight + modeWeights[scope],
+        profile.bases[scope] + dpiAdjustment + buttonAdjustment
+          + modeOffsets[cfg.engineMode][scope] - longScopeStability,
         MIN_SENSI,
         MAX_SENSI
       );
     }
 
     const insights = buildTechnicalNotes(cfg, values);
+    insights.push("Motor 3.2: curva não linear por faixa de DPI, resposta individual por mira e compensação de estabilidade para 2x/4x.");
+    insights.push("Ajustes são sugestões matemáticas para teste; o aplicativo não mede diretamente o toque nem o comportamento dentro do Free Fire.");
     return {
       config: cfg,
       recommendations: recommendDisplaySetup(cfg),
       profileLabel: profile.label,
       engineMode: cfg.engineMode,
+      engineVersion: "3.2",
       values,
-      notes: insights.concat(["Modo híbrido 2.0: " + cfg.engineMode + " combinado ao perfil " + profile.label + "."]),
+      notes: insights,
       disclaimer:
-        "Sugestão inicial local para testes no modo treinamento. Hardware não determina a sensibilidade do toque; ajuste os valores conforme sua resposta real. O SENSI.AI não promete mira automática ou capa garantida.",
+        "Sugestão inicial calculada localmente pelo motor 3.2. Use o treinamento para avaliar a resposta real e refine pela calibração. Não há garantia de mira automática ou capa garantida.",
     };
   }
 

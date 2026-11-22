@@ -252,32 +252,7 @@
           </button>
         </form>
 
-        <section id="resultsSection" class="card results-card hidden" aria-live="polite">
-          <div class="section-head">
-            <div>
-              <h2>Sensibilidade Inicial</h2>
-              <p id="deviceSummary" class="device-summary"></p>
-            </div>
-            <button type="button" id="copyAllBtn" class="btn-copy-all">
-              COPIAR TUDO
-            </button>
-          </div>
-
-          <div class="sensi-grid" id="sensiGrid"></div>
-
-          <section class="setup-recommendations" id="setupRecommendations" aria-label="Resolução e DPI recomendados">
-            <div class="setup-recommendations-head"><div><span class="device-step">AJUSTE COMPLEMENTAR</span><h3>Resolução &amp; DPI sugeridos</h3><p>Referência calculada conforme a categoria do aparelho e a memória RAM.</p></div><span class="setup-tag">AUTO</span></div>
-            <div class="setup-recommendation-grid">
-              <article class="setup-recommendation"><span>RESOLUÇÃO (PIXELS)</span><strong id="recommendedResolution">960 × 720</strong><small id="recommendedResolutionLabel">4:3 · leve</small><label class="resolution-picker-label" for="resolutionOptionSelect">MAIS OPÇÕES</label><select id="resolutionOptionSelect" class="resolution-picker" aria-label="Escolher resolução esticada"></select><button type="button" class="setup-copy-btn" id="copyResolutionBtn">COPIAR RESOLUÇÃO</button></article>
-              <article class="setup-recommendation"><span>DPI SUGERIDO</span><strong id="recommendedDpi">420</strong><small>DPI de referência</small><button type="button" class="setup-copy-btn" id="copyRecommendedDpiBtn">COPIAR DPI</button></article>
-            </div>
-            <p class="setup-recommendation-reason" id="recommendedSetupReason"></p>
-            <p class="setup-recommendation-note" id="recommendedSetupNote"></p>
-          </section>
-
-
-
-          <!-- Calibração Inteligente v3.1.9 -->
+          <!-- Calibração Inteligente v3.2 -->
           <div class="calibration-panel">
             <div class="calibration-head">
               <div><h3>Calibração Inteligente</h3><p>Digite sua sensibilidade atual. O motor ajusta os valores em etapas conforme o resultado dos seus testes.</p></div>
@@ -310,6 +285,31 @@
             </div>
             <div id="calibrationFeedbackBox" class="cal-feedback hidden"></div>
           </div>
+
+        <section id="resultsSection" class="card results-card hidden" aria-live="polite">
+          <div class="section-head">
+            <div>
+              <h2>Sensibilidade Inicial</h2>
+              <p id="deviceSummary" class="device-summary"></p>
+            </div>
+            <button type="button" id="copyAllBtn" class="btn-copy-all">
+              COPIAR TUDO
+            </button>
+          </div>
+
+          <div class="sensi-grid" id="sensiGrid"></div>
+
+          <section class="setup-recommendations" id="setupRecommendations" aria-label="Resolução e DPI recomendados">
+            <div class="setup-recommendations-head"><div><span class="device-step">AJUSTE COMPLEMENTAR</span><h3>Resolução &amp; DPI sugeridos</h3><p>Referência calculada conforme a categoria do aparelho e a memória RAM.</p></div><span class="setup-tag">AUTO</span></div>
+            <div class="setup-recommendation-grid">
+              <article class="setup-recommendation"><span>RESOLUÇÃO (PIXELS)</span><strong id="recommendedResolution">960 × 720</strong><small id="recommendedResolutionLabel">4:3 · leve</small><label class="resolution-picker-label" for="resolutionOptionSelect">MAIS OPÇÕES</label><select id="resolutionOptionSelect" class="resolution-picker" aria-label="Escolher resolução esticada"></select><button type="button" class="setup-copy-btn" id="copyResolutionBtn">COPIAR RESOLUÇÃO</button></article>
+              <article class="setup-recommendation"><span>DPI SUGERIDO</span><strong id="recommendedDpi">420</strong><small>DPI de referência</small><button type="button" class="setup-copy-btn" id="copyRecommendedDpiBtn">COPIAR DPI</button></article>
+            </div>
+            <p class="setup-recommendation-reason" id="recommendedSetupReason"></p>
+            <p class="setup-recommendation-note" id="recommendedSetupNote"></p>
+          </section>
+
+
 
           <!-- Salvar Perfil Local -->
           <div class="save-profile-box">
