@@ -45,7 +45,7 @@
         </div>
         <div>
           <h1 class="brand-title">SENSI<span>.AI</span></h1>
-          <p class="brand-sub">SENSITIVITY LAB <span>•</span> FREE FIRE <span class="app-version">v3.3.2</span></p>
+          <p class="brand-sub">SENSITIVITY & PERFORMANCE <span>•</span> FREE FIRE <span class="app-version">v3.4.0</span></p>
         </div>
       </div>
 
@@ -57,25 +57,20 @@
 
     <nav class="tab-bar" role="tablist" aria-label="Navegação principal">
       <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="generator">
-        <span class="tab-icon">⌁</span><span>Gerador</span>
+        <span class="tab-icon">⌁</span><span>Sensibilidade</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="boost">
+        <span class="tab-icon">⚡</span><span>Otimização</span>
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="saved">
         <span class="tab-icon">▤</span><span>Biblioteca</span>
       </button>
-      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="compare">
-        <span class="tab-icon">⇄</span><span>Comparar</span>
-      </button>
-      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="resolutionLab">
-        <span class="tab-icon">▦</span><span>Resolução</span>
-      </button>
-      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="boost"><span class="tab-icon">⚡</span><span>Boost</span></button>
-      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="settings"><span class="tab-icon">⚙</span><span>Ajustes</span></button>
     </nav>
 
     <main class="main-content">
       <!-- TAB 1: GERADOR + CALIBRAÇÃO -->
       <section id="tab-generator" class="tab-panel" role="tabpanel">
-        <section class="hero-panel"><div class="hero-copy"><span class="eyebrow"><i></i> PERSONAL SETUP / 01</span><h2>Encontre o seu <em>ritmo.</em></h2><p>Monte seu setup, gere uma base e refine cada mira com seus próprios testes.</p><div class="hero-meta"><span>● MOTOR LOCAL</span><span>6 MIRAS</span><span>4 PERFIS</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">S<span>.</span></div><i class="orbit-dot"></i></div></section>
+        <section class="hero-panel"><div class="hero-copy"><span class="eyebrow"><i></i> SENSITIVITY LAB / MAIN</span><h2>Encontre o seu <em>ritmo.</em></h2><p>Monte seu setup, gere uma base e refine cada mira com seus próprios testes.</p><div class="hero-meta"><span>● MOTOR LOCAL</span><span>6 MIRAS</span><span>4 PERFIS</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">S<span>.</span></div><i class="orbit-dot"></i></div></section>
         <section class="card boost-card telegram-community-card">
           <div class="section-head"><div><h2>Comunidade SENSI.AI</h2><p class="device-summary">Novidades, atualizações e avisos oficiais.</p></div><span class="badge">TELEGRAM</span></div>
           <a class="btn-primary telegram-join-btn" href="https://t.me/+ICpY9A07EmxhNWI5" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal oficial do SENSI.AI no Telegram">ENTRAR NO CANAL ↗</a>
@@ -412,7 +407,7 @@
       </section>
 
       <section id="tab-boost" class="tab-panel hidden" role="tabpanel">
-<header class="boost-mobile-head"><div class="boost-mobile-kicker"><span class="boost-live-dot"></span> DEVICE PERFORMANCE / LOCAL</div><div class="boost-mobile-title-row"><div><h2>Boost Control <em>Center.</em></h2><p>Diagnóstico do Android, planos transparentes e ajustes reversíveis.</p></div><span class="boost-version-pill">CORE 3.3</span></div><div class="boost-head-actions"><button type="button" id="boostRefreshBtn" class="btn-primary">↻ ATUALIZAR DIAGNÓSTICO</button><button type="button" id="boostCopyReport" class="btn-secondary">COPIAR RELATÓRIO</button></div></header>
+<header class="boost-mobile-head"><div class="boost-mobile-kicker"><span class="boost-live-dot"></span> DEVICE PERFORMANCE / LOCAL</div><div class="boost-mobile-title-row"><div><h2>Optimization <em>Center.</em></h2><p>Central de desempenho Android, ferramentas Benimaru adaptadas e ajustes verificáveis.</p></div><span class="boost-version-pill">CORE 3.4</span></div><div class="boost-head-actions"><button type="button" id="boostRefreshBtn" class="btn-primary">↻ ATUALIZAR DIAGNÓSTICO</button><button type="button" id="boostCopyReport" class="btn-secondary">COPIAR RELATÓRIO</button></div></header>
 <section class="card boost-card boost-overview-card"><div class="boost-card-heading"><div><span class="boost-overline">VISÃO GERAL</span><h3 id="boostDevice">Aguardando diagnóstico…</h3><small id="boostLastCheck">Nenhuma leitura nesta sessão</small></div><span class="boost-status-chip">DEVICE CHECK</span></div><div class="boost-stats"><div class="boost-stat"><span>RAM disponível</span><strong id="boostMemory">--</strong><small id="boostMemoryHint">Aguardando leitura</small></div><div class="boost-stat"><span>Bateria</span><strong id="boostBattery">--</strong><small id="boostBatteryHint">Aguardando leitura</small></div><div class="boost-stat"><span>Temperatura</span><strong id="boostTemp">--</strong><small id="boostTempHint">Aguardando leitura</small></div><div class="boost-stat"><span>Android</span><strong id="boostAndroid">--</strong><small id="boostAndroidHint">Versão do sistema</small></div>
 <div class="boost-stat"><span>Resolução ativa</span><strong id="boostResolution">--</strong><small id="boostResolutionHint">Leitura do display</small></div><div class="boost-stat"><span>Taxa de atualização</span><strong id="boostRefreshRate">--</strong><small id="boostRefreshRateHint">Hz reportados pelo Android</small></div></div><p id="boostAdvice" class="boost-advice" aria-live="polite">Atualize o diagnóstico para analisar os dados disponíveis.</p><div class="boost-quick-grid"><button type="button" id="boostLaunchGame" class="boost-quick-tile"><span>▶</span><strong>Abrir Free Fire</strong><small>Iniciar jogo selecionado</small></button><button type="button" id="boostOpenDisplaySettings" class="boost-quick-tile"><span>▣</span><strong>Configurações de tela</strong><small>Abrir painel oficial Android</small></button><button type="button" id="boostOpenBatterySettings" class="boost-quick-tile"><span>⌁</span><strong>Bateria</strong><small>Ver consumo e energia</small></button><button type="button" id="shizukuCheckBtn" class="boost-quick-tile"><span>⌘</span><strong>Verificar Shizuku</strong><small>Serviço e autorização</small></button></div></section>
 <section class="card boost-card heat-shield-card"><div class="boost-card-heading"><div><span class="boost-overline">PROTEÇÃO TÉRMICA</span><h3>Heat Shield <em>Insight.</em></h3><small>Orientação baseada nos dados que o Android disponibiliza.</small></div><span class="boost-status-chip">THERMAL GUARD</span></div><div id="heatShieldState" class="heat-shield-state level-unknown" aria-live="polite"><span class="heat-shield-state-dot" aria-hidden="true"></span><strong id="heatShieldStatus">AGUARDANDO LEITURA</strong><small id="heatShieldThermal">Diagnóstico ainda não atualizado</small></div><div class="heat-shield-meter" role="progressbar" aria-label="Indicador de atenção térmica" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="heatShieldMeter"></span></div><div class="heat-shield-metrics"><div><small>Temperatura da bateria</small><strong id="heatShieldTemp">--</strong></div><div><small>Estado térmico Android</small><strong id="heatShieldAndroidStatus">--</strong></div><div><small>Memória disponível</small><strong id="heatShieldMemory">--</strong></div></div><p id="heatShieldAdvice" class="heat-shield-advice">Atualize o diagnóstico para receber uma orientação.</p><button type="button" id="heatShieldRefresh" class="btn-secondary">ATUALIZAR LEITURA TÉRMICA</button><p class="boost-safety-note">O Android informa temperatura da bateria e estado térmico geral, não FPS nem temperatura direta da CPU/GPU. Este painel não altera configurações automaticamente.</p></section>
@@ -437,7 +432,7 @@
         </section>
         <section class="card boost-card legacy-support-card">
           <div class="section-head"><div><h2>Central de suporte e compatibilidade</h2><p class="device-summary">Ajuda restaurada para aparelhos antigos e versões diferentes do Android.</p></div><span class="badge">SUPORTE</span></div>
-          <div class="support-version-line"><strong>SENSI.AI 3.3.2</strong><span>Build 38 · Android 7.0 ou superior</span></div>
+          <div class="support-version-line"><strong>SENSI.AI 3.4.0</strong><span>Build 39 · Android 7.0 ou superior</span></div>
           <details class="support-topic" open>
             <summary>Compatibilidade com celulares antigos</summary>
             <p>O aplicativo mantém suporte a Android 7.0 (API 24) ou superior. Em aparelhos mais antigos, mantenha o Android System WebView atualizado quando houver atualização compatível. O desempenho e a disponibilidade de recursos variam conforme fabricante, memória e versão do sistema.</p>
