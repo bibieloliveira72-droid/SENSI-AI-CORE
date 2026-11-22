@@ -292,21 +292,15 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
     val intent = when (key) {
       "battery" -> Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
       "network" -> Intent(Settings.ACTION_WIFI_SETTINGS)
-      "display" -> Intent(Settings.ACTION_DISPLAY_SETTINGS)
+      "display", "touch" -> Intent(Settings.ACTION_DISPLAY_SETTINGS)
       "storage" -> Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS)
-      "background" -> Intent(Settings.ACTION_APPLICATION_SETTINGS)
+      "background", "memory" -> Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
       "sound" -> Intent(Settings.ACTION_SOUND_SETTINGS)
-      "privacy" -> Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-        data = Uri.parse("package:${context.packageName}")
-      }
-      "notifications" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-          putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-        }
+      "privacy" -> Intent(Settings.ACTION_PRIVACY_SETTINGS)
+      "notifications" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Intent(Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS)
       } else {
-        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
-          data = Uri.parse("package:${context.packageName}")
-        }
+        Intent(Settings.ACTION_SETTINGS)
       }
       "updates" -> Intent(Settings.ACTION_SETTINGS)
       "accessibility" -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)

@@ -3,7 +3,7 @@
 const $=id=>document.getElementById(id), bridge=window.AndroidBridge||null;
 const parse=v=>{try{return JSON.parse(v)}catch(_){return null}};
 const put=(id,v)=>{const e=$(id);if(e)e.textContent=v};
-const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
+const settingTargets={battery:"battery",network:"network",display:"display",storage:"storage",background:"background",memory:"memory",touch:"touch",sound:"sound",privacy:"privacy",notifications:"notifications",updates:"updates",accessibility:"accessibility"};
 
 const SETTINGS_KEY="sensi_ai_app_settings_v1";
 const defaultSettings={autoOpenFreeFire:true,gameEdition:"freefire"};
@@ -41,30 +41,56 @@ notifications:["Notificações","Configure Não Perturbe manualmente e permita c
 updates:["Atualizações","Agende downloads e atualizações para um horário conveniente. Não desative atualizações de segurança."],
 accessibility:["Acessibilidade","Revise recursos ativos e mantenha ligados os que você usa. Não desative serviços essenciais para tentar ganhar desempenho."]
 };
+const guideActionLabels={
+game:"ABRIR FREE FIRE",massinha:"APLICAR COM SHIZUKU",memory:"DIAGNÓSTICO + APPS",thermal:"ATUALIZAR TEMPERATURA",battery:"ABRIR BATERIA",network:"ABRIR WI-FI",touch:"ABRIR TELA / TOQUE",display:"ABRIR TELA",animations:"APLICAR 0,5x",storage:"ABRIR ARMAZENAMENTO",background:"ABRIR APPS",sound:"ABRIR ÁUDIO",privacy:"ABRIR PRIVACIDADE",report:"COPIAR RELATÓRIO",refresh:"ATUALIZAR DIAGNÓSTICO",notifications:"ABRIR NOTIFICAÇÕES",updates:"ABRIR CONFIGURAÇÕES",accessibility:"ABRIR ACESSIBILIDADE"
+};
 const recommended={stable:["animations","game","memory","thermal","display","background","refresh"],cool:["animations","thermal","display","battery","game"],battery:["animations","battery","display","background","updates"],network:["animations","network","updates","notifications"],balanced:["animations","game","memory","thermal","network","display","refresh"]};
 let activeBoostProfile="stable";
 function selected(){return [...document.querySelectorAll("#tab-boost input[type=checkbox]:checked")].map(x=>x.value)}
 function syncCount(){put("boostSelectedCount",selected().length+" selecionada(s)")}
 function setSelected(keys){document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.checked=keys.includes(x.value));syncCount()}
+function openNativeSettings(key){
+ const target=settingTargets[key]||key;
+ if(!bridge||typeof bridge.openTweakSettings!=="function"){applyStatus("Este atalho exige o APK Android. No painel web, consulte a orientação da etapa.");return false}
+ let opened=false;try{opened=bridge.openTweakSettings(target)===true}catch(_){}
+ const messages={battery:"Painel de bateria aberto. Confira o consumo e escolha economia somente se aceitar os limites.",network:"Configurações de Wi-Fi abertas. Verifique a rede estável que você usa para jogar.",display:"Configurações de tela abertas. Use apenas opções oferecidas pelo aparelho.",touch:"Configurações de tela abertas. Em aparelhos Samsung, procure Sensibilidade ao toque, se disponível.",storage:"Armazenamento aberto. Não apague dados ou pastas de jogos para liberar espaço.",background:"Lista de aplicativos aberta. Revise manualmente e não encerre Spotify, Shizuku ou serviços importantes.",memory:"Diagnóstico atualizado e lista de aplicativos aberta. Feche somente apps que você reconhece e não precisa.",sound:"Configurações de áudio abertas.",privacy:"Configurações de privacidade abertas. Mantenha proteções e permissões necessárias.",notifications:"Configurações de notificações abertas. Preserve chamadas e alertas importantes.",updates:"Configurações do Android abertas. Procure Atualização de software quando quiser verificar atualizações.",accessibility:"Configurações de acessibilidade abertas. Não desative recursos que você utiliza."};
+ applyStatus(opened?(messages[key]||"Painel do Android aberto."):"O Android ou a versão do fabricante não disponibilizou esse painel. Nenhuma configuração foi alterada.");
+ return opened;
+}
+async function copySystemReport(){
+ const d=lastDeviceSnapshot;
+ if(!d){put("boostApplyStatus","Relatório indisponível. Atualize primeiro o diagnóstico do aparelho.");return false}
+ const report=["SENSI.AI BOOST REPORT","Dispositivo: "+d.manufacturer+" "+d.model,"Android: "+d.android+" (API "+d.sdk+")","RAM disponível: "+d.availableMemoryMb+" MB / "+d.totalMemoryMb+" MB","Bateria: "+d.batteryPercent+"%","Temperatura da bateria: "+d.batteryTempC+" °C","Estado térmico: "+thermal(d.thermalStatus),"Resolução: "+(d.screenWidth>0?d.screenWidth+" x "+d.screenHeight:"N/D"),"Taxa de atualização: "+(d.refreshRateHz>0?d.refreshRateHz+" Hz":"N/D"),"Densidade: "+(d.densityDpi>0?d.densityDpi+" DPI":"N/D"),"Gerado em: "+new Date().toLocaleString()].join("\n");
+ try{if(bridge?.copyText)bridge.copyText(report);else if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(report);else throw new Error("Cópia indisponível");put("boostApplyStatus","Relatório do aparelho copiado.");return true}catch(_){put("boostApplyStatus","Não foi possível copiar o relatório neste ambiente.");return false}
+}
+function runGuideAction(key){
+ if(key==="game")return openFreeFire(true);
+ if(key==="thermal"||key==="refresh"){try{refresh();applyStatus(key==="thermal"?"Leitura térmica atualizada. Consulte o Heat Shield e faça uma pausa se houver alerta.":"Diagnóstico do Android atualizado.");}catch(_){applyStatus("Não foi possível atualizar o diagnóstico. Tente novamente.");}return}
+ if(key==="report"){copySystemReport();return}
+ if(key==="memory"){try{refresh()}catch(_){}openNativeSettings("memory");return}
+ if(key==="animations"||key==="massinha"){startApplyTweaks();return}
+ if(settingTargets[key]){openNativeSettings(key);return}
+ applyStatus("Esta etapa ainda não possui uma ação compatível com o Android instalado.");
+}
 function buildPlan(){
  const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();
  if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
  const executable=keys.filter(k=>k==="animations"||k==="massinha"),manual=keys.filter(k=>!executable.includes(k));
  const h=document.createElement("strong");h.textContent="Plano SENSI.AI · "+keys.length+" etapa(s)";box.append(h);
- const p=document.createElement("p");p.textContent=executable.length?executable.length+" ação(ões) executável(is), sujeitas a Shizuku, confirmação e backup. "+manual.length+" orientação(ões) ficam sob seu controle.":"Este plano contém somente orientações. Nenhuma configuração do Android será alterada.";box.append(p);
- const group=(title,items)=>{if(!items.length)return;const h=document.createElement("h4");h.textContent=title;box.append(h);const ol=document.createElement("ol");items.forEach(k=>{const li=document.createElement("li"),strong=document.createElement("b"),span=document.createElement("span");strong.textContent=guides[k][0]+": ";span.textContent=guides[k][1];li.append(strong,span);ol.append(li)});box.append(ol)};
- group("AÇÕES EXECUTÁVEIS",executable);group("ETAPAS MANUAIS",manual);
- const note=document.createElement("small");note.textContent="Nada será executado em segundo plano. Spotify e outros aplicativos não são encerrados pelo Boost.";box.append(note);
+ const p=document.createElement("p");p.textContent=executable.length?executable.length+" ajuste(s) protegido(s) usam Shizuku, confirmação e backup. "+manual.length+" atalho(s) abrem painéis oficiais, atualizam diagnósticos ou copiam o relatório.":"Todas as etapas selecionadas agora possuem uma ação: abrir um painel do Android, atualizar uma leitura, iniciar o jogo ou copiar o relatório.";box.append(p);
+ const group=(title,items)=>{if(!items.length)return;const heading=document.createElement("h4");heading.textContent=title;box.append(heading);const ol=document.createElement("ol");items.forEach(k=>{const li=document.createElement("li"),strong=document.createElement("b"),span=document.createElement("span"),button=document.createElement("button");strong.textContent=guides[k][0]+": ";span.textContent=guides[k][1];button.type="button";button.className="btn-ghost-sm boost-plan-action";button.textContent=guideActionLabels[k]||"EXECUTAR ETAPA";button.addEventListener("click",()=>runGuideAction(k));li.append(strong,span,button);ol.append(li)});box.append(ol)};
+ group("AJUSTES PROTEGIDOS VIA SHIZUKU",executable);group("ATALHOS E AÇÕES DO ANDROID",manual);
+ const note=document.createElement("small");note.textContent="Os atalhos não encerram aplicativos nem alteram opções silenciosamente. Spotify, Shizuku e serviços importantes são preservados.";box.append(note);
 }
 function startApplyTweaks(){
  const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha");
  if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
- if(!doAnimations&&!doMassinha){applyStatus("Sua seleção contém orientações e checklists. Nenhum ajuste executável foi marcado.");return}
+ if(!doAnimations&&!doMassinha){buildPlan();applyStatus("Plano montado. Agora cada etapa tem seu próprio botão para abrir o painel correto, atualizar o diagnóstico ou copiar o relatório. Nenhuma alteração foi feita sem sua escolha.");return}
  if(!bridge||typeof bridge.getShizukuStatus!=="function"){applyStatus("A execução de ajustes exige o APK Android com Shizuku.");return}
  const auth=parse(bridge.getShizukuStatus());
  if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
  const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
- const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"", "Os outros itens selecionados são apenas orientações. Confirmar?"].filter(Boolean).join("\n\n");
+ const warning=[doAnimations?"Aplicar Animações Leves em 0,5x (com backup).":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" em "+(pkg==="com.dts.freefiremax"?"Free Fire MAX":"Free Fire")+". O jogo selecionado será encerrado para recarregar as configurações.":"", "Os outros itens selecionados terão botões próprios no plano para abrir painéis ou executar diagnósticos. Eles não serão alterados automaticamente. Confirmar?"].filter(Boolean).join("\n\n");
  const confirmBox=$("boostConfirmModal"),confirmText=$("boostConfirmMessage");
  if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
  confirmText.textContent=warning;
@@ -157,7 +183,7 @@ function selectBoostProfile(profile){
  if($("boostUseCase"))$("boostUseCase").value=target;
  setSelected(recommended[target]);
  document.querySelectorAll("[data-boost-profile]").forEach(x=>x.classList.toggle("active",x.getAttribute("data-boost-profile")===target));
- put("boostApplyStatus","Perfil "+target+" selecionado. Revise o plano: apenas Animações Leves é executável neste perfil; as demais etapas são orientações manuais.");
+ put("boostApplyStatus","Perfil "+target+" selecionado. Animações usam Shizuku; as demais etapas têm atalhos próprios no plano.");
 }
 function applySelectedBoostProfile(){
  const profile=$("boostUseCase")?.value||activeBoostProfile||"stable";
@@ -174,10 +200,7 @@ $("boostApplyProfileBtn")?.addEventListener("click",applySelectedBoostProfile);
 $("boostLaunchGame")?.addEventListener("click",()=>openFreeFire(true));
 $("boostOpenDisplaySettings")?.addEventListener("click",()=>{const ok=bridge&&typeof bridge.openTweakSettings==="function"&&bridge.openTweakSettings("display");put("boostApplyStatus",ok?"Configurações de tela abertas. As alterações são feitas por você no Android.":"Esse painel está disponível somente no APK Android.")});
 $("boostOpenBatterySettings")?.addEventListener("click",()=>{const ok=bridge&&typeof bridge.openTweakSettings==="function"&&bridge.openTweakSettings("battery");put("boostApplyStatus",ok?"Configurações de bateria abertas.":"Esse painel está disponível somente no APK Android.")});
-$("boostCopyReport")?.addEventListener("click",async()=>{
- const d=lastDeviceSnapshot,report=d?["SENSI.AI BOOST REPORT","Dispositivo: "+d.manufacturer+" "+d.model,"Android: "+d.android+" (API "+d.sdk+")","RAM disponível: "+d.availableMemoryMb+" MB / "+d.totalMemoryMb+" MB","Bateria: "+d.batteryPercent+"%","Temperatura da bateria: "+d.batteryTempC+" °C","Estado térmico: "+thermal(d.thermalStatus),"Resolução: "+(d.screenWidth>0?d.screenWidth+" x "+d.screenHeight:"N/D"),"Taxa de atualização: "+(d.refreshRateHz>0?d.refreshRateHz+" Hz":"N/D"),"Densidade: "+(d.densityDpi>0?d.densityDpi+" DPI":"N/D"),"Gerado em: "+new Date().toLocaleString()].join("\n"):"Diagnóstico indisponível. Abra o APK e atualize a leitura.";
- try{if(navigator.clipboard?.writeText)await navigator.clipboard.writeText(report);else if(bridge?.copyText)bridge.copyText(report);else throw new Error("Cópia indisponível");put("boostApplyStatus","Relatório copiado.");}catch(_){put("boostApplyStatus","Não foi possível copiar o relatório neste ambiente.");}
-});
+$("boostCopyReport")?.addEventListener("click",copySystemReport);
 $("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides).filter(key=>key!=="massinha")));
 $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
 $("massinhaTargetPackage")?.addEventListener("change",massinhaCommands);
