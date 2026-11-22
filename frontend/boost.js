@@ -109,8 +109,8 @@ function executeConfirmedTweaks(payload){
   if(doGameMode){if(typeof bridge.applyGameMode!=="function"){allApplied=false;messages.push("Modo de jogo: função indisponível nesta versão.");}else{const r=parse(bridge.applyGameMode(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Modo performance ativado.");}else{allApplied=false;messages.push(r?.message||"Falha no modo performance.");}}}
   if(doGame){if(typeof bridge.compileGameProfile!=="function"){allApplied=false;messages.push("Compilação: função indisponível nesta versão.");}else{const r=parse(bridge.compileGameProfile(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Compilação concluída.");}else{allApplied=false;messages.push(r?.message||"Falha na compilação.");}}}
   const manual=keys.filter(k=>!["animations","massinha","game","gameMode","shader"].includes(k));if(manual.length){allApplied=false;messages.push(manual.length+" opção(ões) ainda não têm módulo portado e foram ignoradas.");}
-  if(allApplied&&appliedCount>0){put("boostApplyStatus",messages.join(" ")+" Otimizações concluídas. Abrindo o jogo…");openFreeFire(false);}
-  else { applyStatus(messages.join(" ")+" O jogo não será aberto porque nem todas as operações foram concluídas."); }
+  if(appliedCount>0){put("boostApplyStatus",messages.join(" ")+(allApplied?" Todas as operações foram concluídas.":" Execução concluída com avisos nas operações recusadas pelo Android.")+" Abrindo o Free Fire…");openFreeFire(false);}
+  else { applyStatus(messages.join(" ")+" Nenhuma otimização foi aplicada; o jogo não será aberto automaticamente."); }
  }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
 }
 function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
