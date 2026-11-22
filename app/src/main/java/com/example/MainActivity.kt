@@ -189,6 +189,13 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
   }
 
   @JavascriptInterface
+  fun compileGameProfile(packageName: String): String {
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    return try { callSafeTweakService(6, packageName) } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha na compilação: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
   fun applySafeTweak(key: String): String {
     if (key != "animations") return JSONObject().put("ok", false).put("message", "Tweak não permitido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Inicie o Shizuku e conceda autorização ao SENSI.AI.").toString()
