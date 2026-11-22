@@ -114,3 +114,6 @@
 .boost-plan-result li{display:grid;grid-template-columns:minmax(0,1fr);gap:7px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.07)}
 .boost-plan-action{justify-self:start;min-height:34px;padding:7px 12px;border-color:rgba(167,139,250,.32);color:#d9c8ff}
 .boost-plan-action:active{transform:scale(.98)}
+
+/* SENSI.AI 3.3.0 Boost action labels */
+.boost-toolkit-label{letter-spacing:.1em}.boost-option-kind{font-size:9px;font-weight:800;letter-spacing:.08em;color:#c4b5fd;border:1px solid rgba(167,139,250,.3);border-radius:7px;padding:4px 6px;white-space:nowrap}
