@@ -75,7 +75,7 @@ function runGuideAction(key){
 function buildPlan(){
  const keys=selected(),box=$("boostPlanResult");if(!box)return;box.replaceChildren();
  if(!keys.length){const p=document.createElement("p");p.textContent="Escolha pelo menos uma opção para montar seu plano.";box.append(p);return}
- const executable=keys.filter(k=>k==="animations"||k==="massinha"),manual=keys.filter(k=>!executable.includes(k));
+ const executable=keys.filter(k=>["animations","massinha","game"].includes(k)),manual=keys.filter(k=>!executable.includes(k));
  const h=document.createElement("strong");h.textContent="Plano SENSI.AI · "+keys.length+" etapa(s)";box.append(h);
  const p=document.createElement("p");p.textContent=executable.length?executable.length+" ajuste(s) protegido(s) usam Shizuku, confirmação e backup. "+manual.length+" atalho(s) abrem painéis oficiais, atualizam diagnósticos ou copiam o relatório.":"Todas as etapas selecionadas agora possuem uma ação: abrir um painel do Android, atualizar uma leitura, iniciar o jogo ou copiar o relatório.";box.append(p);
  const group=(title,items)=>{if(!items.length)return;const heading=document.createElement("h4");heading.textContent=title;box.append(heading);const ol=document.createElement("ol");items.forEach(k=>{const li=document.createElement("li"),strong=document.createElement("b"),span=document.createElement("span"),button=document.createElement("button");strong.textContent=guides[k][0]+": ";span.textContent=guides[k][1];button.type="button";button.className="btn-ghost-sm boost-plan-action";button.textContent=guideActionLabels[k]||"EXECUTAR ETAPA";button.addEventListener("click",()=>runGuideAction(k));li.append(strong,span,button);ol.append(li)});box.append(ol)};
@@ -83,10 +83,10 @@ function buildPlan(){
  const note=document.createElement("small");note.textContent="Os atalhos não encerram aplicativos nem alteram opções silenciosamente. Spotify, Shizuku e serviços importantes são preservados.";box.append(note);
 }
 function startApplyTweaks(){
- const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha");
+ const keys=selected(),doAnimations=keys.includes("animations"),doMassinha=keys.includes("massinha"),doGame=keys.includes("game");
  if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
  buildPlan();
- if(!doAnimations&&!doMassinha){buildPlan();applyStatus("Plano montado. Agora cada etapa tem seu próprio botão para abrir o painel correto, atualizar o diagnóstico ou copiar o relatório. Nenhuma alteração foi feita sem sua escolha.");return}
+ if(!doAnimations&&!doMassinha&&!doGame){buildPlan();applyStatus("Nenhuma ação executável foi selecionada. Escolha uma função compatível com Shizuku.");return}
  if(!bridge||typeof bridge.getShizukuStatus!=="function"){applyStatus("A execução de ajustes exige o APK Android com Shizuku.");return}
  const auth=parse(bridge.getShizukuStatus());
  if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
@@ -97,15 +97,16 @@ function startApplyTweaks(){
  confirmText.textContent=warning;
  confirmBox.classList.remove("hidden");
  confirmBox.setAttribute("aria-hidden","false");
- confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,pkg,version});
+ confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,doGame,pkg,version});
  return;
 }
 function executeConfirmedTweaks(payload){
- const {keys,doAnimations,doMassinha,pkg,version}=payload,messages=[];let allApplied=true,appliedCount=0;
+ const {keys,doAnimations,doMassinha,doGame,pkg,version}=payload,messages=[];let allApplied=true,appliedCount=0;
  try{
   if(doAnimations){if(typeof bridge.applySafeTweak!=="function"){allApplied=false;messages.push("Animações Leves: função indisponível nesta versão.");}else{const r=parse(bridge.applySafeTweak("animations"));if(r?.ok){appliedCount++;messages.push(r.message||"Animações Leves aplicadas.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Animações Leves.");}}}
   if(doMassinha){if(typeof bridge.applyMassinhaTweak!=="function"){allApplied=false;messages.push("Gráficos Massinha: função indisponível nesta versão.");}else{const r=parse(bridge.applyMassinhaTweak(version,pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Gráficos Massinha aplicados.");}else{allApplied=false;messages.push(r?.message||"Falha ao aplicar Gráficos Massinha.");}}}
-  const manual=keys.filter(k=>k!=="animations"&&k!=="massinha");if(manual.length)messages.push(manual.length+" orientação(ões) continuam manuais; nenhum app em segundo plano foi encerrado.");
+  if(doGame){if(typeof bridge.compileGameProfile!=="function"){allApplied=false;messages.push("Compilação: função indisponível nesta versão.");}else{const r=parse(bridge.compileGameProfile(pkg));if(r?.ok){appliedCount++;messages.push(r.message||"Compilação concluída.");}else{allApplied=false;messages.push(r?.message||"Falha na compilação.");}}}
+  const manual=keys.filter(k=>!["animations","massinha","game"].includes(k));if(manual.length)messages.push(manual.length+" função(ões) ainda não possuem executor automático.");
   applyStatus(messages.join(" "));
   if(allApplied&&appliedCount>0&&appSettings.autoOpenFreeFire){put("boostApplyStatus",messages.join(" ")+" Abrindo o jogo conforme sua preferência…");openFreeFire(false);}
  }catch(error){applyStatus("A execução foi interrompida: "+String(error?.message||"falha inesperada")+". Confira o estado e restaure os backups se necessário.");}
