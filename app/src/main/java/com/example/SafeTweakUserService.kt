@@ -1,10 +1,14 @@
 package com.example
+import android.app.Service
+import android.content.Intent
+import android.os.IBinder
 import android.os.Binder
 import android.os.Parcel
 import org.json.JSONObject
 
 /** Strict Shizuku allowlist. No arbitrary shell input. */
-class SafeTweakUserService : Binder() {
+class SafeTweakUserService : Service() {
+ private val commandBinder = object : Binder() {
  companion object {
   const val DESCRIPTOR="com.example.SENSIAI_SAFE_TWEAKS"
   private const val APPLY_ANIMATIONS=1
@@ -49,6 +53,9 @@ class SafeTweakUserService : Binder() {
   }}catch(e:Throwable){JSONObject().put("ok",false).put("message",e.message?:"Shizuku operation failed")}
   reply?.writeNoException();reply?.writeString(result.toString());return true
  }
+ }
+
+ override fun onBind(intent: Intent?): IBinder = commandBinder
 
  private fun gameMode(pkg:String, performance:Boolean):JSONObject {
   require(pkg in allowed) { "Pacote de jogo não permitido." }
