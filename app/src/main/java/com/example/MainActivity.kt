@@ -205,6 +205,20 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
     }
   }
   @JavascriptInterface
+  fun applyGameMode(packageName: String): String {
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "game_mode_" + packageName
+    if (prefs.contains(key)) return JSONObject().put("ok", false).put("message", "O modo performance já está aplicado para este jogo. Restaure antes de reaplicar.").toString()
+    return try {
+      val result = callSafeTweakService(7, packageName)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().putBoolean(key, true).apply()
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha no modo de jogo: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
   fun applySafeTweak(key: String): String {
     if (key != "animations") return JSONObject().put("ok", false).put("message", "Tweak não permitido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Inicie o Shizuku e conceda autorização ao SENSI.AI.").toString()
@@ -248,6 +262,20 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
       if (JSONObject(result).optBoolean("ok")) prefs.edit().remove("massinha_backup").apply()
       result
     } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha ao restaurar: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
+  fun restoreGameMode(packageName: String): String {
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "game_mode_" + packageName
+    if (!prefs.contains(key)) return JSONObject().put("ok", false).put("message", "Nenhum modo performance salvo para restaurar.").toString()
+    return try {
+      val result = callSafeTweakService(8, packageName)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove(key).apply()
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha ao restaurar modo de jogo: " + (error.message ?: "erro desconhecido")).toString() }
   }
 
   @JavascriptInterface
