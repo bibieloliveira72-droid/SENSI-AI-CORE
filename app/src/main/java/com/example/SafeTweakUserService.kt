@@ -13,6 +13,8 @@ class SafeTweakUserService : Binder() {
   private const val RESTORE_MASSINHA=4
   private const val TEST_ACCESS=5
   private const val COMPILE_GAME=6
+  private const val APPLY_GAME_MODE=7
+  private const val RESTORE_GAME_MODE=8
   private val animKeys=listOf("window_animation_scale","transition_animation_scale","animator_duration_scale")
   private const val SETTINGS="/system/bin/settings"
   private const val GETPROP="/system/bin/getprop"
@@ -24,7 +26,7 @@ class SafeTweakUserService : Binder() {
   private val allowed=setOf("com.dts.freefireth","com.dts.freefiremax")
  }
  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
-  if(code !in APPLY_ANIMATIONS..COMPILE_GAME)return super.onTransact(code,data,reply,flags)
+  if(code !in APPLY_ANIMATIONS..RESTORE_GAME_MODE)return super.onTransact(code,data,reply,flags)
   data.enforceInterface(DESCRIPTOR)
   val result=try{when(code){
    APPLY_ANIMATIONS->applyAnimations()
@@ -33,9 +35,20 @@ class SafeTweakUserService : Binder() {
    RESTORE_MASSINHA->restoreMassinha(data.readString().orEmpty())
    TEST_ACCESS->testAccess()
    COMPILE_GAME->compileGame(data.readString().orEmpty())
+   APPLY_GAME_MODE->gameMode(data.readString().orEmpty(), true)
+   RESTORE_GAME_MODE->gameMode(data.readString().orEmpty(), false)
    else->JSONObject().put("ok",false)
   }}catch(e:Throwable){JSONObject().put("ok",false).put("message",e.message?:"Shizuku operation failed")}
   reply?.writeNoException();reply?.writeString(result.toString());return true
+ }
+
+ private fun gameMode(pkg:String, performance:Boolean):JSONObject {
+  require(pkg in allowed) { "Pacote de jogo não permitido." }
+  val mode=if(performance) "performance" else "standard"
+  var result=run("/system/bin/cmd","game","mode",mode,pkg)
+  if(result.first!=0 && performance) result=run("/system/bin/cmd","game","mode","2",pkg)
+  if(result.first!=0) return JSONObject().put("ok",false).put("exitCode",result.first).put("message","Modo de jogo não suportado ou recusado: "+result.second)
+  return JSONObject().put("ok",true).put("exitCode",result.first).put("message",if(performance) "Modo de desempenho solicitado para $pkg." else "Modo padrão restaurado para $pkg.")
  }
  private fun compileGame(pkg:String):JSONObject {
   require(pkg in allowed) { "Pacote de jogo não permitido." }
