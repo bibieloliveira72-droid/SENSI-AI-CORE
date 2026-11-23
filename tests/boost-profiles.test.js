@@ -18,16 +18,17 @@ test("os perfis possuem ações válidas", () => {
   }
 });
 
-test("aba de otimização oferece Shizuku e Brevent", () => {
+test("Brevent fica restrito aos Gráficos Massinha V1/V2", () => {
   assert.match(html, /id="tab-boost"/);
   assert.match(html, /id="boostApplyTweaks"/);
-  assert.match(html, /id="boostExecutionMode"/);
+  assert.match(html, /id="massinhaExecutionMode"/);
   assert.match(html, /value="shizuku"/);
   assert.match(html, /value="brevent"/);
   assert.match(html, /id="breventCommandOutput"/);
   assert.match(js, /function breventScript\(/);
-  assert.match(js, /executionMode==="brevent"/);
+  assert.match(js, /massinhaExecutionMode==="brevent"/);
   assert.match(js, /copyBreventCommand/);
+  assert.match(js, /Somente o Gráfico Massinha será enviado ao Brevent/);
 });
 
 test("Shizuku executa os módulos em segundo plano e informa o resultado", () => {
