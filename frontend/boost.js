@@ -146,16 +146,6 @@ function startApplyTweaks(){
 }
 async function executeConfirmedTweaks(payload){
  const {keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver,hz,massinhaExecutionMode="shizuku"}=payload;
- if(executionMode==="brevent"){
-  const script=breventScript(payload);
-  if(!script){applyStatus("Não foi possível gerar o comando para o jogo selecionado.");return;}
-  const panel=$("breventCommandPanel"),output=$("breventCommandOutput");
-  if(output)output.value=script;
-  panel?.classList.remove("hidden");
-  put("boostApplyStatus","Script preparado para o Brevent. Copie e execute manualmente no menu Executar comando.");
-  await copyBreventCommand();
-  return;
- }
  const operations=[];
  if(doAnimations)operations.push(["animations",{},"Animações 0,5x"]);
  if(doRefreshRate)operations.push(["refreshRate",{hz:Number(hz||60)},"Taxa de atualização"]);
@@ -181,7 +171,7 @@ async function executeConfirmedTweaks(payload){
  if(appliedCount>0){
   put("boostApplyStatus",messages.join(" ") +(allApplied?" Todas as operações concluídas.":" Algumas operações falharam ou foram ignoradas.")+" Abrindo o Free Fire…");
   openFreeFire(false,pkg==="com.dts.freefiremax"?"freefiremax":"freefire");
- }else applyStatus(messages.join(" ")+" Nenhuma otimização foi confirmada; o jogo não será aberto.");
+ }else if(!(doMassinha&&massinhaExecutionMode==="brevent")) applyStatus(messages.join(" ")+" Nenhuma otimização foi confirmada; o jogo não será aberto.");
 }
 function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
