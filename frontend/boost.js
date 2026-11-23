@@ -229,8 +229,21 @@ function massinhaCommands(){
  const pkg=massinhaPackage?.value||"com.dts.freefireth";
  const v1="settings put global angle_gl_driver_selection_pkgs "+pkg+" && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop "+pkg;
  const v2="settings put global angle_gl_driver_selection_pkgs "+pkg+" && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled forceNearestFiltering:disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop "+pkg;
- put("massinhaCommandV1",v1);put("massinhaCommandV2",v2);
+ const fieldV1=$("massinhaCommandV1"),fieldV2=$("massinhaCommandV2");if(fieldV1)fieldV1.value=v1;if(fieldV2)fieldV2.value=v2;
  return {v1,v2};
+}
+function detectMassinhaDevice(){
+ const info=$("massinhaDeviceInfo");
+ if(!bridge||typeof bridge.getDeviceSnapshot!=="function"){if(info)info.textContent="Detecção automática disponível na versão APK Android. Selecione o jogo manualmente.";massinhaCommands();return;}
+ const device=parse(bridge.getDeviceSnapshot());
+ if(!device){if(info)info.textContent="Não foi possível ler o aparelho. Selecione o jogo manualmente.";massinhaCommands();return;}
+ const installedFF=!!device.freeFireInstalled,installedMax=!!device.freeFireMaxInstalled;
+ if(installedFF&&!installedMax)massinhaPackage.value="com.dts.freefireth";
+ else if(installedMax&&!installedFF)massinhaPackage.value="com.dts.freefiremax";
+ else if(installedFF&&installedMax){const preferred=appSettings.gameEdition==="freefiremax"?"com.dts.freefiremax":"com.dts.freefireth";massinhaPackage.value=preferred;}
+ const gameLabel=installedFF&&installedMax?"Free Fire e Free Fire MAX instalados":installedMax?"Free Fire MAX detectado":installedFF?"Free Fire detectado":"Nenhuma edição encontrada, selecione manualmente";
+ if(info)info.textContent=(device.manufacturer+" "+device.model+" · "+gameLabel);
+ massinhaCommands();
 }
 async function copyMassinha(version){
  const commands=massinhaCommands(),value=version==="v2"?commands.v2:commands.v1;
@@ -277,6 +290,7 @@ $("copyBreventCommand")?.addEventListener("click",copyBreventCommand);
 $("massinhaCopyV1")?.addEventListener("click",()=>copyMassinha("v1"));
 $("massinhaCopyV2")?.addEventListener("click",()=>copyMassinha("v2"));
 massinhaCommands();
+detectMassinhaDevice();
 $("boostBuildPlan")?.addEventListener("click",buildPlan);
 $("boostApplyTweaks")?.addEventListener("click",startApplyTweaks);
 
