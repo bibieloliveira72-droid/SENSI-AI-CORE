@@ -24,7 +24,7 @@ test("aba de otimização apresenta o motor Benimaru e remove atalhos manuais", 
   assert.match(html, /value="shader"/);
   assert.match(html, /value="refreshRate"/);
   assert.match(html, /value="gameMode" checked/);
-  assert.doesNotMatch(html, /massinhaCopyV1|massinhaCopyV2|boostApplyProfileBtn|boostBuildPlan/);
+  assert.match(html, /id="boostExecutionMode"/);\n  assert.match(html, /value="brevent"/);\n  assert.match(html, /id="breventCommandOutput"/);\n  assert.doesNotMatch(html, /boostApplyProfileBtn/);
 });
 
 test("botão Aplicar otimizações executa os módulos e abre o jogo ao terminar", () => {
