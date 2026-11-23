@@ -113,7 +113,14 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
     val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
       (context.getSystemService(Context.POWER_SERVICE) as PowerManager).currentThermalStatus
     } else -1
+    @Suppress("DEPRECATION")
+    fun isPackageInstalled(packageName: String): Boolean = try {
+      context.packageManager.getPackageInfo(packageName, 0)
+      true
+    } catch (_: PackageManager.NameNotFoundException) { false }
     return JSONObject().apply {
+      put("freeFireInstalled", isPackageInstalled("com.dts.freefireth"))
+      put("freeFireMaxInstalled", isPackageInstalled("com.dts.freefiremax"))
       put("manufacturer", Build.MANUFACTURER)
       put("model", Build.MODEL)
       put("android", Build.VERSION.RELEASE)
