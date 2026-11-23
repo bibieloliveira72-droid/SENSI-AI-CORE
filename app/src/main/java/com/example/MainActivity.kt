@@ -12,6 +12,7 @@ import android.os.Parcel
 import android.os.RemoteException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.Executors
 import android.app.ActivityManager
 import android.content.Intent
 import android.content.IntentFilter
@@ -87,7 +88,8 @@ class MainActivity : ComponentActivity() {
   }
 }
 
-private class AndroidClipboardBridge(private val activity: ComponentActivity) {
+private class AndroidClipboardBridge(private val activity: ComponentActivity, private val dispatchJs: (String) -> Unit) {
+  private val tweakExecutor = Executors.newSingleThreadExecutor()
   private val context: Context = activity.applicationContext
   @JavascriptInterface
   fun getDeviceSnapshot(): String {
@@ -359,6 +361,28 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
     }
   }
 
+  @JavascriptInterface
+  fun runTweakAsync(operation: String, payload: String, requestId: String) {
+    if (!requestId.matches(Regex("[A-Za-z0-9_-]{1,64}"))) return
+    tweakExecutor.execute {
+      val result = try {
+        val data = JSONObject(payload.ifBlank { "{}" })
+        when (operation) {
+          "animations" -> applySafeTweak("animations")
+          "game" -> compileGameProfile(data.optString("package"))
+          "gameMode" -> applyGameMode(data.optString("package"))
+          "shader" -> applyBenimaruShaderDriver(data.optString("package"), data.optString("driver"))
+          "refreshRate" -> applyBenimaruRefreshRate(data.optInt("hz", 60))
+          "massinha" -> applyMassinhaTweak(data.optString("version"), data.optString("package"))
+          else -> JSONObject().put("ok", false).put("message", "Operação assíncrona não reconhecida.").toString()
+        }
+      } catch (error: Throwable) {
+        JSONObject().put("ok", false).put("message", "Falha na execução: ${error.message ?: "erro desconhecido"}").toString()
+      }
+      dispatchJs("window.__sensiNativeResult && window.__sensiNativeResult(${JSONObject.quote(requestId)}, ${JSONObject.quote(result)});")
+    }
+  }
+
   private fun isShizukuAuthorized(): Boolean {
     return try { Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED } catch (_: Throwable) { false }
   }
@@ -392,7 +416,7 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity) {
         reply.recycle()
       }
     } finally {
-      try { Shizuku.unbindUserService(args, connection, true) } catch (_: Throwable) { }
+      try { Shizuku.unbindUserService(args, connection, false) } catch (_: Throwable) { }
     }
   }
 
@@ -494,7 +518,10 @@ fun SensiOfflineWebHost() {
           }
 
           val hostActivity = context.findComponentActivity() ?: error("Activity Android indisponível para o Shizuku.")
-          addJavascriptInterface(AndroidClipboardBridge(hostActivity), "AndroidBridge")
+          val currentWebView = this
+          addJavascriptInterface(AndroidClipboardBridge(hostActivity) { script ->
+            currentWebView.post { currentWebView.evaluateJavascript(script, null) }
+          }, "AndroidBridge")
 
           webChromeClient = WebChromeClient()
           webViewClient =
