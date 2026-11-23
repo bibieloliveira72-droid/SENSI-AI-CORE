@@ -22,6 +22,10 @@ test("Brevent fica restrito aos Gráficos Massinha V1/V2", () => {
   assert.match(html, /id="tab-boost"/);
   assert.match(html, /id="boostApplyTweaks"/);
   assert.match(html, /id="massinhaExecutionMode"/);
+  assert.match(html, /id="massinhaCommandV1"/);
+  assert.match(html, /id="massinhaCommandV2"/);
+  assert.match(html, /id="massinhaCopyV1"/);
+  assert.match(html, /id="massinhaCopyV2"/);
   assert.match(html, /value="shizuku"/);
   assert.match(html, /value="brevent"/);
   assert.match(html, /id="breventCommandOutput"/);
@@ -70,4 +74,13 @@ test("atalhos nativos usam telas oficiais do Android e não encerram Spotify", (
   assert.match(android, /ACTION_ALL_APPS_NOTIFICATION_SETTINGS/);
   assert.match(android, /ACTION_MANAGE_APPLICATIONS_SETTINGS/);
   assert.doesNotMatch(js, /am force-stop.*(spotify|com\.spotify)/i);
+});
+
+test("comandos Massinha V1/V2 usam os parâmetros exatos e encerram somente o Free Fire escolhido", () => {
+  assert.match(js, /disableAnisotropicFiltering:forceTextureLodOffset4/);
+  assert.match(js, /forceNearestFiltering:disableAnisotropicFiltering:forceTextureLodOffset4/);
+  assert.match(js, /am force-stop \"\+pkg/);
+  assert.match(js, /function detectMassinhaDevice\(/);
+  assert.match(android, /freeFireInstalled/);
+  assert.match(android, /freeFireMaxInstalled/);
 });
