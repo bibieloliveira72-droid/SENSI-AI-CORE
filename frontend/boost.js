@@ -15,9 +15,9 @@ const auto=$("settingAutoOpenFF"),edition=$("settingGameEdition");
 if(auto)auto.checked=!!appSettings.autoOpenFreeFire;
 if(edition)edition.value=appSettings.gameEdition;
 }
-function openFreeFire(manual){
+function openFreeFire(manual,editionOverride){
 if(!bridge||typeof bridge.openFreeFire!=="function"){put("settingsStatus","A abertura automática está disponível apenas no APK Android.");if(manual)applyStatus("Instale e abra o SENSI.AI pelo APK para iniciar o Free Fire.");return false}
-let opened=false;try{opened=bridge.openFreeFire(appSettings.gameEdition)==="opened"}catch(_){}
+let opened=false;try{opened=bridge.openFreeFire(editionOverride||appSettings.gameEdition)==="opened"}catch(_){}
 const message=opened?"Free Fire iniciado. Boa partida!": "Não encontrei essa versão do Free Fire instalada. Confira a versão escolhida nas Configurações.";
 put("settingsStatus",message);if(!manual)applyStatus(message);return opened
 }
@@ -181,7 +181,7 @@ async function executeConfirmedTweaks(payload){
  if(manual.length){allApplied=false;messages.push(manual.length+" opção(ões) não possuem módulo executável.");}
  if(appliedCount>0){
   put("boostApplyStatus",messages.join(" ") +(allApplied?" Todas as operações concluídas.":" Algumas operações falharam ou foram ignoradas.")+" Abrindo o Free Fire…");
-  openFreeFire(false);
+  openFreeFire(false,pkg==="com.dts.freefiremax"?"freefiremax":"freefire");
  }else applyStatus(messages.join(" ")+" Nenhuma otimização foi confirmada; o jogo não será aberto.");
 }
 function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
