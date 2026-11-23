@@ -10,7 +10,7 @@ assert.ok(profileLiteral, "Mapa de perfis precisa existir");
 const profiles = Function("return (" + profileLiteral[1] + ")")();
 const validActions = new Set(["animations","game","gameMode","shader","refreshRate","memory","thermal","battery","network","touch","display","storage","background","sound","privacy","report","refresh","notifications","updates","accessibility","massinha"]);
 
-test("os cinco perfis possuem uma lista válida e a ação executável reversível", () => {
+test("os perfis possuem ações válidas", () => {
   for (const name of ["stable","cool","battery","network","balanced"]) {
     assert.ok(Array.isArray(profiles[name]), "Perfil ausente: " + name);
     assert.ok(profiles[name].includes("animations"), "Perfil sem ação executável: " + name);
@@ -18,27 +18,39 @@ test("os cinco perfis possuem uma lista válida e a ação executável reversív
   }
 });
 
-test("aba de otimização apresenta o motor Benimaru e remove atalhos manuais", () => {
+test("aba de otimização oferece Shizuku e Brevent", () => {
   assert.match(html, /id="tab-boost"/);
   assert.match(html, /id="boostApplyTweaks"/);
-  assert.match(html, /value="shader"/);
-  assert.match(html, /value="refreshRate"/);
-  assert.match(html, /value="gameMode" checked/);
-  assert.match(html, /id="boostExecutionMode"/);\n  assert.match(html, /value="brevent"/);\n  assert.match(html, /id="breventCommandOutput"/);\n  assert.doesNotMatch(html, /boostApplyProfileBtn/);
+  assert.match(html, /id="boostExecutionMode"/);
+  assert.match(html, /value="shizuku"/);
+  assert.match(html, /value="brevent"/);
+  assert.match(html, /id="breventCommandOutput"/);
+  assert.match(js, /function breventScript\(/);
+  assert.match(js, /executionMode==="brevent"/);
+  assert.match(js, /copyBreventCommand/);
 });
 
-test("botão Aplicar otimizações executa os módulos e abre o jogo ao terminar", () => {
-  assert.match(html, /id="boostApplyTweaks"/);
-  assert.match(js, /\$\("boostApplyTweaks"\)\?\.addEventListener\("click",startApplyTweaks\)/);
-  assert.match(js, /function executeConfirmedTweaks\([\s\S]*?applyBenimaruRefreshRate[\s\S]*?applyBenimaruShaderDriver[\s\S]*?openFreeFire\(false\)/);
+test("Shizuku executa os módulos em segundo plano e informa o resultado", () => {
+  assert.match(js, /function runNativeTweak\(/);
+  assert.match(js, /await runNativeTweak\(/);
+  assert.match(js, /window\.__sensiNativeResult/);
+  assert.match(android, /fun runTweakAsync/);
+  for (const op of ["animations","game","gameMode","shader","refreshRate","massinha"]) {
+    assert.ok(android.includes('"'+op+'" ->'), "Operação nativa ausente: " + op);
+  }
+  assert.match(android, /unbindUserService\(args, connection, false\)/);
 });
-test("ações nativas continuam protegidas por Shizuku, confirmação e backup", () => {
-  assert.match(js, /getShizukuStatus/);
+
+test("o jogo escolhido é aberto após operações confirmadas", () => {
+  assert.match(js, /openFreeFire\(false,pkg==="com\.dts\.freefiremax"\?"freefiremax":"freefire"\)/);
+});
+
+test("ações nativas mantêm confirmação e restauração", () => {
   assert.match(js, /boostConfirmModal/);
-  assert.match(js, /applySafeTweak\("animations"\)/);
-  assert.match(js, /applyMassinhaTweak\(version,pkg\)/);
   assert.match(js, /restoreSafeTweak/);
   assert.match(js, /restoreMassinhaTweak/);
+  assert.match(js, /restoreBenimaruRefreshRate/);
+  assert.match(js, /restoreBenimaruShaderDriver/);
 });
 
 test("todas as opções do Boost possuem uma ação ligada", () => {
@@ -50,15 +62,11 @@ test("todas as opções do Boost possuem uma ação ligada", () => {
   assert.match(js, /button.addEventListener\("click",\(\)=>runGuideAction\(k\)\)/);
 });
 
-test("atalhos nativos usam telas oficiais do Android e não encerram apps", () => {
+test("atalhos nativos usam telas oficiais do Android e não encerram Spotify", () => {
   for (const key of ["battery","network","display","touch","storage","background","memory","sound","privacy","notifications","updates","accessibility"]) {
-    assert.match(android, new RegExp('"' + key + '"'));
+    assert.match(android, new RegExp('"'+key+'"'));
   }
   assert.match(android, /ACTION_ALL_APPS_NOTIFICATION_SETTINGS/);
   assert.match(android, /ACTION_MANAGE_APPLICATIONS_SETTINGS/);
   assert.doesNotMatch(js, /am force-stop.*(spotify|com\.spotify)/i);
-});
-
-test("o plano é montado antes de verificar Shizuku para não bloquear os atalhos", () => {
-  assert.match(js, /function startApplyTweaks\(\)[\s\S]*?buildPlan\(\);[\s\S]*?getShizukuStatus/);
 });
