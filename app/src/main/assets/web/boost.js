@@ -103,22 +103,15 @@ function runNativeTweak(operation,payload){
  });
 }
 function breventScript(payload){
- const {doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver,hz}=payload;
- if(!["com.dts.freefireth","com.dts.freefiremax"].includes(pkg))return "";
- const lines=["# SENSI.AI / comandos para executar manualmente no Brevent","PKG="+pkg];
- if(doAnimations)lines.push("settings put global window_animation_scale 0.5 && settings put global transition_animation_scale 0.5 && settings put global animator_duration_scale 0.5");
- if(doRefreshRate)lines.push("settings put system min_refresh_rate "+Number(hz||60)+" && settings put system peak_refresh_rate "+Number(hz||60));
- if(doGameMode)lines.push("cmd game mode performance \"$PKG\" || cmd game mode 2 \"$PKG\"");
- if(doGame)lines.push("cmd package compile -m speed -f \"$PKG\"");
- if(doShader||doMassinha){
-  const feature=doMassinha?(version==="v2"?"forceNearestFiltering:disableAnisotropicFiltering:forceTextureLodOffset4":"disableAnisotropicFiltering:forceTextureLodOffset4"):"";
-  const selectedDriver=doMassinha?"angle":(driver||"angle");
-  lines.push("OLD_PKGS=$(settings get global angle_gl_driver_selection_pkgs); OLD_VALUES=$(settings get global angle_gl_driver_selection_values);");
-  lines.push("case \",\"$OLD_PKGS\",\" in *\",\"$PKG\",\"*) echo 'O jogo ja possui uma entrada ANGLE. Mantenha a configuracao existente ou use Shizuku para editar com backup.' ;; *) if [ \"$OLD_PKGS\" = null ] || [ -z \"$OLD_PKGS\" ]; then settings put global angle_gl_driver_selection_pkgs \"$PKG\"; settings put global angle_gl_driver_selection_values "+selectedDriver+"; else settings put global angle_gl_driver_selection_pkgs \"$OLD_PKGS,$PKG\"; settings put global angle_gl_driver_selection_values \"$OLD_VALUES,"+selectedDriver+"\"; fi ;; esac");
-  if(feature)lines.push("setprop debug.angle.feature_overrides_enabled "+feature);
- }
- lines.push("monkey -p \"$PKG\" 1");
- lines.push("# O Brevent executa os comandos acima. Confira o resultado no próprio Brevent.");
+ const {doMassinha,pkg,version}=payload;
+ if(!doMassinha||!["com.dts.freefireth","com.dts.freefiremax"].includes(pkg))return "";
+ const feature=version==="v2"?"forceNearestFiltering:disableAnisotropicFiltering:forceTextureLodOffset4":"disableAnisotropicFiltering:forceTextureLodOffset4";
+ const lines=["# SENSI.AI / Graficos Massinha "+(version==="v2"?"V2":"V1"),"PKG="+pkg,
+  "OLD_PKGS=$(settings get global angle_gl_driver_selection_pkgs)",
+  "OLD_VALUES=$(settings get global angle_gl_driver_selection_values)",
+  "case \",$OLD_PKGS,\" in *\",$PKG,\"*) echo Ja existe uma entrada ANGLE para este jogo. Nenhuma alteracao foi feita. ;; *) if [ \"$OLD_PKGS\" = null ] || [ -z \"$OLD_PKGS\" ]; then settings put global angle_gl_driver_selection_pkgs \"$PKG\" && settings put global angle_gl_driver_selection_values angle; else settings put global angle_gl_driver_selection_pkgs \"$OLD_PKGS,$PKG\" && settings put global angle_gl_driver_selection_values \"$OLD_VALUES,angle\"; fi ;; esac",
+  "setprop debug.angle.feature_overrides_enabled "+feature,
+  "# Execute no Brevent. Depois, abra o Free Fire manualmente para testar."];
  return lines.join("\n");
 }
 async function copyBreventCommand(){
@@ -136,37 +129,28 @@ function startApplyTweaks(){
  if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
  buildPlan();
  if(!doAnimations&&!doMassinha&&!doGame&&!doGameMode&&!doShader&&!doRefreshRate){applyStatus("Nenhuma otimização executável foi selecionada.");return}
- const executionMode=$("boostExecutionMode")?.value||"shizuku";
- if(executionMode==="shizuku"){
-  if(!bridge||typeof bridge.getShizukuStatus!=="function"){applyStatus("A execução integrada exige o APK Android com Shizuku.");return}
+ const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
+ const massinhaExecutionMode=$("massinhaExecutionMode")?.value||"shizuku";
+ const needsShizuku=doAnimations||doGame||doGameMode||doShader||doRefreshRate||(doMassinha&&massinhaExecutionMode==="shizuku");
+ if(needsShizuku){
+  if(!bridge||typeof bridge.getShizukuStatus!=="function"){applyStatus("Os módulos selecionados exigem o APK Android com Shizuku.");return}
   const auth=parse(bridge.getShizukuStatus());
   if(!auth?.running||!auth?.granted){applyStatus(!auth?.running?"Shizuku não está ativo. Inicie o serviço e verifique novamente.":"Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização.");return}
  }
- const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
- const warning=[doAnimations?"Aplicar Animações Leves em 0,5x.":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+".":"",doGame?"Executar compilação ART speed -f.":"",doGameMode?"Ativar modo performance do Android.":"",doShader?"Configurar o driver gráfico escolhido.":"",doRefreshRate?"Definir a taxa de atualização em "+($("benimaruRefreshRate")?.value||"60")+" Hz.":"",executionMode==="brevent"?"O SENSI.AI vai gerar e copiar um script. A execução será confirmada por você dentro do Brevent.":"As operações serão executadas pelo Shizuku. Confirmar?"].filter(Boolean).join("\n\n");
+ const warning=[doAnimations?"Aplicar Animações Leves em 0,5x.":"",doMassinha?"Aplicar Gráficos Massinha "+version.toUpperCase()+" por "+(massinhaExecutionMode==="brevent"?"comando Brevent":"Shizuku")+".":"",doGame?"Executar compilação ART speed -f.":"",doGameMode?"Ativar modo performance do Android.":"",doShader?"Configurar o driver gráfico escolhido.":"",doRefreshRate?"Definir a taxa de atualização em "+($("benimaruRefreshRate")?.value||"60")+" Hz.":"",massinhaExecutionMode==="brevent"&&doMassinha?"Somente o Gráfico Massinha será enviado ao Brevent. Os demais módulos continuam no Shizuku.":"As operações nativas serão executadas pelo Shizuku. Confirmar?"].filter(Boolean).join("\n\n");
  const confirmBox=$("boostConfirmModal"),confirmText=$("boostConfirmMessage");
  if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
  confirmText.textContent=warning;
  confirmBox.classList.remove("hidden");confirmBox.setAttribute("aria-hidden","false");
- confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver:$("benimaruShaderDriver")?.value||"angle",hz:Number($("benimaruRefreshRate")?.value||60),executionMode});
+ confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver:$("benimaruShaderDriver")?.value||"angle",hz:Number($("benimaruRefreshRate")?.value||60),massinhaExecutionMode});
 }
 async function executeConfirmedTweaks(payload){
- const {keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver,hz,executionMode="shizuku"}=payload;
- if(executionMode==="brevent"){
-  const script=breventScript(payload);
-  if(!script){applyStatus("Não foi possível gerar o comando para o jogo selecionado.");return;}
-  const panel=$("breventCommandPanel"),output=$("breventCommandOutput");
-  if(output)output.value=script;
-  panel?.classList.remove("hidden");
-  put("boostApplyStatus","Script preparado para o Brevent. Copie e execute manualmente no menu Executar comando.");
-  await copyBreventCommand();
-  return;
- }
+ const {keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver,hz,massinhaExecutionMode="shizuku"}=payload;
  const operations=[];
  if(doAnimations)operations.push(["animations",{},"Animações 0,5x"]);
  if(doRefreshRate)operations.push(["refreshRate",{hz:Number(hz||60)},"Taxa de atualização"]);
  if(doShader)operations.push(["shader",{package:pkg,driver:driver||"angle"},"Driver gráfico"]);
- if(doMassinha)operations.push(["massinha",{package:pkg,version},"Gráficos Massinha"]);
+ if(doMassinha&&massinhaExecutionMode!=="brevent")operations.push(["massinha",{package:pkg,version},"Gráficos Massinha"]);
  if(doGameMode)operations.push(["gameMode",{package:pkg},"Modo performance"]);
  if(doGame)operations.push(["game",{package:pkg},"Compilação ART"]);
  const manual=keys.filter(k=>!["animations","massinha","game","gameMode","shader","refreshRate"].includes(k));
@@ -179,10 +163,15 @@ async function executeConfirmedTweaks(payload){
   else{allApplied=false;messages.push(label+": "+(result?.message||"operação recusada."));}
  }
  if(manual.length){allApplied=false;messages.push(manual.length+" opção(ões) não possuem módulo executável.");}
+ if(doMassinha&&massinhaExecutionMode==="brevent"){
+  const script=breventScript(payload);
+  if(script){const output=$("breventCommandOutput"),panel=$("breventCommandPanel");if(output)output.value=script;panel?.classList.remove("hidden");put("boostApplyStatus","Comando exclusivo do Gráfico Massinha "+version.toUpperCase()+" preparado. Copie e execute no Brevent.");await copyBreventCommand();}
+  else{allApplied=false;messages.push("Não foi possível gerar o comando Massinha.");}
+ }
  if(appliedCount>0){
   put("boostApplyStatus",messages.join(" ") +(allApplied?" Todas as operações concluídas.":" Algumas operações falharam ou foram ignoradas.")+" Abrindo o Free Fire…");
   openFreeFire(false,pkg==="com.dts.freefiremax"?"freefiremax":"freefire");
- }else applyStatus(messages.join(" ")+" Nenhuma otimização foi confirmada; o jogo não será aberto.");
+ }else if(!(doMassinha&&massinhaExecutionMode==="brevent")) applyStatus(messages.join(" ")+" Nenhuma otimização foi confirmada; o jogo não será aberto.");
 }
 function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
 function thermal(n){return ({0:"Normal",1:"Leve",2:"Moderado",3:"Alto",4:"Severo",5:"Crítico",6:"Emergência"})[n]||"Não informado"}
