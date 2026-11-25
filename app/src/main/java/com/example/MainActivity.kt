@@ -91,6 +91,7 @@ class MainActivity : ComponentActivity() {
 private class AndroidClipboardBridge(private val activity: ComponentActivity, private val dispatchJs: (String) -> Unit) {
   private val tweakExecutor = Executors.newSingleThreadExecutor()
   private val context: Context = activity.applicationContext
+  private fun isSupportedGamePackage(packageName: String): Boolean = packageName in setOf("com.dts.freefireth", "com.dts.freefiremax", "com.roblox.client", "com.activision.callofduty.shooter", "com.tencent.ig", "com.mojang.minecraftpe", "com.mobile.legends", "com.supercell.brawlstars", "com.kitkagames.fallbuddies")
   @JavascriptInterface
   fun getDeviceSnapshot(): String {
     val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
@@ -199,8 +200,8 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
 
   @JavascriptInterface
   fun compileGameProfile(packageName: String): String {
-    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") {
-      return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isSupportedGamePackage(packageName)) {
+      return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
     }
     if (!isShizukuAuthorized()) {
       return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
@@ -215,7 +216,7 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
   }
   @JavascriptInterface
   fun applyGameMode(packageName: String): String {
-    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
     val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
     val key = "game_mode_" + packageName
@@ -305,7 +306,7 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
 
   @JavascriptInterface
   fun applyBenimaruShaderDriver(packageName: String, driver: String): String {
-    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
     if (driver !in setOf("angle", "native", "default")) return JSONObject().put("ok", false).put("message", "Driver inválido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
     val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
@@ -324,7 +325,7 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
 
   @JavascriptInterface
   fun restoreBenimaruShaderDriver(packageName: String): String {
-    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não autorizado.").toString()
     val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
     val key = "shader_backup_" + packageName
@@ -340,7 +341,7 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
 
   @JavascriptInterface
   fun restoreGameMode(packageName: String): String {
-    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
     if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
     val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
     val key = "game_mode_" + packageName
