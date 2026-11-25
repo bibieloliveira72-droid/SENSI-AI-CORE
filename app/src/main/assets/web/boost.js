@@ -221,16 +221,18 @@ if(!d){lastDeviceSnapshot=null;updateHeatShield(null);put("boostDevice","Modo na
 lastDeviceSnapshot=d;updateHeatShield(d);put("boostLastCheck","Última leitura: "+new Date().toLocaleTimeString());try{localStorage.setItem("sensi_boost_last_check",String(Date.now()))}catch(_){}put("boostDevice",(d.manufacturer+" "+d.model).trim());put("boostMemory",d.availableMemoryMb>=0?Math.round(d.availableMemoryMb)+" MB":"N/D");put("boostMemoryHint",d.totalMemoryMb>0?"de "+Math.round(d.totalMemoryMb)+" MB totais":"Leitura indisponível");put("boostBattery",d.batteryPercent>=0?d.batteryPercent+"%":"N/D");put("boostBatteryHint","Nível informado pelo Android");put("boostTemp",d.batteryTempC>=0?Number(d.batteryTempC).toFixed(1)+" °C":"N/D");put("boostTempHint",thermal(d.thermalStatus));put("boostAndroid",d.android||"N/D");put("boostAndroidHint","API "+(d.sdk||"N/D"));put("boostResolution",d.screenWidth>0&&d.screenHeight>0?d.screenWidth+" × "+d.screenHeight:"N/D");put("boostResolutionHint",d.densityDpi>0?d.densityDpi+" DPI":"Densidade indisponível");put("boostRefreshRate",d.refreshRateHz>0?Number(d.refreshRateHz).toFixed(1)+" Hz":"N/D");put("boostRefreshRateHint","Taxa informada pelo display");
 const tips=[];if(d.batteryTempC>=45)tips.push("Temperatura da bateria elevada. Faça uma pausa e deixe esfriar naturalmente.");else if(d.batteryTempC>=0)tips.push("Temperatura da bateria sem alerta imediato.");if(d.availableMemoryMb>=0&&d.totalMemoryMb>0&&d.availableMemoryMb/d.totalMemoryMb<.12)tips.push("Pouca memória disponível. Feche manualmente apps que não está usando.");if(d.lowMemory)tips.push("O Android sinalizou pouca memória.");if(d.thermalStatus>=3)tips.push("Estado térmico elevado. Reduza a carga gráfica e aguarde.");if(!tips.length)tips.push("Sem alertas claros nos dados disponíveis. Isso não substitui um teste de estabilidade.");put("boostAdvice",tips.join(" "))}
 function shizuku(kind,title,detail,canRequest){const box=$("shizukuStatus");if(!box)return;box.className="shizuku-status "+kind;const strong=box.querySelector("strong"),small=box.querySelector("small");if(strong)strong.textContent=title;if(small)small.textContent=detail;const grant=$("shizukuGrantBtn");if(grant)grant.disabled=!canRequest}
-function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}const s=parse(bridge.getShizukuStatus());if(!s||!s.running)shizuku("","Shizuku não está ativo","Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado","Autorização confirmada. Os tweaks via Shizuku estão liberados para execução.",false);else shizuku("denied","Autorização pendente","Você pode solicitar a permissão. A escolha continua sendo sua.",true)}
+function check(){if(!bridge||typeof bridge.getShizukuStatus!=="function"){shizuku("","Disponível somente no APK Android","O painel web não possui conexão nativa.",false);return}let s=null;try{s=parse(typeof bridge.runShizukuDiagnostics==="function"?bridge.runShizukuDiagnostics():bridge.getShizukuStatus())}catch(error){shizuku("","Falha na consulta",String(error?.message||"Não foi possível consultar o Binder do Shizuku."),false);return}if(!s||!s.running)shizuku("","Shizuku não está ativo",s?.message||"Inicie o serviço no app Shizuku e verifique novamente.",false);else if(s.granted)shizuku("ready","Shizuku ativo e SENSI.AI autorizado",s.message||"Autorização confirmada. Os módulos Shizuku estão liberados.",false);else shizuku("denied","Autorização pendente",s.message||"Conceda a permissão ao SENSI.AI no Shizuku.",true)}
 document.addEventListener("DOMContentLoaded",()=>{
+// Inicialize referências DOM antes de qualquer leitura. Declarar const depois do primeiro uso
+// causava ReferenceError (TDZ) e interrompia todos os listeners do Hub e do Massinha.
+const massinhaPackage=$("massinhaTargetPackage");
+const optimizerGameTarget=$("optimizerGameTarget");
+const optimizerCustomPackage=$("optimizerCustomPackage");
 const confirmCancel=$("boostConfirmCancel"),confirmAccept=$("boostConfirmAccept"),confirmModal=$("boostConfirmModal");
 confirmCancel?.addEventListener("click",()=>{closeBoostConfirm();applyStatus("Aplicação cancelada. Nenhuma alteração foi feita.");});
 confirmAccept?.addEventListener("click",()=>{const payload=parse(confirmModal?.dataset.pending||"");closeBoostConfirm();if(payload)executeConfirmedTweaks(payload);else applyStatus("Confirmação expirada. Nenhuma alteração foi feita.");});
 document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
 if(optimizerGameTarget){try{const saved=localStorage.getItem(GAME_TARGET_KEY);if(saved&&(GAME_TARGETS[saved]||saved==="custom"))optimizerGameTarget.value=saved;}catch(_){}optimizerGameTarget.addEventListener("change",syncGameTarget);optimizerCustomPackage?.addEventListener("input",syncGameTarget);syncGameTarget();}
-const massinhaPackage=$("massinhaTargetPackage");
-const optimizerGameTarget=$("optimizerGameTarget");
-const optimizerCustomPackage=$("optimizerCustomPackage");
 const GAME_TARGETS={
  "com.dts.freefireth":{name:"Free Fire",family:"freefire"},
  "com.dts.freefiremax":{name:"Free Fire MAX",family:"freefire"},
@@ -311,10 +313,9 @@ $("boostCopyReport")?.addEventListener("click",copySystemReport);
 $("boostSelectAll")?.addEventListener("click",()=>setSelected(Object.keys(guides).filter(key=>key!=="massinha")));
 $("boostClearSelection")?.addEventListener("click",()=>setSelected([]));
 $("massinhaTargetPackage")?.addEventListener("change",massinhaCommands);
-$("boostExecutionMode")?.addEventListener("change",()=>{
- const isBrevent=$("boostExecutionMode").value==="brevent";
- $("breventCommandPanel")?.classList.toggle("hidden",!isBrevent);
- put("boostApplyStatus",isBrevent?"Modo Brevent selecionado. O app vai gerar um comando para você executar no Brevent.":"Modo Shizuku selecionado. A execução integrada exige autorização ativa.");
+$("massinhaExecutionMode")?.addEventListener("change",()=>{
+ const isBrevent=$("massinhaExecutionMode").value==="brevent";
+ put("massinhaCopyStatus",isBrevent?"Brevent selecionado para o Gráfico Massinha. Copie V1 ou V2 e execute no Brevent.":"Shizuku selecionado para Massinha. Os outros módulos continuam usando Shizuku.");
 });
 $("copyBreventCommand")?.addEventListener("click",copyBreventCommand);
 $("massinhaCopyV1")?.addEventListener("click",()=>copyMassinha("v1"));
