@@ -5,6 +5,7 @@ import { readFileSync } from "node:fs";
 const js = readFileSync(new URL("../frontend/boost.js", import.meta.url), "utf8");
 const html = readFileSync(new URL("../frontend/index.html", import.meta.url), "utf8");
 const android = readFileSync(new URL("../app/src/main/java/com/example/MainActivity.kt", import.meta.url), "utf8");
+const safeService = readFileSync(new URL("../app/src/main/java/com/example/SafeTweakUserService.kt", import.meta.url), "utf8");
 const profileLiteral = js.match(/const recommended=(\{[\s\S]*?\});\nlet activeBoostProfile/);
 assert.ok(profileLiteral, "Mapa de perfis precisa existir");
 const profiles = Function("return (" + profileLiteral[1] + ")")();
@@ -99,6 +100,6 @@ test("otimizador oferece seleção universal de jogos e mantém Massinha exclusi
 
 test("lista nativa de pacotes permitidos inclui os jogos universais e mantém Massinha separado", () => {
   for (const pkg of ["com.roblox.client","com.activision.callofduty.shooter","com.tencent.ig","com.mojang.minecraftpe","com.mobile.legends","com.supercell.brawlstars","com.kitkagames.fallbuddies"]) assert.ok(android.includes(pkg), "Pacote nativo ausente: "+pkg);
-  assert.ok(android.includes("allowedMassinha=setOf(\"com.dts.freefireth\",\"com.dts.freefiremax\")"));
-  assert.ok(android.includes("require(pkg in allowedMassinha)"));
+  assert.ok(safeService.includes("allowedMassinha=setOf(\"com.dts.freefireth\",\"com.dts.freefiremax\")"));
+  assert.ok(safeService.includes("require(pkg in allowedMassinha)"));
 });
