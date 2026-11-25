@@ -232,7 +232,7 @@ const confirmCancel=$("boostConfirmCancel"),confirmAccept=$("boostConfirmAccept"
 confirmCancel?.addEventListener("click",()=>{closeBoostConfirm();applyStatus("Aplicação cancelada. Nenhuma alteração foi feita.");});
 confirmAccept?.addEventListener("click",()=>{const payload=parse(confirmModal?.dataset.pending||"");closeBoostConfirm();if(payload)executeConfirmedTweaks(payload);else applyStatus("Confirmação expirada. Nenhuma alteração foi feita.");});
 document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
-if(optimizerGameTarget){try{const saved=localStorage.getItem(GAME_TARGET_KEY);if(saved&&(GAME_TARGETS[saved]||saved==="custom"))optimizerGameTarget.value=saved;}catch(_){}optimizerGameTarget.addEventListener("change",syncGameTarget);optimizerCustomPackage?.addEventListener("input",syncGameTarget);syncGameTarget();}
+
 const GAME_TARGETS={
  "com.dts.freefireth":{name:"Free Fire",family:"freefire"},
  "com.dts.freefiremax":{name:"Free Fire MAX",family:"freefire"},
@@ -256,6 +256,8 @@ function syncGameTarget(){
  put("optimizerGameHint",supportsMassinha?"Free Fire é o foco principal e oferece os módulos específicos, incluindo Gráfico Massinha.":"Modo universal: os módulos Android compatíveis usam o jogo selecionado. Gráfico Massinha não se aplica a este jogo.");
  syncCount();
 }
+
+if(optimizerGameTarget){try{const saved=localStorage.getItem(GAME_TARGET_KEY);if(saved&&(GAME_TARGETS[saved]||saved==="custom"))optimizerGameTarget.value=saved;}catch(_){}optimizerGameTarget.addEventListener("change",syncGameTarget);optimizerCustomPackage?.addEventListener("input",syncGameTarget);syncGameTarget();}
 
 function massinhaCommands(){
  const pkg=massinhaPackage?.value||"com.dts.freefireth";
