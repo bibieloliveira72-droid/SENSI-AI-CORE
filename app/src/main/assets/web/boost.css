@@ -117,3 +117,9 @@
 
 /* SENSI.AI 3.3.0 Boost action labels */
 .boost-toolkit-label{letter-spacing:.1em}.boost-option-kind{font-size:9px;font-weight:800;letter-spacing:.08em;color:#c4b5fd;border:1px solid rgba(167,139,250,.3);border-radius:7px;padding:4px 6px;white-space:nowrap}
+
+/* SENSI.AI 3.7.0 · seleção universal de jogo */
+.universal-game-target{margin:14px 0;padding:14px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:rgba(255,255,255,.025)}
+.universal-game-target .field{margin:0}
+.boost-option.is-disabled{opacity:.42;filter:saturate(.45)}
+.boost-option input:disabled{cursor:not-allowed}
