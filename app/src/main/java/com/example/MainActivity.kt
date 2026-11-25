@@ -91,7 +91,7 @@ class MainActivity : ComponentActivity() {
 private class AndroidClipboardBridge(private val activity: ComponentActivity, private val dispatchJs: (String) -> Unit) {
   private val tweakExecutor = Executors.newSingleThreadExecutor()
   private val context: Context = activity.applicationContext
-  private fun isSupportedGamePackage(packageName: String): Boolean = packageName in setOf("com.dts.freefireth", "com.dts.freefiremax", "com.roblox.client", "com.activision.callofduty.shooter", "com.tencent.ig", "com.mojang.minecraftpe", "com.mobile.legends", "com.supercell.brawlstars", "com.kitkagames.fallbuddies")
+  private fun isSupportedGamePackage(packageName: String): Boolean = (packageName in setOf("com.dts.freefireth", "com.dts.freefiremax", "com.roblox.client", "com.activision.callofduty.shooter", "com.tencent.ig", "com.mojang.minecraftpe", "com.mobile.legends", "com.supercell.brawlstars", "com.kitkagames.fallbuddies")) || Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$").matches(packageName)
   @JavascriptInterface
   fun getDeviceSnapshot(): String {
     val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
