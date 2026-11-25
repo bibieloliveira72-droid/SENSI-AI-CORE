@@ -103,3 +103,14 @@ test("lista nativa de pacotes permitidos inclui os jogos universais e mantém Ma
   assert.ok(safeService.includes("allowedMassinha=setOf(\"com.dts.freefireth\",\"com.dts.freefiremax\")"));
   assert.ok(safeService.includes("require(pkg in allowedMassinha)"));
 });
+
+
+test("outros jogos podem ser selecionados por pacote validado e Massinha continua exclusivo", () => {
+  assert.ok(html.includes('value="custom"'));
+  assert.ok(html.includes('id="optimizerCustomPackage"'));
+  assert.ok(js.includes("optimizerCustomPackage"));
+  assert.ok(js.includes("Informe um identificador de pacote válido"));
+  assert.ok(main.includes("isSupportedGamePackage(packageName)"));
+  assert.ok(service.includes("isAllowedGamePackage(pkg)"));
+  assert.ok(service.includes("require(pkg in allowedMassinha)"));
+});
