@@ -95,3 +95,10 @@ test("otimizador oferece seleção universal de jogos e mantém Massinha exclusi
   assert.ok(js.includes("GAME_TARGET_KEY"));
   assert.ok(js.includes('if(pkg==="com.dts.freefireth"||pkg==="com.dts.freefiremax")openFreeFire'));
 });
+
+
+test("lista nativa de pacotes permitidos inclui os jogos universais e mantém Massinha separado", () => {
+  for (const pkg of ["com.roblox.client","com.activision.callofduty.shooter","com.tencent.ig","com.mojang.minecraftpe","com.mobile.legends","com.supercell.brawlstars","com.kitkagames.fallbuddies"]) assert.ok(android.includes(pkg), "Pacote nativo ausente: "+pkg);
+  assert.ok(android.includes("allowedMassinha=setOf(\"com.dts.freefireth\",\"com.dts.freefiremax\")"));
+  assert.ok(android.includes("require(pkg in allowedMassinha)"));
+});
