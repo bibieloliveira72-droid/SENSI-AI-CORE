@@ -120,7 +120,9 @@ test("DOM do otimizador inicializa as referências antes de usá-las e não inte
   const ready = js.indexOf('document.addEventListener("DOMContentLoaded",()=>{');
   const firstUse = js.indexOf("if(optimizerGameTarget)", ready);
   const declaration = js.indexOf('const optimizerGameTarget=$("optimizerGameTarget")', ready);
+  const targets = js.indexOf("const GAME_TARGETS=", ready);
   assert.ok(declaration >= 0 && declaration < firstUse, "optimizerGameTarget era lido antes da inicialização");
+  assert.ok(targets >= 0 && targets < firstUse, "GAME_TARGETS era lido antes da inicialização");
   assert.ok(js.indexOf('const massinhaPackage=$("massinhaTargetPackage")', ready) < js.indexOf("function massinhaCommands()", ready));
   assert.ok(js.includes("bridge.runShizukuDiagnostics"));
   assert.ok(js.includes('$("shizukuCheckBtn")?.addEventListener("click"'));
