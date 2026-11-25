@@ -129,7 +129,9 @@ function startApplyTweaks(){
  if(!keys.length){applyStatus("Selecione pelo menos um ajuste antes de continuar.");return}
  buildPlan();
  if(!doAnimations&&!doMassinha&&!doGame&&!doGameMode&&!doShader&&!doRefreshRate){applyStatus("Nenhuma otimização executável foi selecionada.");return}
- const pkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
+ const target=currentGameTarget();
+ const pkg=target.package,massinhaPkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
+ if(doMassinha&&target.family!=="freefire"){applyStatus("Gráfico Massinha está disponível somente para Free Fire e Free Fire MAX.");return;}
  const massinhaExecutionMode=$("massinhaExecutionMode")?.value||"shizuku";
  const needsShizuku=doAnimations||doGame||doGameMode||doShader||doRefreshRate||(doMassinha&&massinhaExecutionMode==="shizuku");
  if(needsShizuku){
@@ -142,15 +144,15 @@ function startApplyTweaks(){
  if(!confirmBox||!confirmText){applyStatus("Confirmação visual indisponível. Nenhuma alteração foi aplicada.");return}
  confirmText.textContent=warning;
  confirmBox.classList.remove("hidden");confirmBox.setAttribute("aria-hidden","false");
- confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver:$("benimaruShaderDriver")?.value||"angle",hz:Number($("benimaruRefreshRate")?.value||60),massinhaExecutionMode});
+ confirmBox.dataset.pending=JSON.stringify({keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,massinhaPkg,gameName:target.name,version,driver:$("benimaruShaderDriver")?.value||"angle",hz:Number($("benimaruRefreshRate")?.value||60),massinhaExecutionMode});
 }
 async function executeConfirmedTweaks(payload){
- const {keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,version,driver,hz,massinhaExecutionMode="shizuku"}=payload;
+ const {keys,doAnimations,doMassinha,doGame,doGameMode,doShader,doRefreshRate,pkg,massinhaPkg,gameName="jogo selecionado",version,driver,hz,massinhaExecutionMode="shizuku"}=payload;
  const operations=[];
  if(doAnimations)operations.push(["animations",{},"Animações 0,5x"]);
  if(doRefreshRate)operations.push(["refreshRate",{hz:Number(hz||60)},"Taxa de atualização"]);
  if(doShader)operations.push(["shader",{package:pkg,driver:driver||"angle"},"Driver gráfico"]);
- if(doMassinha&&massinhaExecutionMode!=="brevent")operations.push(["massinha",{package:pkg,version},"Gráficos Massinha"]);
+ if(doMassinha&&massinhaExecutionMode!=="brevent")operations.push(["massinha",{package:massinhaPkg||pkg,version},"Gráficos Massinha"]);
  if(doGameMode)operations.push(["gameMode",{package:pkg},"Modo performance"]);
  if(doGame)operations.push(["game",{package:pkg},"Compilação ART"]);
  const manual=keys.filter(k=>!["animations","massinha","game","gameMode","shader","refreshRate"].includes(k));
@@ -164,13 +166,13 @@ async function executeConfirmedTweaks(payload){
  }
  if(manual.length){allApplied=false;messages.push(manual.length+" opção(ões) não possuem módulo executável.");}
  if(doMassinha&&massinhaExecutionMode==="brevent"){
-  const script=breventScript(payload);
+  const script=breventScript({...payload,pkg:massinhaPkg||pkg});
   if(script){const output=$("breventCommandOutput"),panel=$("breventCommandPanel");if(output)output.value=script;panel?.classList.remove("hidden");put("boostApplyStatus","Comando exclusivo do Gráfico Massinha "+version.toUpperCase()+" preparado. Copie e execute no Brevent.");await copyBreventCommand();}
   else{allApplied=false;messages.push("Não foi possível gerar o comando Massinha.");}
  }
  if(appliedCount>0){
-  put("boostApplyStatus",messages.join(" ") +(allApplied?" Todas as operações concluídas.":" Algumas operações falharam ou foram ignoradas.")+" Abrindo o Free Fire…");
-  openFreeFire(false,pkg==="com.dts.freefiremax"?"freefiremax":"freefire");
+  put("boostApplyStatus",messages.join(" ") +(allApplied?" Todas as operações concluídas.":" Algumas operações falharam ou foram ignoradas.")+" Alvo: "+gameName+".");
+  if(pkg==="com.dts.freefireth"||pkg==="com.dts.freefiremax")openFreeFire(false,pkg==="com.dts.freefiremax"?"freefiremax":"freefire");
  }else if(!(doMassinha&&massinhaExecutionMode==="brevent")) applyStatus(messages.join(" ")+" Nenhuma otimização foi confirmada; o jogo não será aberto.");
 }
 function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
@@ -224,7 +226,32 @@ const confirmCancel=$("boostConfirmCancel"),confirmAccept=$("boostConfirmAccept"
 confirmCancel?.addEventListener("click",()=>{closeBoostConfirm();applyStatus("Aplicação cancelada. Nenhuma alteração foi feita.");});
 confirmAccept?.addEventListener("click",()=>{const payload=parse(confirmModal?.dataset.pending||"");closeBoostConfirm();if(payload)executeConfirmedTweaks(payload);else applyStatus("Confirmação expirada. Nenhuma alteração foi feita.");});
 document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
+if(optimizerGameTarget){try{const saved=localStorage.getItem(GAME_TARGET_KEY);if(saved&&GAME_TARGETS[saved])optimizerGameTarget.value=saved;}catch(_){}optimizerGameTarget.addEventListener("change",syncGameTarget);syncGameTarget();}
 const massinhaPackage=$("massinhaTargetPackage");
+const optimizerGameTarget=$("optimizerGameTarget");
+const GAME_TARGETS={
+ "com.dts.freefireth":{name:"Free Fire",family:"freefire"},
+ "com.dts.freefiremax":{name:"Free Fire MAX",family:"freefire"},
+ "com.roblox.client":{name:"Roblox",family:"roblox"},
+ "com.activision.callofduty.shooter":{name:"Call of Duty: Mobile",family:"codm"},
+ "com.tencent.ig":{name:"PUBG Mobile",family:"pubgm"},
+ "com.mojang.minecraftpe":{name:"Minecraft",family:"minecraft"},
+ "com.mobile.legends":{name:"Mobile Legends: Bang Bang",family:"mlbb"},
+ "com.supercell.brawlstars":{name:"Brawl Stars",family:"brawlstars"},
+ "com.kitkagames.fallbuddies":{name:"Stumble Guys",family:"stumbleguys"}
+};
+const GAME_TARGET_KEY="sensi_ai_optimizer_game_v1";
+function currentGameTarget(){const pkg=optimizerGameTarget?.value||"com.dts.freefireth";return {package:pkg,...(GAME_TARGETS[pkg]||{name:"Jogo selecionado",family:"other"})};}
+function syncGameTarget(){
+ const target=currentGameTarget(),massinhaOption=document.querySelector('#boostMultiGrid input[value="massinha"]');
+ try{localStorage.setItem(GAME_TARGET_KEY,target.package)}catch(_){}
+ const supportsMassinha=target.family==="freefire";
+ if(massinhaOption){massinhaOption.disabled=!supportsMassinha;if(!supportsMassinha)massinhaOption.checked=false;massinhaOption.closest(".boost-option")?.classList.toggle("is-disabled",!supportsMassinha);}
+ put("optimizerGameStatus","Jogo-alvo: "+target.name+" · pacote "+target.package);
+ put("optimizerGameHint",supportsMassinha?"Free Fire é o foco principal e oferece os módulos específicos, incluindo Gráfico Massinha.":"Modo universal: os módulos Android compatíveis usam o jogo selecionado. Gráfico Massinha não se aplica a este jogo.");
+ syncCount();
+}
+
 function massinhaCommands(){
  const pkg=massinhaPackage?.value||"com.dts.freefireth";
  const v1="settings put global angle_gl_driver_selection_pkgs "+pkg+" && settings put global angle_gl_driver_selection_values angle && setprop debug.angle.feature_overrides_enabled disableAnisotropicFiltering:forceTextureLodOffset4 && am force-stop "+pkg;
