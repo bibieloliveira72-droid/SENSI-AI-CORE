@@ -111,6 +111,6 @@ test("outros jogos podem ser selecionados por pacote validado e Massinha continu
   assert.ok(js.includes("optimizerCustomPackage"));
   assert.ok(js.includes("Informe um identificador de pacote válido"));
   assert.ok(android.includes("isSupportedGamePackage(packageName)"));
-  assert.ok(service.includes("isAllowedGamePackage(pkg)"));
-  assert.ok(service.includes("require(pkg in allowedMassinha)"));
+  assert.ok(safeService.includes("isAllowedGamePackage(pkg)"));
+  assert.ok(safeService.includes("require(pkg in allowedMassinha)"));
 });
