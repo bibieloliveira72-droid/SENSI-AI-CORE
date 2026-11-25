@@ -27,7 +27,8 @@ class SafeTweakUserService : Binder() {
   private const val PKGS="angle_gl_driver_selection_pkgs"
   private const val VALUES="angle_gl_driver_selection_values"
   private const val PROP="debug.angle.feature_overrides_enabled"
-  private val allowed=setOf("com.dts.freefireth","com.dts.freefiremax")
+  private val allowed=setOf("com.dts.freefireth", "com.dts.freefiremax", "com.roblox.client", "com.activision.callofduty.shooter", "com.tencent.ig", "com.mojang.minecraftpe", "com.mobile.legends", "com.supercell.brawlstars", "com.kitkagames.fallbuddies")
+  private val allowedMassinha=setOf("com.dts.freefireth","com.dts.freefiremax")
  }
 
  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
@@ -154,7 +155,7 @@ class SafeTweakUserService : Binder() {
  }
  private fun applyMassinha(raw:String):JSONObject {
   val q=JSONObject(raw);val version=q.getString("version");val pkg=q.getString("package")
-  require(version=="v1"||version=="v2");require(pkg in allowed)
+  require(version=="v1"||version=="v2");require(pkg in allowedMassinha)
   val p=run(SETTINGS,"get","global",PKGS);val v=run(SETTINGS,"get","global",VALUES);val g=run(GETPROP,PROP)
   if(p.first!=0||v.first!=0||g.first!=0)error("Não foi possível ler configurações ANGLE.")
   val oldP=p.second.trim().ifBlank{"null"};val oldV=v.second.trim().ifBlank{"null"};val oldG=g.second.trim()
@@ -172,7 +173,7 @@ class SafeTweakUserService : Binder() {
   return JSONObject().put("ok",true).put("backup",backup).put("message","Gráfico Massinha "+version.uppercase()+" aplicado. Free Fire encerrado para recarregar.")
  }
  private fun restoreMassinha(raw:String):JSONObject {
-  val b=JSONObject(raw);val pkg=b.getString("package");require(pkg in allowed)
+  val b=JSONObject(raw);val pkg=b.getString("package");require(pkg in allowedMassinha)
   restoreAngle(b.getString("packages"),b.getString("values"),b.getString("property"))
   val stop=run(AM,"force-stop",pkg);if(stop.first!=0)error("Configuração restaurada, mas force-stop falhou.")
   return JSONObject().put("ok",true).put("message","Configuração ANGLE original restaurada; jogo encerrado para recarregar.")
