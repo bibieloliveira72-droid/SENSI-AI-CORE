@@ -114,3 +114,16 @@ test("outros jogos podem ser selecionados por pacote validado e Massinha continu
   assert.ok(safeService.includes("isAllowedGamePackage(pkg)"));
   assert.ok(safeService.includes("require(pkg in allowedMassinha)"));
 });
+
+
+test("DOM do otimizador inicializa as referências antes de usá-las e não interrompe o Hub", () => {
+  const ready = js.indexOf('document.addEventListener("DOMContentLoaded",()=>{');
+  const firstUse = js.indexOf("if(optimizerGameTarget)", ready);
+  const declaration = js.indexOf('const optimizerGameTarget=$("optimizerGameTarget")', ready);
+  assert.ok(declaration >= 0 && declaration < firstUse, "optimizerGameTarget era lido antes da inicialização");
+  assert.ok(js.indexOf('const massinhaPackage=$("massinhaTargetPackage")', ready) < js.indexOf("function massinhaCommands()", ready));
+  assert.ok(js.includes("bridge.runShizukuDiagnostics"));
+  assert.ok(js.includes('$("shizukuCheckBtn")?.addEventListener("click"'));
+  assert.ok(js.includes('$("massinhaCopyV1")?.addEventListener("click"'));
+  assert.ok(html.includes('<option value="brevent" selected>'));
+});
