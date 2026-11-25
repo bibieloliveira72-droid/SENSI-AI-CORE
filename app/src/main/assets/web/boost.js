@@ -131,6 +131,7 @@ function startApplyTweaks(){
  if(!doAnimations&&!doMassinha&&!doGame&&!doGameMode&&!doShader&&!doRefreshRate){applyStatus("Nenhuma otimização executável foi selecionada.");return}
  const target=currentGameTarget();
  const pkg=target.package,massinhaPkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
+ if(!pkg||!/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(pkg)){applyStatus("Informe um identificador de pacote válido para o jogo selecionado.");return;}
  if(doMassinha&&target.family!=="freefire"){applyStatus("Gráfico Massinha está disponível somente para Free Fire e Free Fire MAX.");return;}
  const massinhaExecutionMode=$("massinhaExecutionMode")?.value||"shizuku";
  const needsShizuku=doAnimations||doGame||doGameMode||doShader||doRefreshRate||(doMassinha&&massinhaExecutionMode==="shizuku");
@@ -226,9 +227,10 @@ const confirmCancel=$("boostConfirmCancel"),confirmAccept=$("boostConfirmAccept"
 confirmCancel?.addEventListener("click",()=>{closeBoostConfirm();applyStatus("Aplicação cancelada. Nenhuma alteração foi feita.");});
 confirmAccept?.addEventListener("click",()=>{const payload=parse(confirmModal?.dataset.pending||"");closeBoostConfirm();if(payload)executeConfirmedTweaks(payload);else applyStatus("Confirmação expirada. Nenhuma alteração foi feita.");});
 document.querySelectorAll("#tab-boost input[type=checkbox]").forEach(x=>x.addEventListener("change",syncCount));
-if(optimizerGameTarget){try{const saved=localStorage.getItem(GAME_TARGET_KEY);if(saved&&GAME_TARGETS[saved])optimizerGameTarget.value=saved;}catch(_){}optimizerGameTarget.addEventListener("change",syncGameTarget);syncGameTarget();}
+if(optimizerGameTarget){try{const saved=localStorage.getItem(GAME_TARGET_KEY);if(saved&&(GAME_TARGETS[saved]||saved==="custom"))optimizerGameTarget.value=saved;}catch(_){}optimizerGameTarget.addEventListener("change",syncGameTarget);optimizerCustomPackage?.addEventListener("input",syncGameTarget);syncGameTarget();}
 const massinhaPackage=$("massinhaTargetPackage");
 const optimizerGameTarget=$("optimizerGameTarget");
+const optimizerCustomPackage=$("optimizerCustomPackage");
 const GAME_TARGETS={
  "com.dts.freefireth":{name:"Free Fire",family:"freefire"},
  "com.dts.freefiremax":{name:"Free Fire MAX",family:"freefire"},
@@ -241,13 +243,14 @@ const GAME_TARGETS={
  "com.kitkagames.fallbuddies":{name:"Stumble Guys",family:"stumbleguys"}
 };
 const GAME_TARGET_KEY="sensi_ai_optimizer_game_v1";
-function currentGameTarget(){const pkg=optimizerGameTarget?.value||"com.dts.freefireth";return {package:pkg,...(GAME_TARGETS[pkg]||{name:"Jogo selecionado",family:"other"})};}
+function currentGameTarget(){const selected=optimizerGameTarget?.value||"com.dts.freefireth";if(selected==="custom")return {package:(optimizerCustomPackage?.value||"").trim(),name:"Outro jogo",family:"other"};return {package:selected,...(GAME_TARGETS[selected]||{name:"Jogo selecionado",family:"other"})};}
 function syncGameTarget(){
  const target=currentGameTarget(),massinhaOption=document.querySelector('#boostMultiGrid input[value="massinha"]');
- try{localStorage.setItem(GAME_TARGET_KEY,target.package)}catch(_){}
+ try{localStorage.setItem(GAME_TARGET_KEY,optimizerGameTarget?.value||target.package)}catch(_){}
+ const isCustom=optimizerGameTarget?.value==="custom";$("optimizerCustomGameField")?.classList.toggle("hidden",!isCustom);
  const supportsMassinha=target.family==="freefire";
  if(massinhaOption){massinhaOption.disabled=!supportsMassinha;if(!supportsMassinha)massinhaOption.checked=false;massinhaOption.closest(".boost-option")?.classList.toggle("is-disabled",!supportsMassinha);}
- put("optimizerGameStatus","Jogo-alvo: "+target.name+" · pacote "+target.package);
+ put("optimizerGameStatus",target.package?"Jogo-alvo: "+target.name+" · pacote "+target.package:"Informe o pacote do jogo para continuar.");
  put("optimizerGameHint",supportsMassinha?"Free Fire é o foco principal e oferece os módulos específicos, incluindo Gráfico Massinha.":"Modo universal: os módulos Android compatíveis usam o jogo selecionado. Gráfico Massinha não se aplica a este jogo.");
  syncCount();
 }
