@@ -29,6 +29,7 @@ class SafeTweakUserService : Binder() {
   private const val PROP="debug.angle.feature_overrides_enabled"
   private val allowed=setOf("com.dts.freefireth", "com.dts.freefiremax", "com.roblox.client", "com.activision.callofduty.shooter", "com.tencent.ig", "com.mojang.minecraftpe", "com.mobile.legends", "com.supercell.brawlstars", "com.kitkagames.fallbuddies")
   private val allowedMassinha=setOf("com.dts.freefireth","com.dts.freefiremax")
+  private fun isAllowedGamePackage(pkg:String):Boolean = pkg in allowed || Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$").matches(pkg)
  }
 
  override fun onTransact(code:Int,data:Parcel,reply:Parcel?,flags:Int):Boolean {
@@ -108,7 +109,7 @@ class SafeTweakUserService : Binder() {
   val q=JSONObject(raw)
   val pkg=q.getString("package")
   val driver=q.getString("driver")
-  require(pkg in allowed) { "Pacote não permitido." }
+  require(isAllowedGamePackage(pkg)) { "Pacote não permitido." }
   require(driver in setOf("angle","native","default")) { "Driver inválido." }
   val oldPkgs=readSetting(PKGS)
   val oldValues=readSetting(VALUES)
@@ -130,7 +131,7 @@ class SafeTweakUserService : Binder() {
  private fun restoreShaderDriver(raw:String):JSONObject {
   val b=JSONObject(raw)
   val pkg=b.getString("package")
-  require(pkg in allowed) { "Pacote não permitido." }
+  require(isAllowedGamePackage(pkg)) { "Pacote não permitido." }
   writeSetting(PKGS,b.getString("packages"))
   writeSetting(VALUES,b.getString("values"))
   return JSONObject().put("ok",true).put("message","Configuração de driver gráfico original restaurada para $pkg.")
