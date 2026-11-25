@@ -131,7 +131,7 @@ function startApplyTweaks(){
  if(!doAnimations&&!doMassinha&&!doGame&&!doGameMode&&!doShader&&!doRefreshRate){applyStatus("Nenhuma otimização executável foi selecionada.");return}
  const target=currentGameTarget();
  const pkg=target.package,massinhaPkg=$("massinhaTargetPackage")?.value||"com.dts.freefireth",version=$("massinhaVersion")?.value||"v1";
- if(!pkg||!/^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$/.test(pkg)){applyStatus("Informe um identificador de pacote válido para o jogo selecionado.");return;}
+ if(!pkg||!/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*)+$/.test(pkg)){applyStatus("Informe um identificador de pacote válido para o jogo selecionado.");return;}
  if(doMassinha&&target.family!=="freefire"){applyStatus("Gráfico Massinha está disponível somente para Free Fire e Free Fire MAX.");return;}
  const massinhaExecutionMode=$("massinhaExecutionMode")?.value||"shizuku";
  const needsShizuku=doAnimations||doGame||doGameMode||doShader||doRefreshRate||(doMassinha&&massinhaExecutionMode==="shizuku");
