@@ -84,3 +84,14 @@ test("comandos Massinha V1/V2 usam os parâmetros exatos e encerram somente o Fr
   assert.match(android, /freeFireInstalled/);
   assert.match(android, /freeFireMaxInstalled/);
 });
+
+
+test("otimizador oferece seleção universal de jogos e mantém Massinha exclusivo do Free Fire", () => {
+  for (const pkg of ["com.dts.freefireth","com.dts.freefiremax","com.roblox.client","com.activision.callofduty.shooter","com.tencent.ig","com.mojang.minecraftpe","com.mobile.legends","com.supercell.brawlstars","com.kitkagames.fallbuddies"]) assert.ok(html.includes('value="'+pkg+'"'), "Jogo ausente: "+pkg);
+  assert.match(html, /id="optimizerGameTarget"/);
+  assert.ok(js.includes("function currentGameTarget()"));
+  assert.ok(js.includes("massinhaPkg||pkg"));
+  assert.ok(js.includes('target.family!=="freefire"'));
+  assert.ok(js.includes("GAME_TARGET_KEY"));
+  assert.ok(js.includes('if(pkg==="com.dts.freefireth"||pkg==="com.dts.freefiremax")openFreeFire'));
+});
