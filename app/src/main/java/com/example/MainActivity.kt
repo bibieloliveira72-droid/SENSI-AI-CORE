@@ -458,7 +458,7 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
 
   @JavascriptInterface
   fun openGame(packageName: String): String {
-    if (!Regex("^[A-Za-z][A-Za-z0-9_]*(\\\\.[A-Za-z][A-Za-z0-9_]*)+$").matches(packageName)) return "invalid_package"
+    if (!Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$").matches(packageName)) return "invalid_package"
     val launchIntent = try { context.packageManager.getLaunchIntentForPackage(packageName) } catch (_: Throwable) { null }
       ?: return "not_installed"
     return try {
