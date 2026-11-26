@@ -457,6 +457,18 @@ private class AndroidClipboardBridge(private val activity: ComponentActivity, pr
   }
 
   @JavascriptInterface
+  fun openGame(packageName: String): String {
+    if (!Regex("^[A-Za-z][A-Za-z0-9_]*(\\\\.[A-Za-z][A-Za-z0-9_]*)+$").matches(packageName)) return "invalid_package"
+    val launchIntent = try { context.packageManager.getLaunchIntentForPackage(packageName) } catch (_: Throwable) { null }
+      ?: return "not_installed"
+    return try {
+      launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(launchIntent)
+      "opened"
+    } catch (_: Throwable) { "failed" }
+  }
+
+  @JavascriptInterface
   fun openFreeFire(edition: String): String {
     val packages = when (edition) {
       "freefiremax" -> listOf("com.dts.freefiremax", "com.dts.freefireth")
