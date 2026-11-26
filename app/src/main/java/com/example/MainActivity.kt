@@ -4,9 +4,31 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.ContextWrapper
+import android.content.ComponentName
+import android.content.ServiceConnection
+import android.os.IBinder
+import android.os.Parcel
+import android.os.RemoteException
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.Executors
+import android.app.ActivityManager
+import android.content.Intent
+import android.content.IntentFilter
+import android.net.Uri
+import android.provider.Settings
+import android.os.BatteryManager
+import android.os.Build
+import android.os.PowerManager
+import android.content.pm.PackageManager
+import org.json.JSONObject
+import rikka.shizuku.Shizuku
 import android.graphics.Color as AndroidColor
 import android.os.Bundle
 import android.view.ViewGroup
+import android.view.WindowManager
+import android.util.DisplayMetrics
 import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -36,8 +58,16 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.ui.theme.MyApplicationTheme
 
 class MainActivity : ComponentActivity() {
+  private val shizukuPermissionListener =
+    Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
+      if (requestCode == 2407) {
+        // The Hub reads the definitive state again when the user taps "Verificar".
+      }
+    }
+
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    Shizuku.addRequestPermissionResultListener(shizukuPermissionListener)
 
     val darkBar = AndroidColor.parseColor("#070709")
     enableEdgeToEdge(
@@ -51,14 +81,423 @@ class MainActivity : ComponentActivity() {
       }
     }
   }
+
+  override fun onDestroy() {
+    Shizuku.removeRequestPermissionResultListener(shizukuPermissionListener)
+    super.onDestroy()
+  }
 }
 
-private class AndroidClipboardBridge(private val context: Context) {
+private class AndroidClipboardBridge(private val activity: ComponentActivity, private val dispatchJs: (String) -> Unit) {
+  private val tweakExecutor = Executors.newSingleThreadExecutor()
+  private val context: Context = activity.applicationContext
+  private fun isSupportedGamePackage(packageName: String): Boolean = (packageName in setOf("com.dts.freefireth", "com.dts.freefiremax", "com.roblox.client", "com.activision.callofduty.shooter", "com.tencent.ig", "com.mojang.minecraftpe", "com.mobile.legends", "com.supercell.brawlstars", "com.kitkagames.fallbuddies")) || Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$").matches(packageName)
+  @JavascriptInterface
+  fun getDeviceSnapshot(): String {
+    val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+    val memory = ActivityManager.MemoryInfo()
+    manager.getMemoryInfo(memory)
+    val battery = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+    val temp = battery?.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, -1) ?: -1
+    val level = battery?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+    val scale = battery?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+    val percent = if (level >= 0 && scale > 0) (level * 100) / scale else -1
+    val displayInfo = try {
+      val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+      val metrics = DisplayMetrics()
+      @Suppress("DEPRECATION")
+      windowManager.defaultDisplay.getRealMetrics(metrics)
+      @Suppress("DEPRECATION")
+      val refreshRate = windowManager.defaultDisplay.refreshRate.toDouble()
+      Triple(metrics.widthPixels, metrics.heightPixels, Pair(metrics.densityDpi, refreshRate))
+    } catch (_: Throwable) { Triple(-1, -1, Pair(-1, -1.0)) }
+    val thermal = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      (context.getSystemService(Context.POWER_SERVICE) as PowerManager).currentThermalStatus
+    } else -1
+    @Suppress("DEPRECATION")
+    fun isPackageInstalled(packageName: String): Boolean = try {
+      context.packageManager.getPackageInfo(packageName, 0)
+      true
+    } catch (_: PackageManager.NameNotFoundException) { false }
+    return JSONObject().apply {
+      put("freeFireInstalled", isPackageInstalled("com.dts.freefireth"))
+      put("freeFireMaxInstalled", isPackageInstalled("com.dts.freefiremax"))
+      put("manufacturer", Build.MANUFACTURER)
+      put("model", Build.MODEL)
+      put("android", Build.VERSION.RELEASE)
+      put("sdk", Build.VERSION.SDK_INT)
+      put("totalMemoryMb", memory.totalMem / (1024 * 1024))
+      put("availableMemoryMb", memory.availMem / (1024 * 1024))
+      put("lowMemory", memory.lowMemory)
+      put("batteryPercent", percent)
+      put("batteryTempC", if (temp >= 0) temp / 10.0 else -1)
+      put("thermalStatus", thermal)
+      put("screenWidth", displayInfo.first)
+      put("screenHeight", displayInfo.second)
+      put("densityDpi", displayInfo.third.first)
+      put("refreshRateHz", displayInfo.third.second)
+    }.toString()
+  }
+
+  @JavascriptInterface
+  fun getShizukuStatus(): String {
+    val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
+    val granted = running && try {
+      Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+    } catch (_: Throwable) { false }
+    return JSONObject().put("running", running).put("granted", granted).toString()
+  }
+
+  @JavascriptInterface
+  fun requestShizukuPermission(): String {
+    val result = arrayOf("Não foi possível iniciar a solicitação do Shizuku.")
+    val latch = CountDownLatch(1)
+    activity.runOnUiThread {
+      try {
+        if (!Shizuku.pingBinder()) {
+          result[0] = "Shizuku não está ativo. Inicie o serviço primeiro."
+        } else if (Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED) {
+          result[0] = "O SENSI.AI já está autorizado no Shizuku."
+        } else {
+          Shizuku.requestPermission(2407)
+          result[0] = "Pedido de autorização enviado ao Shizuku. Conclua a confirmação exibida."
+        }
+      } catch (error: Throwable) {
+        result[0] = "Falha ao solicitar autorização: ${error.message ?: "erro desconhecido"}"
+      } finally {
+        latch.countDown()
+      }
+    }
+    try { latch.await(3, TimeUnit.SECONDS) } catch (_: InterruptedException) {
+      Thread.currentThread().interrupt()
+    }
+    return result[0]
+  }
+
+
+  @JavascriptInterface
+  fun runShizukuDiagnostics(): String {
+    // Verificação temporariamente limitada ao estado do Binder e à autorização do app.
+    // Não inicia UserService nem executa teste de compatibilidade enquanto o Hub estiver instável.
+    val running = try { Shizuku.pingBinder() } catch (_: Throwable) { false }
+    val granted = running && try {
+      Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED
+    } catch (_: Throwable) { false }
+
+    val message = when {
+      !running -> "Shizuku não está ativo. Inicie o serviço e tente novamente."
+      !granted -> "Shizuku está ativo, mas o SENSI.AI ainda não recebeu autorização."
+      else -> "Shizuku está ativo e a autorização do SENSI.AI foi confirmada. Teste de compatibilidade temporariamente desativado."
+    }
+    return JSONObject()
+      .put("ok", running && granted)
+      .put("running", running)
+      .put("granted", granted)
+      .put("message", message)
+      .put("checkMode", "authorization_only")
+      .toString()
+  }
+
+  @JavascriptInterface
+  fun compileGameProfile(packageName: String): String {
+    if (!isSupportedGamePackage(packageName)) {
+      return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
+    }
+    if (!isShizukuAuthorized()) {
+      return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    }
+    return try {
+      // Executa pelo UserService público do Shizuku. O comando e o pacote
+      // permanecem fixos e validados dentro do serviço, sem shell arbitrário.
+      callSafeTweakService(6, packageName)
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha na compilação: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+  @JavascriptInterface
+  fun applyGameMode(packageName: String): String {
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "game_mode_" + packageName
+    if (prefs.contains(key)) return JSONObject().put("ok", false).put("message", "O modo performance já está aplicado para este jogo. Restaure antes de reaplicar.").toString()
+    return try {
+      val result = callSafeTweakService(7, packageName)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().putBoolean(key, true).apply()
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha no modo de jogo: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
+  fun applySafeTweak(key: String): String {
+    if (key != "animations") return JSONObject().put("ok", false).put("message", "Tweak não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Inicie o Shizuku e conceda autorização ao SENSI.AI.").toString()
+    if (context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).contains("animations_backup")) return JSONObject().put("ok", false).put("message", "Animações Leves já foi aplicado. Restaure os valores anteriores antes de aplicar novamente, para não sobrescrever o backup.").toString()
+    return try {
+      val result = callSafeTweakService(1, null)
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) {
+        val backup = json.optJSONObject("backup")
+        if (backup != null) context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).edit().putString("animations_backup", backup.toString()).apply()
+      }
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Não foi possível executar via Shizuku: ${error.message ?: "erro desconhecido"}").toString()
+    }
+  }
+
+
+  @JavascriptInterface
+  fun applyMassinhaTweak(version: String, packageName: String): String {
+    if (version != "v1" && version != "v2") return JSONObject().put("ok", false).put("message", "Variante inválida.").toString()
+    if (packageName != "com.dts.freefireth" && packageName != "com.dts.freefiremax") return JSONObject().put("ok", false).put("message", "Pacote não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    if (prefs.contains("massinha_backup")) return JSONObject().put("ok", false).put("message", "Restaure o backup anterior antes de aplicar outro perfil.").toString()
+    return try {
+      val result = callSafeTweakService(3, JSONObject().put("version", version).put("package", packageName).toString())
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) json.optJSONObject("backup")?.let { prefs.edit().putString("massinha_backup", it.toString()).apply() }
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
+  fun restoreMassinhaTweak(): String {
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val backup = prefs.getString("massinha_backup", null) ?: return JSONObject().put("ok", false).put("message", "Backup Massinha não encontrado.").toString()
+    return try {
+      val result = callSafeTweakService(4, backup)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove("massinha_backup").apply()
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha ao restaurar: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
+  fun applyBenimaruRefreshRate(hz: Int): String {
+    if (hz !in 30..240) return JSONObject().put("ok", false).put("message", "Taxa de atualização inválida.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    if (prefs.contains("refresh_rate_backup")) return JSONObject().put("ok", false).put("message", "Já existe um backup de Hz. Restaure antes de aplicar outro valor.").toString()
+    return try {
+      val result = callSafeTweakService(11, JSONObject().put("hz", hz).toString())
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) json.optJSONObject("backup")?.let { prefs.edit().putString("refresh_rate_backup", it.toString()).apply() }
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao ajustar Hz: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun restoreBenimaruRefreshRate(): String {
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val backup = prefs.getString("refresh_rate_backup", null) ?: return JSONObject().put("ok", false).put("message", "Nenhum backup de Hz encontrado.").toString()
+    return try {
+      val result = callSafeTweakService(12, backup)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove("refresh_rate_backup").apply()
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao restaurar Hz: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun applyBenimaruShaderDriver(packageName: String, driver: String): String {
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
+    if (driver !in setOf("angle", "native", "default")) return JSONObject().put("ok", false).put("message", "Driver inválido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "shader_backup_" + packageName
+    if (prefs.contains(key)) return JSONObject().put("ok", false).put("message", "Já existe um backup de driver para este jogo. Restaure antes de aplicar outra opção.").toString()
+    return try {
+      val payload = JSONObject().put("package", packageName).put("driver", driver).toString()
+      val result = callSafeTweakService(9, payload)
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) json.optJSONObject("backup")?.let { prefs.edit().putString(key, it.toString()).apply() }
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha no driver gráfico: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun restoreBenimaruShaderDriver(packageName: String): String {
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "shader_backup_" + packageName
+    val backup = prefs.getString(key, null) ?: return JSONObject().put("ok", false).put("message", "Nenhum backup de driver encontrado para este jogo.").toString()
+    return try {
+      val result = callSafeTweakService(10, backup)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove(key).apply()
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao restaurar driver: " + (error.message ?: "erro desconhecido")).toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun restoreGameMode(packageName: String): String {
+    if (!isSupportedGamePackage(packageName)) return JSONObject().put("ok", false).put("message", "Pacote de jogo não permitido.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val prefs = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE)
+    val key = "game_mode_" + packageName
+    if (!prefs.contains(key)) return JSONObject().put("ok", false).put("message", "Nenhum modo performance salvo para restaurar.").toString()
+    return try {
+      val result = callSafeTweakService(8, packageName)
+      if (JSONObject(result).optBoolean("ok")) prefs.edit().remove(key).apply()
+      result
+    } catch (error: Throwable) { JSONObject().put("ok", false).put("message", "Falha ao restaurar modo de jogo: " + (error.message ?: "erro desconhecido")).toString() }
+  }
+
+  @JavascriptInterface
+  fun restoreSafeTweak(key: String): String {
+    if (key != "animations") return JSONObject().put("ok", false).put("message", "Restauração não permitida.").toString()
+    if (!isShizukuAuthorized()) return JSONObject().put("ok", false).put("message", "Shizuku não está ativo ou autorizado.").toString()
+    val backup = context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).getString("animations_backup", null)
+      ?: return JSONObject().put("ok", false).put("message", "Não há backup de Animações Leves neste aparelho.").toString()
+    return try {
+      val result = callSafeTweakService(2, backup)
+      val json = JSONObject(result)
+      if (json.optBoolean("ok")) context.getSharedPreferences("sensi_safe_tweaks", Context.MODE_PRIVATE).edit().remove("animations_backup").apply()
+      result
+    } catch (error: Throwable) {
+      JSONObject().put("ok", false).put("message", "Falha ao restaurar: ${error.message ?: "erro desconhecido"}").toString()
+    }
+  }
+
+  @JavascriptInterface
+  fun runTweakAsync(operation: String, payload: String, requestId: String) {
+    if (!requestId.matches(Regex("[A-Za-z0-9_-]{1,64}"))) return
+    tweakExecutor.execute {
+      val result = try {
+        val data = JSONObject(payload.ifBlank { "{}" })
+        when (operation) {
+          "animations" -> applySafeTweak("animations")
+          "game" -> compileGameProfile(data.optString("package"))
+          "gameMode" -> applyGameMode(data.optString("package"))
+          "shader" -> applyBenimaruShaderDriver(data.optString("package"), data.optString("driver"))
+          "refreshRate" -> applyBenimaruRefreshRate(data.optInt("hz", 60))
+          "massinha" -> applyMassinhaTweak(data.optString("version"), data.optString("package"))
+          else -> JSONObject().put("ok", false).put("message", "Operação assíncrona não reconhecida.").toString()
+        }
+      } catch (error: Throwable) {
+        JSONObject().put("ok", false).put("message", "Falha na execução: ${error.message ?: "erro desconhecido"}").toString()
+      }
+      dispatchJs("window.__sensiNativeResult && window.__sensiNativeResult(${JSONObject.quote(requestId)}, ${JSONObject.quote(result)});")
+    }
+  }
+
+  private fun isShizukuAuthorized(): Boolean {
+    return try { Shizuku.pingBinder() && Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED } catch (_: Throwable) { false }
+  }
+
+  private fun callSafeTweakService(code: Int, payload: String?): String {
+    val args = Shizuku.UserServiceArgs(ComponentName(context, SafeTweakUserService::class.java))
+      .daemon(false)
+      .processNameSuffix("safe_tweaks")
+      .tag("sensi_safe_tweaks")
+      .version(2)
+    val latch = CountDownLatch(1)
+    var remote: IBinder? = null
+    val connection = object : ServiceConnection {
+      override fun onServiceConnected(name: ComponentName?, service: IBinder?) { remote = service; latch.countDown() }
+      override fun onServiceDisconnected(name: ComponentName?) { remote = null; latch.countDown() }
+    }
+    try {
+      Shizuku.bindUserService(args, connection)
+      if (!latch.await(10, TimeUnit.SECONDS)) throw IllegalStateException("Tempo esgotado ao conectar ao serviço Shizuku.")
+      val binder = remote ?: throw IllegalStateException("Serviço Shizuku indisponível.")
+      val data = Parcel.obtain()
+      val reply = Parcel.obtain()
+      try {
+        data.writeInterfaceToken(SafeTweakUserService.DESCRIPTOR)
+        if (payload != null) data.writeString(payload)
+        if (!binder.transact(code, data, reply, 0)) throw RemoteException("Operação não suportada pelo serviço.")
+        reply.readException()
+        return reply.readString() ?: JSONObject().put("ok", false).put("message", "Resposta vazia do serviço.").toString()
+      } finally {
+        data.recycle()
+        reply.recycle()
+      }
+    } finally {
+      try { Shizuku.unbindUserService(args, connection, false) } catch (_: Throwable) { }
+    }
+  }
+
+  @JavascriptInterface
+  fun openTweakSettings(key: String): Boolean {
+    val intent = when (key) {
+      "battery" -> Intent(Settings.ACTION_BATTERY_SAVER_SETTINGS)
+      "network" -> Intent(Settings.ACTION_WIFI_SETTINGS)
+      "display", "touch" -> Intent(Settings.ACTION_DISPLAY_SETTINGS)
+      "storage" -> Intent(Settings.ACTION_INTERNAL_STORAGE_SETTINGS)
+      "background", "memory" -> Intent(Settings.ACTION_MANAGE_APPLICATIONS_SETTINGS)
+      "sound" -> Intent(Settings.ACTION_SOUND_SETTINGS)
+      "privacy" -> Intent(Settings.ACTION_PRIVACY_SETTINGS)
+      "notifications" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        Intent(Settings.ACTION_ALL_APPS_NOTIFICATION_SETTINGS)
+      } else {
+        Intent(Settings.ACTION_SETTINGS)
+      }
+      "updates" -> Intent(Settings.ACTION_SETTINGS)
+      "accessibility" -> Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
+      else -> return false
+    }
+    return try {
+      intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(intent)
+      true
+    } catch (_: Throwable) {
+      false
+    }
+  }
+
+  @JavascriptInterface
+  fun openGame(packageName: String): String {
+    if (!Regex("^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*)+$").matches(packageName)) return "invalid_package"
+    val launchIntent = try { context.packageManager.getLaunchIntentForPackage(packageName) } catch (_: Throwable) { null }
+      ?: return "not_installed"
+    return try {
+      launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      context.startActivity(launchIntent)
+      "opened"
+    } catch (_: Throwable) { "failed" }
+  }
+
+  @JavascriptInterface
+  fun openFreeFire(edition: String): String {
+    val packages = when (edition) {
+      "freefiremax" -> listOf("com.dts.freefiremax", "com.dts.freefireth")
+      else -> listOf("com.dts.freefireth", "com.dts.freefiremax")
+    }
+    for (packageName in packages) {
+      val launchIntent = try { context.packageManager.getLaunchIntentForPackage(packageName) } catch (_: Throwable) { null }
+      if (launchIntent != null) {
+        return try {
+          launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+          context.startActivity(launchIntent)
+          "opened"
+        } catch (_: Throwable) { "failed" }
+      }
+    }
+    return "not_installed"
+  }
+
   @JavascriptInterface
   fun copyText(text: String) {
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
     clipboard?.setPrimaryClip(ClipData.newPlainText("SENSI.AI", text))
   }
+}
+
+private tailrec fun Context.findComponentActivity(): ComponentActivity? = when (this) {
+  is ComponentActivity -> this
+  is ContextWrapper -> baseContext.findComponentActivity()
+  else -> null
 }
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -98,7 +537,11 @@ fun SensiOfflineWebHost() {
             cacheMode = WebSettings.LOAD_NO_CACHE
           }
 
-          addJavascriptInterface(AndroidClipboardBridge(context.applicationContext), "AndroidBridge")
+          val hostActivity = context.findComponentActivity() ?: error("Activity Android indisponível para o Shizuku.")
+          val currentWebView = this
+          addJavascriptInterface(AndroidClipboardBridge(hostActivity) { script ->
+            currentWebView.post { currentWebView.evaluateJavascript(script, null) }
+          }, "AndroidBridge")
 
           webChromeClient = WebChromeClient()
           webViewClient =

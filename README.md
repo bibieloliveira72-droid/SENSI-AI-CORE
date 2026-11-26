@@ -103,3 +103,164 @@ Plataforma: Android
 ## Observação sobre os resultados
 
 O motor produz pontos de partida com base nos dados informados. Ele não mede diretamente o toque, não acessa os dados internos do Free Fire e não aprende automaticamente com partidas. A calibração depende do retorno selecionado pelo jogador.
+
+
+## Versão atual
+
+**SENSI.AI 1.3.0**
+
+### Novidades da 1.3.0
+- Preenchimento automático de chipset, categoria do processador, RAM de referência e taxa de atualização para modelos com ficha técnica cadastrada.
+- Dados técnicos sincronizados entre a versão web e o Android WebView.
+- Aviso para confirmar a variante de RAM e ajustar manualmente os modelos sem ficha técnica cadastrada.
+- DPI permanece manual, pois é uma configuração do Android que pode mudar independentemente do modelo.
+
+> As especificações preenchidas são referências para variantes comuns. RAM e algumas características podem variar por região e configuração; confirme os dados do seu aparelho antes de gerar a sensibilidade.
+
+
+## Versão atual
+
+**SENSI.AI 1.4.0**
+
+### Novidades da 1.4.0
+- Geração inicial deixa de usar fabricante, nome do modelo, RAM, chipset e taxa de atualização como substitutos de uma medição real de toque.
+- DPI e tamanho do botão permanecem como parâmetros configuráveis da sugestão inicial.
+- Calibração adaptativa com memória local por aparelho e perfil.
+- Redução gradual do passo quando a mesma mira recebe correções repetidas na mesma direção.
+- Memória independente para cada uma das seis miras, armazenada no próprio dispositivo.
+- Reset da base também reinicia o aprendizado daquele aparelho e perfil.
+
+O aprendizado é uma heurística local baseada no feedback selecionado, não um modelo de IA treinado nem uma medição automática da partida. O resultado deve ser validado pelo jogador no modo treinamento.
+
+# SENSI.AI 2.0.0
+
+A versão 2.0 inaugura o motor híbrido local, combinando perfis-base, modo de resposta e personalização manual de cada mira.
+
+## Novidades da 2.0.0
+- Três modos do motor: Controle, Balanceado e Ágil.
+- Combinação do modo selecionado com os quatro perfis de jogo existentes.
+- Controles deslizantes individuais de 0 a 200 para Geral, Red Dot, 2x, 4x, AWM e Olhadinha.
+- Ajuste fino imediato sem modificar as outras miras.
+- Preservação do catálogo de aparelhos, preenchimento técnico, perfis salvos, histórico, comparação e calibração adaptativa.
+- Funcionamento offline mantido, com dados no armazenamento local.
+- Testes automatizados para modos híbridos, limites e independência dos ajustes.
+
+## Arquitetura e limites
+O motor híbrido combina regras determinísticas e controles do jogador. Não é um modelo de aprendizado de máquina treinado, não mede diretamente o toque e não acessa dados internos do Free Fire. RAM, chipset e taxa de atualização são dados informativos, não medidas de sensibilidade. As configurações são pontos de partida para testar e ajustar.
+
+## Versionamento
+- VersionName: 2.0.0
+- VersionCode: 5
+- Branch: release/sensi-ai-2.0.0
+
+
+## Mega upgrade interno da linha 2.0.0
+
+O Boost Center amplia a versão 2.0.0 sem alterar o VersionName. O VersionCode Android foi incrementado para permitir que o Android reconheça a compilação como atualização.
+
+### Boost Center
+- Painel de diagnóstico local com modelo, versão Android, memória disponível, bateria e temperatura quando o sistema fornece esses dados.
+- Recomendações conservadoras para estabilidade e uso durante jogos.
+- Indicadores de dados indisponíveis quando o Android não fornece uma leitura.
+- Nenhum ajuste de sistema é aplicado automaticamente.
+
+### Shizuku Hub
+- Integração com a API Shizuku para verificar se o serviço está ativo e se a autorização do SENSI.AI foi concedida.
+- Solicitação de autorização somente após toque explícito do usuário.
+- Esta compilação não executa comandos privilegiados nem modifica configurações do Android ou arquivos do jogo.
+- A autorização Shizuku é opcional e pode ser revogada pelo usuário.
+
+### Segurança e limites
+O diagnóstico não é um benchmark de FPS e não mede diretamente o desempenho dentro do Free Fire. O SENSI.AI não encerra processos à força, não desativa proteções, não altera arquivos do jogo e não promete ganho de FPS ou headshots. O app continua funcionando sem Shizuku.
+
+- VersionName: 2.0.0 (mantido)
+- VersionCode: 6 (incremento técnico para atualização Android)
+
+
+# SENSI.AI 2.1.1
+
+- **VersionName:** 2.1.1
+- **VersionCode:** 17
+- **Android mínimo:** 7.0 (API 24)
+- **Application ID:** `com.aistudio.mockcraft.kvwqnz`
+
+### Suporte restaurado
+- Central de suporte dentro de Configurações, com orientações para Android antigo e solução de problemas do Shizuku.
+- Compatibilidade declarada para Android 7.0 ou superior, mantendo o minSdk 24.
+- Orientação correta de inicialização do Shizuku: depuração sem fio no Android 11 ou superior; computador via ADB para Android 10 ou inferior sem root; método root quando disponível.
+- Fallback para abrir as configurações do aplicativo em Android anterior ao Android 8 ao acessar opções de notificações.
+- Application ID preservado para permitir atualização do mesmo pacote.
+
+O fluxo de inicialização do Shizuku segue o manual oficial: https://shizuku.rikka.app/guide/setup/
+
+
+## SENSI.AI 2.1.2
+
+- Gráficos Massinha movido para um painel independente na aba Boost.
+- Comandos V1 e V2 visíveis e copiáveis para uso manual no Brevent.
+- Seleção entre Free Fire e Free Fire MAX para montar o comando correto.
+- A seção Gráficos Massinha não depende da autorização Shizuku e não executa comandos automaticamente.
+- O painel avisa sobre backup dos valores ANGLE atuais e sobre o encerramento do jogo selecionado.
+
+
+## SENSI.AI 2.1.3
+
+- **VersionName:** 2.1.3
+- **VersionCode:** 19
+- Ao gerar a sensibilidade, o app também apresenta uma resolução de referência e um DPI sugerido conforme a categoria do processador e a RAM informadas.
+- Botões independentes para copiar resolução e DPI; ambos também entram em **COPIAR TUDO**.
+- As recomendações são referências de configuração, não alteram automaticamente o Android ou o jogo e devem ser validadas nas opções disponíveis no aparelho.
+
+
+## SENSI.AI 2.1.4
+
+- **VersionName:** 2.1.4
+- **VersionCode:** 20
+- As recomendações de resolução agora priorizam proporção esticada 4:3, em vez da proporção original da tela.
+- Perfis sugeridos por capacidade: 960×720 (entrada), 1280×960 (intermediário) e 1440×1080 (alto desempenho).
+- DPI continua adaptado à categoria do hardware.
+- O app informa que a proporção 4:3 pode deformar ou cortar a imagem e não é suportada por todos os aparelhos/jogos. Nenhuma alteração é aplicada automaticamente.
+
+
+## SENSI.AI 2.1.5
+
+- **VersionName:** 2.1.5
+- **VersionCode:** 21
+- Seletor com nove opções de resolução esticada 4:3: 800×600, 960×720, 1024×768, 1152×864, 1280×960, 1360×1020, 1440×1080, 1600×1200 e 1920×1440.
+- A recomendação automática escolhe um ponto de partida conforme a categoria do hardware, mas o usuário pode selecionar outra opção e copiar a resolução escolhida.
+- O DPI sugerido permanece separado da seleção de resolução.
+- Resoluções maiores podem exigir mais recursos; compatibilidade e proporção visual variam por aparelho e jogo. O app não aplica alterações automaticamente.
+
+
+## SENSI.AI 2.1.6
+
+- **VersionName:** 2.1.6
+- **VersionCode:** 22
+- Catálogo ampliado para 14 presets 4:3 encontrados em referências e conteúdos da comunidade de Free Fire/tela esticada: 400×300, 512×384, 640×480, 800×600, 832×624, 960×720, 1024×768, 1152×864, 1280×960, 1360×1020, 1400×1050, 1440×1080, 1600×1200 e 1920×1440.
+- A seleção manual e a cópia continuam disponíveis; DPI permanece separado.
+- Os presets são referências comunitárias, não uma classificação oficial de popularidade nem garantia de compatibilidade ou vantagem no jogo.
+
+
+## SENSI.AI 2.1.7
+
+- **VersionName:** 2.1.7
+- **VersionCode:** 23
+- Catálogo ampliado para **100 resoluções 4:3**, com seleção manual e cópia da opção escolhida.
+- As 12 opções identificadas como referências comunitárias ficam diferenciadas das 88 variações matemáticas calculadas para ampliar as possibilidades de teste.
+- As variações calculadas não são apresentadas como presets populares comprovados.
+- DPI continua independente da resolução.
+- A recomendação não altera o Android automaticamente. Compatibilidade, deformação/corte da imagem e impacto no desempenho variam conforme aparelho e jogo.
+
+
+# SENSI.AI 2.2.0
+
+- **VersionName:** 2.2.0
+- **VersionCode:** 24
+- Nova aba **Resolution Lab**, independente do gerador de sensibilidade.
+- Catálogo offline com 400 dimensões organizadas em quatro proporções: 4:3, 16:9, 19.5:9 e 20:9.
+- 100 opções por proporção, com dimensões de referência cadastradas separadas das variações matemáticas.
+- Pesquisa por dimensão/proporção, filtros por proporção e origem, prévia visual, cópia e favoritos locais.
+- Lista paginada para manter a interface leve em aparelhos de entrada.
+- A ferramenta não aplica mudanças no Android nem no Free Fire; copiar uma resolução não significa que o aparelho ou jogo a aceite.
+- DPI continua independente e não é alterado pelo Resolution Lab.
+- Testes automatizados verificam as 400 opções, unicidade e proporções exatas.

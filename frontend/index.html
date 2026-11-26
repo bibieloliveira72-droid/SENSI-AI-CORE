@@ -6,13 +6,32 @@
     name="viewport"
     content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
   />
-  <meta name="theme-color" content="#070709" />
+  <meta name="theme-color" content="#090D13" />
   <title>SENSI.AI — Motor de Sensibilidade Free Fire</title>
   <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./boost.css" />
+  <link rel="stylesheet" href="./resolution-lab.css" />
+  <link rel="stylesheet" href="./masterstrap-inspired.css" />
+  <link rel="stylesheet" href="./masterstrap-mobile.css" />
+  <style>
+.calibration-import{margin:12px 0;padding:12px;border:1px solid var(--border-subtle);border-radius:var(--radius-md);background:rgba(255,255,255,.025)}
+.calibration-import-head,.calibration-session{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.calibration-import-head strong{font-size:.88rem}
+.calibration-import-head span,.calibration-helper,.calibration-session span{color:var(--text-secondary);font-size:.76rem}
+.calibration-input-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.calibration-input-grid label{display:flex;flex-direction:column;gap:5px;color:var(--text-secondary);font-size:.76rem;font-weight:700}
+.calibration-input-grid .input-control{min-height:43px;padding:8px 10px}
+.calibration-start-btn{margin-top:12px;min-height:48px}
+.calibration-helper{margin:8px 0 0;line-height:1.45}
+.calibration-session{margin:12px 0;padding:10px 12px;border-radius:var(--radius-sm);background:var(--bg-input)}
+.calibration-session>div{display:flex;flex-direction:column;gap:3px}
+.calibration-session strong{font-size:.82rem}
+.calibration-finish-btn{min-height:42px;padding:0 12px;font-size:.72rem}
+.cal-btn:disabled,.calibration-finish-btn:disabled{opacity:.42;cursor:not-allowed}
+@media(max-width:360px){.calibration-session{align-items:stretch;flex-direction:column}.calibration-finish-btn{width:100%}}
+</style>
 </head>
 <body>
-  <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-glow" aria-hidden="true"></div>
 
   <div class="app-shell">
     <header class="topbar">
@@ -26,77 +45,76 @@
         </div>
         <div>
           <h1 class="brand-title">SENSI<span>.AI</span></h1>
-          <p class="brand-sub">Motor Próprio • Free Fire</p>
+          <p class="brand-sub">SENSITIVITY & PERFORMANCE <span>•</span> FREE FIRE <span class="app-version">v3.7.0</span></p>
         </div>
       </div>
 
       <div class="offline-pill" aria-label="Modo de execução offline local">
         <span class="status-dot online" aria-hidden="true"></span>
-        <span>100% OFFLINE</span>
+        <span>ENGINE LOCAL</span>
       </div>
     </header>
 
     <nav class="tab-bar" role="tablist" aria-label="Navegação principal">
       <button type="button" class="tab-btn active" role="tab" aria-selected="true" data-tab="generator">
-        Gerador
+        <span class="tab-icon">⌁</span><span>Sensibilidade</span>
+      </button>
+      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="boost">
+        <span class="tab-icon">⚡</span><span>Otimização</span>
       </button>
       <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="saved">
-        Perfis &amp; Histórico
-      </button>
-      <button type="button" class="tab-btn" role="tab" aria-selected="false" data-tab="compare">
-        Comparar
+        <span class="tab-icon">▤</span><span>Biblioteca</span>
       </button>
     </nav>
 
     <main class="main-content">
       <!-- TAB 1: GERADOR + CALIBRAÇÃO -->
       <section id="tab-generator" class="tab-panel" role="tabpanel">
+        <section class="hero-panel"><div class="hero-copy"><span class="eyebrow"><i></i> SENSITIVITY LAB / MAIN</span><h2>Encontre o seu <em>ritmo.</em></h2><p>Monte seu setup, gere uma base e refine cada mira com seus próprios testes.</p><div class="hero-meta"><span>● MOTOR LOCAL</span><span>6 MIRAS</span><span>4 PERFIS</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">S<span>.</span></div><i class="orbit-dot"></i></div></section>
+        <section class="card boost-card telegram-community-card">
+          <div class="section-head"><div><h2>Comunidade SENSI.AI</h2><p class="device-summary">Novidades, atualizações e avisos oficiais.</p></div><span class="badge">TELEGRAM</span></div>
+          <a class="btn-primary telegram-join-btn" href="https://t.me/+ICpY9A07EmxhNWI5" target="_blank" rel="noopener noreferrer" aria-label="Abrir canal oficial do SENSI.AI no Telegram">ENTRAR NO CANAL ↗</a>
+        </section>
         <form id="sensiForm" class="card form-card" novalidate>
           <div class="section-head">
             <h2>Hardware &amp; Botão de Tiro</h2>
             <span class="badge">MOTOR LOCAL JS</span>
           </div>
 
-          <div class="field-grid">
-            <div class="field">
-              <label for="marcaSelect">Marca do Celular</label>
-              <select id="marcaSelect" name="marca" class="input-control" required>
-                <option value="Samsung">Samsung</option>
-                <option value="Xiaomi">Xiaomi / Redmi / POCO</option>
-                <option value="Motorola">Motorola</option>
-                <option value="Apple">Apple (iPhone)</option>
-                <option value="ASUS ROG">ASUS ROG / RedMagic</option>
-                <option value="Realme">Realme</option>
-                <option value="Infinix">Infinix</option>
-                <option value="OnePlus">OnePlus</option>
-                <option value="Outra">Outra marca</option>
-              </select>
+          <section class="device-picker" aria-label="Selecionar dispositivo">
+            <div class="device-picker-heading">
+              <div><span class="device-step">ETAPA 01</span><h3>Qual é o seu dispositivo?</h3><p>Escolha a marca e encontre o modelo exato.</p></div>
+              <span class="device-count">CATÁLOGO</span>
             </div>
-
-            <div class="field hidden" id="customBrandField">
-              <label for="customMarcaInput">Qual marca?</label>
-              <input
-                type="text"
-                id="customMarcaInput"
-                class="input-control"
-                placeholder="Ex.: Tecno, LG, Sony"
-                maxlength="50"
-              />
+            <div id="selectedDeviceCard" class="selected-device hidden">
+              <div class="device-phone-icon" aria-hidden="true">▯</div>
+              <div class="selected-device-copy"><strong id="selectedDeviceName">Dispositivo</strong><span id="selectedDeviceMeta">Selecionado</span></div>
+              <button type="button" id="changeDeviceBtn" class="device-change-btn">TROCAR</button>
             </div>
-
-            <div class="field">
-              <label for="modeloInput">Modelo do Celular</label>
-              <input
-                type="text"
-                id="modeloInput"
-                name="modelo"
-                class="input-control"
-                placeholder="Ex.: Poco X6 Pro, Galaxy A55"
-                maxlength="60"
-                required
-              />
+            <div id="devicePickerSearch" class="device-picker-search">
+              <label class="device-search-box"><span aria-hidden="true">⌕</span><input id="deviceSearchInput" class="input-control" type="search" placeholder="Buscar marca ou modelo..." autocomplete="off" /></label>
+              <div id="deviceBrandFilters" class="device-brand-filters" aria-label="Filtrar por marca"></div>
+              <div id="deviceResults" class="device-results" role="listbox" aria-label="Modelos disponíveis"></div>
+              <button type="button" id="manualDeviceBtn" class="device-manual-btn">Não encontrei meu aparelho · Informar manualmente</button>
             </div>
-          </div>
+            <div id="deviceManualFields" class="device-manual-fields hidden">
+              <p>Informe a marca e o modelo exatamente como aparecem nas configurações do celular.</p>
+              <div class="field-grid">
+                <div class="field">
+                  <label for="marcaSelect">Marca do Celular</label>
+                  <select id="marcaSelect" name="marca" class="input-control" required>
+                    <option value="Samsung">Samsung</option><option value="Xiaomi">Xiaomi / Redmi / POCO</option><option value="Motorola">Motorola</option><option value="Apple">Apple (iPhone)</option><option value="ASUS ROG">ASUS ROG</option><option value="Realme">Realme</option><option value="Infinix">Infinix</option><option value="OnePlus">OnePlus</option><option value="Outra">Outra marca</option>
+                  </select>
+                </div>
+                <div class="field hidden" id="customBrandField"><label for="customMarcaInput">Qual marca?</label><input type="text" id="customMarcaInput" class="input-control" placeholder="Ex.: Tecno, LG, Sony" maxlength="50" /></div>
+                <div class="field">
+                  <label for="modeloInput">Modelo do Celular</label>
+                  <input type="text" id="modeloInput" name="modelo" class="input-control" placeholder="Ex.: Galaxy A07 4G, Poco X6 Pro" maxlength="60" required />
+                </div>
+              </div>
+              <button type="button" id="backToDeviceCatalogBtn" class="device-back-btn">← Voltar ao catálogo</button>
+            </div>
+          </section>
 
           <div class="field-grid">
             <div class="field">
@@ -143,6 +161,7 @@
               <button type="button" class="chip active" data-value="120">120 Hz</button>
               <button type="button" class="chip" data-value="144">144 Hz</button>
               <button type="button" class="chip" data-value="165">165 Hz</button>
+              <button type="button" class="chip" data-value="185">185 Hz</button>
             </div>
             <input type="hidden" id="hzInput" name="hz" value="120" />
           </div>
@@ -164,6 +183,7 @@
               inputmode="numeric"
               required
             />
+            <p class="field-help">A DPI depende das configurações do Android e não pode ser deduzida com segurança apenas pelo modelo do celular.</p>
             <div class="chip-group compact" aria-label="Atalhos de DPI" id="dpiPresets">
               <button type="button" class="chip-mini" data-dpi="411">411</button>
               <button type="button" class="chip-mini" data-dpi="520">520</button>
@@ -171,8 +191,7 @@
               <button type="button" class="chip-mini" data-dpi="720">720</button>
               <button type="button" class="chip-mini" data-dpi="800">800</button>
               <button type="button" class="chip-mini" data-dpi="960">960</button>
-            </div>
-          </div>
+            </div>          </div>
 
           <div class="field">
             <div class="label-row">
@@ -218,6 +237,7 @@
               </button>
             </div>
             <input type="hidden" id="profileInput" name="profile" value="capa" />
+          <div class="field engine-mode-field"><label for="engineModeInput">Modo do motor híbrido 2.0</label><select id="engineModeInput" name="engineMode" class="input-control"><option value="controle">Controle: prioriza estabilidade</option><option value="balanceado" selected>Balanceado: ponto de partida versátil</option><option value="agil">Ágil: prioriza giro e resposta</option></select><p class="field-help">O modo aplica pequenos ajustes iniciais. Valide o resultado no treinamento.</p></div>
           </div>
 
           <div id="errorBox" class="alert-error hidden" role="alert"></div>
@@ -226,6 +246,40 @@
             GERAR SENSIBILIDADE
           </button>
         </form>
+
+          <!-- Calibração Inteligente v3.2 -->
+          <div class="calibration-panel">
+            <div class="calibration-head">
+              <div><h3>Calibração Inteligente</h3><p>Digite sua sensibilidade atual. O motor ajusta os valores em etapas conforme o resultado dos seus testes.</p></div>
+              <button type="button" id="resetBaseBtn" class="btn-ghost-sm">Voltar ao início</button>
+            </div>
+            <div class="calibration-import">
+              <div class="calibration-import-head"><strong>Minha sensibilidade atual</strong><span>Valores de 0 a 200</span></div>
+              <div class="calibration-input-grid">
+                <label>Geral<input class="input-control mono-input" id="calInputGeneral" type="number" min="0" max="200" inputmode="numeric" placeholder="Geral" /></label>
+                <label>Red Dot<input class="input-control mono-input" id="calInputRedDot" type="number" min="0" max="200" inputmode="numeric" placeholder="Red Dot" /></label>
+                <label>Mira 2x<input class="input-control mono-input" id="calInput2x" type="number" min="0" max="200" inputmode="numeric" placeholder="2x" /></label>
+                <label>Mira 4x<input class="input-control mono-input" id="calInput4x" type="number" min="0" max="200" inputmode="numeric" placeholder="4x" /></label>
+                <label>AWM<input class="input-control mono-input" id="calInputAWM" type="number" min="0" max="200" inputmode="numeric" placeholder="AWM" /></label>
+                <label>Olhadinha<input class="input-control mono-input" id="calInputOlhadinha" type="number" min="0" max="200" inputmode="numeric" placeholder="Olhadinha" /></label>
+              </div>
+              <button type="button" class="btn-primary calibration-start-btn" id="startCalibrationBtn">USAR MINHA SENSI E CALIBRAR</button>
+              <p class="calibration-helper">Preencha os seis campos. Teste no modo treinamento e selecione o comportamento observado para o motor ajustar sua configuração.</p>
+            </div>
+            <div class="calibration-session" aria-live="polite">
+              <div><strong id="calibrationStatus">Aguardando sua sensibilidade</strong><span id="calibrationStepCount">Nenhum ajuste realizado</span></div>
+              <button type="button" class="btn-secondary calibration-finish-btn" id="finishCalibrationBtn" disabled>ESTOU SATISFEITO</button>
+            </div>
+            <div class="calibration-actions" id="calibrationButtons" aria-label="Como a mira se comportou">
+              <button type="button" class="cal-btn" data-feedback="overshoot_head" disabled>Passando da cabeça</button>
+              <button type="button" class="cal-btn" data-feedback="stuck_chest" disabled>Travando no peito</button>
+              <button type="button" class="cal-btn" data-feedback="scope_shake" disabled>2x / 4x tremendo</button>
+              <button type="button" class="cal-btn" data-feedback="slow_turn" disabled>Giro / gelo lento</button>
+              <button type="button" class="cal-btn" data-feedback="awm_slow" disabled>AWM lenta</button>
+              <button type="button" class="cal-btn" data-feedback="awm_fast" disabled>AWM rápida</button>
+            </div>
+            <div id="calibrationFeedbackBox" class="cal-feedback hidden"></div>
+          </div>
 
         <section id="resultsSection" class="card results-card hidden" aria-live="polite">
           <div class="section-head">
@@ -240,39 +294,17 @@
 
           <div class="sensi-grid" id="sensiGrid"></div>
 
-          <!-- Calibração Interativa -->
-          <div class="calibration-panel">
-            <div class="calibration-head">
-              <div>
-                <h3>Calibração Interativa (Teste no Treinamento)</h3>
-                <p>Informe como a mira se comportou para o algoritmo adaptativo refinar os valores:</p>
-              </div>
-              <button type="button" id="resetBaseBtn" class="btn-ghost-sm">Resetar Base</button>
+          <section class="setup-recommendations" id="setupRecommendations" aria-label="Resolução e DPI recomendados">
+            <div class="setup-recommendations-head"><div><span class="device-step">AJUSTE COMPLEMENTAR</span><h3>Resolução &amp; DPI sugeridos</h3><p>Referência calculada conforme a categoria do aparelho e a memória RAM.</p></div><span class="setup-tag">AUTO</span></div>
+            <div class="setup-recommendation-grid">
+              <article class="setup-recommendation"><span>RESOLUÇÃO (PIXELS)</span><strong id="recommendedResolution">960 × 720</strong><small id="recommendedResolutionLabel">4:3 · leve</small><label class="resolution-picker-label" for="resolutionOptionSelect">MAIS OPÇÕES</label><select id="resolutionOptionSelect" class="resolution-picker" aria-label="Escolher resolução esticada"></select><button type="button" class="setup-copy-btn" id="copyResolutionBtn">COPIAR RESOLUÇÃO</button></article>
+              <article class="setup-recommendation"><span>DPI SUGERIDO</span><strong id="recommendedDpi">420</strong><small>DPI de referência</small><button type="button" class="setup-copy-btn" id="copyRecommendedDpiBtn">COPIAR DPI</button></article>
             </div>
+            <p class="setup-recommendation-reason" id="recommendedSetupReason"></p>
+            <p class="setup-recommendation-note" id="recommendedSetupNote"></p>
+          </section>
 
-            <div class="calibration-actions" id="calibrationButtons">
-              <button type="button" class="cal-btn" data-feedback="overshoot_head">
-                Passando da cabeça
-              </button>
-              <button type="button" class="cal-btn" data-feedback="stuck_chest">
-                Travando no peito
-              </button>
-              <button type="button" class="cal-btn" data-feedback="scope_shake">
-                2x / 4x tremendo
-              </button>
-              <button type="button" class="cal-btn" data-feedback="slow_turn">
-                Giro / gelo lento
-              </button>
-              <button type="button" class="cal-btn" data-feedback="awm_slow">
-                AWM lenta
-              </button>
-              <button type="button" class="cal-btn" data-feedback="awm_fast">
-                AWM rápida
-              </button>
-            </div>
 
-            <div id="calibrationFeedbackBox" class="cal-feedback hidden"></div>
-          </div>
 
           <!-- Salvar Perfil Local -->
           <div class="save-profile-box">
@@ -316,6 +348,7 @@
             <h2>Perfis Salvos</h2>
             <span class="badge" id="savedCountBadge">0 SALVOS</span>
           </div>
+          <label class="search-wrap"><span>⌕</span><input id="profileSearch" class="input-control" type="search" placeholder="Buscar por aparelho ou perfil..." autocomplete="off" /></label>
           <div id="savedProfilesList" class="list-stack"></div>
         </div>
 
@@ -337,8 +370,7 @@
           </div>
 
           <div class="field-grid">
-            <div class="field">
-              <label for="compareSelectA">Configuração A (Base)</label>
+            <div class="field">              <label for="compareSelectA">Configuração A (Base)</label>
               <select id="compareSelectA" class="input-control"></select>
             </div>
             <div class="field">
@@ -350,12 +382,130 @@
           <div id="compareResultBox" class="compare-result"></div>
         </div>
       </section>
+
+      <section id="tab-resolutionLab" class="tab-panel hidden" role="tabpanel">
+        <section class="hero-panel resolution-lab-hero"><div class="hero-copy"><span class="eyebrow"><i></i> DISPLAY CONFIGURATION / 06</span><h2>Resolution <em>Lab.</em></h2><p>Explore proporções, compare dimensões, visualize o formato e salve suas opções favoritas.</p><div class="hero-meta"><span>400 OPÇÕES</span><span>4 PROPORÇÕES</span><span>OFFLINE</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">▦</div><i class="orbit-dot"></i></div></section>
+        <section class="card rl-card">
+          <div class="section-head"><div><h2>Catálogo de resoluções</h2><p class="device-summary">Dimensões de referência e variações matemáticas exatas.</p></div><span class="badge" id="rlCountBadge">400 OPÇÕES</span></div>
+          <label class="rl-search-label" for="rlSearch">PESQUISAR DIMENSÃO</label>
+          <input id="rlSearch" class="input-control" type="search" placeholder="Ex.: 1920x1080, 4:3, referência..." autocomplete="off" />
+          <div class="rl-filter-grid">
+            <div class="field"><label for="rlRatioFilter">Proporção</label><select id="rlRatioFilter" class="input-control"><option value="all">Todas as proporções</option><option value="4:3">4:3 · Clássica</option><option value="16:9">16:9 · Widescreen</option><option value="19.5:9">19.5:9 · Tela ampla</option><option value="20:9">20:9 · Ultrawide</option></select></div>
+            <div class="field"><label for="rlSourceFilter">Origem</label><select id="rlSourceFilter" class="input-control"><option value="all">Todas</option><option value="reference">Referências cadastradas</option><option value="calculated">Variações calculadas</option></select></div>
+          </div>
+          <label class="rl-favorites-toggle"><input id="rlFavoritesOnly" type="checkbox" /> Mostrar somente favoritos</label>
+          <div class="rl-preview-panel">
+            <div class="rl-preview-copy"><span>PRÉVIA DA PROPORÇÃO</span><strong id="rlSelectedResolution">960 × 720</strong><small id="rlSelectedMeta">4:3 · Referência cadastrada</small></div>
+            <div class="rl-preview-stage"><div id="rlPreviewShape" class="rl-preview-shape" aria-label="Prévia da proporção selecionada"></div></div>
+          </div>
+          <div class="rl-selection-actions"><button type="button" id="rlCopyBtn" class="btn-primary">COPIAR RESOLUÇÃO</button><button type="button" id="rlFavoriteBtn" class="btn-secondary">☆ SALVAR FAVORITO</button></div>
+          <p class="rl-safety-note">O catálogo é informativo. Copiar uma dimensão não altera a tela, o Android ou o Free Fire. Nem todas as combinações são suportadas pelo aparelho ou pelo jogo. DPI permanece independente.</p>
+          <div class="rl-results-head"><strong id="rlResultsSummary">Mostrando opções</strong><span id="rlFavoriteCount">0 favoritos</span></div>
+          <div id="rlResults" class="rl-results" aria-live="polite"></div>
+          <button type="button" id="rlLoadMore" class="btn-secondary rl-load-more">CARREGAR MAIS</button>
+        </section>
+      </section>
+
+      <section id="tab-boost" class="tab-panel hidden" role="tabpanel">
+<header class="boost-mobile-head"><div class="boost-mobile-kicker"><span class="boost-live-dot"></span> BENIMARU ENGINE / SENSI.AI</div><div class="boost-mobile-title-row"><div><h2>Otimização <em>real.</em></h2><p>Motor Android integrado, execução pelo Shizuku ou Brevent e abertura do Free Fire ao concluir.</p></div><span class="boost-version-pill">CORE 3.6</span></div><div class="boost-head-actions"><button type="button" id="boostRefreshBtn" class="btn-primary">ATUALIZAR DIAGNÓSTICO</button></div></header>
+<section class="card boost-card boost-overview-card"><div class="boost-card-heading"><div><span class="boost-overline">DIAGNÓSTICO DO APARELHO</span><h3 id="boostDevice">Aguardando diagnóstico…</h3><small id="boostLastCheck">Nenhuma leitura nesta sessão</small></div><span class="boost-status-chip">DEVICE CHECK</span></div><div class="boost-stats"><div class="boost-stat"><span>RAM disponível</span><strong id="boostMemory">--</strong><small id="boostMemoryHint">Aguardando leitura</small></div><div class="boost-stat"><span>Bateria</span><strong id="boostBattery">--</strong><small id="boostBatteryHint">Aguardando leitura</small></div><div class="boost-stat"><span>Temperatura</span><strong id="boostTemp">--</strong><small id="boostTempHint">Aguardando leitura</small></div><div class="boost-stat"><span>Android</span><strong id="boostAndroid">--</strong><small id="boostAndroidHint">Versão do sistema</small></div><div class="boost-stat"><span>Resolução</span><strong id="boostResolution">--</strong><small id="boostResolutionHint">Leitura do display</small></div><div class="boost-stat"><span>Atualização</span><strong id="boostRefreshRate">--</strong><small id="boostRefreshRateHint">Hz informados pelo Android</small></div></div><p id="boostAdvice" class="boost-advice" aria-live="polite">Atualize o diagnóstico para consultar o Android.</p></section>
+<section class="card boost-card heat-shield-card"><div class="boost-card-heading"><div><span class="boost-overline">PROTEÇÃO TÉRMICA</span><h3>Heat Shield</h3><small>Monitoramento sem desativar limites térmicos do aparelho.</small></div><span class="boost-status-chip">THERMAL GUARD</span></div><div id="heatShieldState" class="heat-shield-state level-unknown" aria-live="polite"><span class="heat-shield-state-dot" aria-hidden="true"></span><strong id="heatShieldStatus">AGUARDANDO LEITURA</strong><small id="heatShieldThermal">Diagnóstico ainda não atualizado</small></div><div class="heat-shield-meter" role="progressbar" aria-label="Indicador de atenção térmica" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="heatShieldMeter"></span></div><div class="heat-shield-metrics"><div><small>Temperatura da bateria</small><strong id="heatShieldTemp">--</strong></div><div><small>Estado térmico Android</small><strong id="heatShieldAndroidStatus">--</strong></div><div><small>Memória disponível</small><strong id="heatShieldMemory">--</strong></div></div><p id="heatShieldAdvice" class="heat-shield-advice">Atualize a leitura para receber orientação.</p><button type="button" id="heatShieldRefresh" class="btn-secondary">ATUALIZAR TEMPERATURA</button></section>
+<section class="card boost-card boost-workspace"><div class="boost-card-heading"><div><span class="boost-overline">MOTOR DE OTIMIZAÇÃO PORTADO</span><h3>Benimaru <em>Core.</em></h3><small>Otimize diferentes jogos pelo Shizuku. Free Fire continua como foco principal.</small></div><span class="boost-status-chip">SHIZUKU CORE</span></div>
+
+<div class="universal-game-target"><div class="field"><label for="optimizerGameTarget">Jogo que será otimizado</label><select id="optimizerGameTarget" class="input-control"><option value="com.dts.freefireth">Free Fire · principal</option><option value="com.dts.freefiremax">Free Fire MAX</option><option value="com.roblox.client">Roblox</option><option value="com.activision.callofduty.shooter">Call of Duty: Mobile</option><option value="com.tencent.ig">PUBG Mobile</option><option value="com.mojang.minecraftpe">Minecraft</option><option value="com.mobile.legends">Mobile Legends: Bang Bang</option><option value="com.supercell.brawlstars">Brawl Stars</option><option value="com.kitkagames.fallbuddies">Stumble Guys</option><option value="custom">Outro jogo instalado</option></select><div id="optimizerCustomGameField" class="field hidden"><label for="optimizerCustomPackage">Pacote Android do jogo</label><input id="optimizerCustomPackage" class="input-control" type="text" placeholder="Ex.: com.exemplo.jogo" autocapitalize="none" spellcheck="false" maxlength="160"><p class="field-help">Informe o identificador do pacote instalado. O SENSI.AI valida o formato antes de enviar ao Shizuku.</p></div><p id="optimizerGameHint" class="field-help">Free Fire recebe os módulos específicos. Outros jogos usam apenas os ajustes Android compatíveis.</p></div><p id="optimizerGameStatus" class="field-help" aria-live="polite">Jogo-alvo: Free Fire.</p></div><section class="massinha-command-card" aria-labelledby="massinhaCommandTitle">
+ <div class="massinha-command-head"><div><span class="boost-overline">AUTO DETECT</span><h4 id="massinhaCommandTitle">Gráfico Massinha · Brevent</h4><p id="massinhaDeviceInfo" class="field-help">Detectando modelo do aparelho e versão do Free Fire…</p></div><span class="boost-status-chip">V1 / V2</span></div>
+ <div class="field"><label for="massinhaTargetPackage">Jogo detectado (pode alterar)</label><select id="massinhaTargetPackage" class="input-control"><option value="com.dts.freefireth">Free Fire</option><option value="com.dts.freefiremax">Free Fire MAX</option></select></div>
+ <div class="massinha-command-grid">
+  <div class="field"><label for="massinhaCommandV1">Massinha V1</label><textarea id="massinhaCommandV1" class="input-control" rows="3" readonly></textarea><button type="button" id="massinhaCopyV1" class="btn-secondary">COPIAR COMANDO V1</button></div>
+  <div class="field"><label for="massinhaCommandV2">Massinha V2</label><textarea id="massinhaCommandV2" class="input-control" rows="3" readonly></textarea><button type="button" id="massinhaCopyV2" class="btn-secondary">COPIAR COMANDO V2</button></div>
+ </div>
+ <p id="massinhaCopyStatus" class="field-help" aria-live="polite">Escolha V1 ou V2 e cole o comando em Brevent → Executar comando. O comando encerra o Free Fire no final para recarregar as opções.</p>
+</section>
+<div id="breventCommandPanel" class="brevent-command-panel hidden"><label for="breventCommandOutput">Comando gerado para o Brevent</label><textarea id="breventCommandOutput" class="input-control" rows="7" readonly></textarea><div class="boost-apply-actions"><button type="button" id="copyBreventCommand" class="btn-secondary">COPIAR COMANDO</button></div><p id="breventCommandStatus" class="field-help" aria-live="polite">Comando exclusivo do Massinha.</p></div>
+<div class="boost-massinha-inline"><div class="field"><label for="benimaruShaderDriver">Driver gráfico</label><select id="benimaruShaderDriver" class="input-control"><option value="angle">ANGLE</option><option value="native">Nativo</option><option value="default">Padrão do sistema</option></select></div></div>
+<div class="boost-multi-grid" id="boostMultiGrid">
+<label class="boost-option"><input type="checkbox" value="animations" checked><span class="boost-option-icon">✧</span><span><strong>Animações 0,5x</strong><small>Módulo de interface do Benimaru, com backup.</small></span><span class="boost-option-kind">REVERSÍVEL</span></label>
+<label class="boost-option"><input type="checkbox" value="game" checked><span class="boost-option-icon">🎮</span><span><strong>Compilação ART</strong><small>Compilação do jogo no modo speed -f.</small></span><span class="boost-option-kind">NATIVO</span></label>
+<label class="boost-option"><input type="checkbox" value="gameMode" checked><span class="boost-option-icon">⚡</span><span><strong>Modo performance</strong><small>Game Mode nativo, com restauração.</small></span><span class="boost-option-kind">NATIVO</span></label>
+<label class="boost-option"><input type="checkbox" value="refreshRate"><span class="boost-option-icon">↻</span><span><strong>Taxa de atualização</strong><small>Define o limite de Hz escolhido e permite restaurar o valor anterior.</small></span><span class="boost-option-kind">REVERSÍVEL</span></label>
+<label class="boost-option"><input type="checkbox" value="shader"><span class="boost-option-icon">▧</span><span><strong>Driver gráfico</strong><small>ANGLE, nativo ou padrão, com backup.</small></span><span class="boost-option-kind">OPCIONAL</span></label>
+<label class="boost-option"><input type="checkbox" value="massinha"><span class="boost-option-icon">◈</span><span><strong>Gráficos Massinha</strong><small>Perfil ANGLE V1/V2 exclusivo do Free Fire. Reinicia o jogo para recarregar.</small></span><span class="boost-option-kind">EXPERIMENTAL</span></label>
+</div>
+<div class="field"><label for="benimaruRefreshRate">Taxa de atualização desejada</label><select id="benimaruRefreshRate" class="input-control"><option value="60">60 Hz</option><option value="90" selected>90 Hz</option><option value="120">120 Hz</option></select></div>
+<div class="field"><label for="massinhaVersion">Perfil Massinha · somente Free Fire</label><select id="massinhaVersion" class="input-control"><option value="v1">V1 · Base</option><option value="v2">V2 · Alternativo</option></select></div><div class="field"><label for="massinhaExecutionMode">Aplicar Gráfico Massinha por</label><select id="massinhaExecutionMode" class="input-control"><option value="brevent" selected>Brevent · gerar comando V1/V2</option><option value="shizuku">Shizuku · aplicar no aplicativo</option></select><p class="field-help">Brevent é usado somente para os Gráficos Massinha. Os demais módulos continuam pelo Shizuku.</p></div>
+<div class="boost-apply-actions"><button type="button" id="boostApplyTweaks" class="btn-primary">APLICAR OTIMIZAÇÕES E ABRIR FREE FIRE</button><button type="button" id="boostRestoreTweaks" class="btn-ghost-sm">RESTAURAR BACKUPS</button></div>
+<div id="boostApplyStatus" class="boost-apply-status" aria-live="polite">Verifique o Shizuku, escolha os módulos e aplique. O resultado de cada operação será informado.</div>
+<p class="boost-safety-note">O motor não desativa proteção térmica, não encerra Spotify nem mata aplicativos aleatórios. Módulos experimentais podem não melhorar o desempenho em todos os aparelhos.</p></section>
+<section class="card boost-card"><div class="boost-card-heading"><div><span class="boost-overline">SHIZUKU HUB</span><h3>Permissão e serviço</h3><small>Confirmação do Binder e da autorização do SENSI.AI.</small></div><span class="boost-status-chip">AUTH CHECK</span></div><div class="shizuku-status" id="shizukuStatus"><span class="status-dot"></span><div><strong>Estado não verificado</strong><small>Toque em verificar para consultar.</small></div></div><div class="shizuku-actions"><button type="button" id="shizukuCheckBtn" class="btn-secondary">VERIFICAR SHIZUKU</button><button type="button" id="shizukuGrantBtn" class="btn-secondary" disabled>SOLICITAR AUTORIZAÇÃO</button></div><p class="field-help">A verificação não executa comandos. As operações só começam após a confirmação do usuário.</p></section>
+</section>
+
+<section id="tab-settings" class="tab-panel hidden" role="tabpanel">
+        <section class="hero-panel"><div class="hero-copy"><span class="eyebrow"><i></i> PERSONAL PREFERENCES / 05</span><h2>Configurações <em>do app.</em></h2><p>Personalize como o SENSI.AI se comporta. Suas escolhas ficam salvas neste aparelho.</p><div class="hero-meta"><span>ARMAZENAMENTO LOCAL</span><span>OFFLINE</span><span>CONTROLE DO USUÁRIO</span></div></div><div class="hero-orbit" aria-hidden="true"><div class="orbit-ring"></div><div class="orbit-core">⚙</div><i class="orbit-dot"></i></div></section>
+        <section class="card boost-card app-settings-card">
+          <div class="section-head"><div><h2>Ao concluir os tweaks</h2><p class="device-summary">Automatize a próxima etapa da sua sessão.</p></div><span class="badge">PREFERÊNCIAS</span></div>
+          <label class="app-setting-row"><span><strong>Abrir Free Fire ao terminar</strong><small>Quando todos os itens do plano forem concluídos e você voltar ao SENSI.AI, o jogo será iniciado automaticamente.</small></span><input id="settingAutoOpenFF" type="checkbox" checked></label>
+          <div class="field app-setting-field"><label for="settingGameEdition">Versão do jogo</label><select id="settingGameEdition" class="input-control"><option value="freefire">Free Fire</option><option value="freefiremax">Free Fire MAX</option></select><p class="field-help">O app tenta abrir a versão escolhida. Ela precisa estar instalada no aparelho.</p></div>
+          <div class="app-setting-actions"><button type="button" id="settingsOpenFF" class="btn-secondary">ABRIR JOGO AGORA</button><button type="button" id="settingsReset" class="btn-ghost-sm">RESTAURAR PADRÕES</button></div>
+          <div id="settingsStatus" class="boost-apply-status" aria-live="polite">As preferências são guardadas localmente e funcionam sem internet.</div>
+        </section>
+        <section class="card boost-card">
+          <div class="section-head"><div><h2>Privacidade e funcionamento</h2><p class="device-summary">O que o SENSI.AI faz no aparelho.</p></div><span class="badge">OFFLINE</span></div>
+          <ul class="settings-info-list"><li>Perfis, histórico e preferências permanecem no armazenamento local do app.</li><li>O catálogo e o motor de sensibilidade não precisam de Wi-Fi.</li><li>O SENSI.AI não altera arquivos do Free Fire nem aplica comandos escondidos.</li><li>A abertura do jogo acontece somente após concluir o fluxo iniciado por você ou ao tocar em Abrir Jogo Agora.</li></ul>
+        </section>
+        <section class="card boost-card legacy-support-card">
+          <div class="section-head"><div><h2>Central de suporte e compatibilidade</h2><p class="device-summary">Ajuda restaurada para aparelhos antigos e versões diferentes do Android.</p></div><span class="badge">SUPORTE</span></div>
+          <div class="support-version-line"><strong>SENSI.AI 3.4.0</strong><span>Build 39 · Android 7.0 ou superior</span></div>
+          <details class="support-topic" open>
+            <summary>Compatibilidade com celulares antigos</summary>
+            <p>O aplicativo mantém suporte a Android 7.0 (API 24) ou superior. Em aparelhos mais antigos, mantenha o Android System WebView atualizado quando houver atualização compatível. O desempenho e a disponibilidade de recursos variam conforme fabricante, memória e versão do sistema.</p>
+            <p>Se uma leitura não estiver disponível no seu aparelho, o SENSI.AI mostra um valor indisponível e mantém as funções principais de geração, biblioteca e comparação.</p>
+          </details>
+          <details class="support-topic">
+            <summary>Shizuku em versões antigas do Android</summary>
+            <ul>
+              <li><strong>Android 11 ou superior:</strong> pode iniciar o Shizuku pela Depuração sem fio, se o aparelho oferecer esse recurso, ou por root.</li>
+              <li><strong>Android 10 ou inferior:</strong> sem root, o início do Shizuku normalmente precisa ser feito por um computador conectado via ADB. A depuração sem fio integrada do Android não está disponível nessas versões.</li>
+              <li><strong>Aparelho com root:</strong> o Shizuku pode ser iniciado pelo método root, se a configuração do dispositivo permitir.</li>
+            </ul>
+            <p>Depois de iniciar o serviço, abra o Shizuku, volte ao SENSI.AI e toque em Solicitar autorização. Confirme o pedido no Shizuku e depois toque em Verificar Shizuku. Em aparelhos sem root, o serviço pode precisar ser iniciado novamente após reiniciar o celular.</p>
+          </details>
+          <details class="support-topic">
+            <summary>O SENSI.AI não aparece na lista de autorização</summary>
+            <ol>
+              <li>Confirme que o serviço Shizuku está indicado como ativo no próprio aplicativo Shizuku.</li>
+              <li>Abra o SENSI.AI instalado, entre em Boost e toque em Solicitar autorização.</li>
+              <li>Se não surgir a confirmação, feche e abra os dois aplicativos e tente novamente com o serviço ativo.</li>
+              <li>Confira se o Shizuku instalado é uma versão compatível e atualizada para seu Android.</li>
+            </ol>
+            <p>A lista de aplicativos autorizados só passa a mostrar o SENSI.AI depois que o pedido de permissão chega ao serviço. A autorização é necessária somente para os ajustes que usam Shizuku.</p>
+          </details>
+          <details class="support-topic">
+            <summary>O que funciona sem Shizuku?</summary>
+            <p>Gerador de sensibilidade, biblioteca, comparação, catálogo e orientações do Boost continuam disponíveis. Apenas a execução e a restauração dos ajustes que dependem de Shizuku ficam bloqueadas até a autorização.</p>
+          </details>
+          <p class="support-footnote">O suporte legado não promete compatibilidade universal. Alguns fabricantes limitam recursos do Android e podem exigir etapas adicionais no próprio sistema.</p>
+        </section>
+      </section>
     </main>
   </div>
 
+  <div id="boostConfirmModal" class="boost-confirm-modal hidden" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="boostConfirmTitle">
+    <div class="boost-confirm-backdrop"></div>
+    <section class="boost-confirm-panel">
+      <span class="boost-confirm-kicker">CONFIRMAÇÃO DE SEGURANÇA</span>
+      <h2 id="boostConfirmTitle">Aplicar ajustes?</h2>
+      <p id="boostConfirmMessage"></p>
+      <div class="boost-confirm-actions">
+        <button type="button" id="boostConfirmCancel" class="btn-secondary">CANCELAR</button>
+        <button type="button" id="boostConfirmAccept" class="btn-primary">CONFIRMAR APLICAÇÃO</button>
+      </div>
+    </section>
+  </div>
   <div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
 
   <script src="./sensi-engine.js" defer></script>
   <script src="./app.js" defer></script>
+  <script src="./boost.js" defer></script>
+  <script src="./resolution-lab.js" defer></script>
 </body>
 </html>
