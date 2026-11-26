@@ -6,6 +6,7 @@ const js = readFileSync(new URL("../frontend/boost.js", import.meta.url), "utf8"
 const html = readFileSync(new URL("../frontend/index.html", import.meta.url), "utf8");
 const android = readFileSync(new URL("../app/src/main/java/com/example/MainActivity.kt", import.meta.url), "utf8");
 const safeService = readFileSync(new URL("../app/src/main/java/com/example/SafeTweakUserService.kt", import.meta.url), "utf8");
+const manifest = readFileSync(new URL("../app/src/main/AndroidManifest.xml", import.meta.url), "utf8");
 const profileLiteral = js.match(/const recommended=(\{[\s\S]*?\});\nlet activeBoostProfile/);
 assert.ok(profileLiteral, "Mapa de perfis precisa existir");
 const profiles = Function("return (" + profileLiteral[1] + ")")();
@@ -128,4 +129,12 @@ test("DOM do otimizador inicializa as referências antes de usá-las e não inte
   assert.ok(js.includes('$("shizukuCheckBtn")?.addEventListener("click"'));
   assert.ok(js.includes('$("massinhaCopyV1")?.addEventListener("click"'));
   assert.ok(html.includes('<option value="brevent" selected>'));
+});
+
+
+test("o app abre o jogo universal selecionado após uma otimização confirmada", () => {
+  assert.ok(js.includes("function openSelectedGame(packageName,gameName)"));
+  assert.ok(js.includes("openSelectedGame(pkg,gameName)"));
+  assert.ok(kt.includes("fun openGame(packageName: String): String"));
+  assert.ok(manifest.includes('<category android:name="android.intent.category.LAUNCHER" />'));
 });
