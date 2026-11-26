@@ -15,6 +15,13 @@ const auto=$("settingAutoOpenFF"),edition=$("settingGameEdition");
 if(auto)auto.checked=!!appSettings.autoOpenFreeFire;
 if(edition)edition.value=appSettings.gameEdition;
 }
+function openSelectedGame(packageName,gameName){
+ if(!bridge||typeof bridge.openGame!=="function"){applyStatus("A abertura de jogos exige a versão APK Android atualizada.");return false;}
+ let result="failed";try{result=bridge.openGame(packageName)}catch(error){result="failed";}
+ const opened=result==="opened";
+ const message=opened?(gameName+" iniciado. Boa partida!"):result==="not_installed"?"Não encontrei "+gameName+" instalado ou visível para o Android. Confira o pacote selecionado.":"O Android não conseguiu abrir "+gameName+". Confira se o app pode ser iniciado normalmente.";
+ applyStatus(message);return opened;
+}
 function openFreeFire(manual,editionOverride){
 if(!bridge||typeof bridge.openFreeFire!=="function"){put("settingsStatus","A abertura automática está disponível apenas no APK Android.");if(manual)applyStatus("Instale e abra o SENSI.AI pelo APK para iniciar o Free Fire.");return false}
 let opened=false;try{opened=bridge.openFreeFire(editionOverride||appSettings.gameEdition)==="opened"}catch(_){}
@@ -173,7 +180,7 @@ async function executeConfirmedTweaks(payload){
  }
  if(appliedCount>0){
   put("boostApplyStatus",messages.join(" ") +(allApplied?" Todas as operações concluídas.":" Algumas operações falharam ou foram ignoradas.")+" Alvo: "+gameName+".");
-  if(pkg==="com.dts.freefireth"||pkg==="com.dts.freefiremax")openFreeFire(false,pkg==="com.dts.freefiremax"?"freefiremax":"freefire");
+  openSelectedGame(pkg,gameName);
  }else if(!(doMassinha&&massinhaExecutionMode==="brevent")) applyStatus(messages.join(" ")+" Nenhuma otimização foi confirmada; o jogo não será aberto.");
 }
 function closeBoostConfirm(){const box=$("boostConfirmModal");if(box){box.classList.add("hidden");box.setAttribute("aria-hidden","true");box.dataset.pending="";}}
